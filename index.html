@@ -201,7 +201,7 @@ button.stat.hot{border-color:var(--seal)} button.stat.hot b{color:var(--seal)}
 @media print{
   @page{size:A4;margin:0}
   html,body{height:auto!important;background:#fff!important}
-  aside,.bell,.notif,.toast,.gate,dialog,.no-print{display:none!important}
+  aside,.burger,.scrim,.mini,.bell,.notif,.toast,.gate,dialog,.no-print{display:none!important}
   .app{display:block!important;min-height:0!important}
   main{padding:0!important;max-width:none!important}
   .cv-wrap{display:block!important}
@@ -286,6 +286,24 @@ dialog h2{margin-bottom:16px}
   .stats{grid-template-columns:1fr 1fr}
   main{padding-inline:28px}
 }
+/* Escritorio: el menú vive escondido a la izquierda y se abre con el botón de tres rayas */
+.burger,.scrim{display:none}
+@media (min-width:821px){
+  .app{grid-template-columns:1fr}
+  main{padding-left:88px;margin-inline:auto}
+  aside{position:fixed;top:0;left:0;bottom:0;height:auto;width:260px;padding-top:calc(84px + env(safe-area-inset-top,0px));z-index:30;box-shadow:0 0 40px -10px rgba(0,0,0,.5);
+    transform:translateX(-100%);visibility:hidden;transition:transform .22s ease,visibility 0s .22s}
+  .menu-open aside{transform:none;visibility:visible;transition:transform .22s ease,visibility 0s}
+  .burger{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;position:fixed;top:calc(24px + env(safe-area-inset-top,0px));left:24px;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line);color:var(--ink);z-index:31}
+  .burger:hover{border-color:var(--accent);color:var(--accent)}
+  .burger i{display:block;width:18px;height:2px;border-radius:2px;background:currentColor;transition:transform .22s ease,opacity .15s ease}
+  .menu-open .burger i:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .menu-open .burger i:nth-child(2){opacity:0}
+  .menu-open .burger i:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+  .scrim{display:block;position:fixed;inset:0;background:rgba(10,15,20,.45);z-index:29;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility 0s .22s}
+  .menu-open .scrim{opacity:1;visibility:visible;transition:opacity .22s ease,visibility 0s}
+  .mini{position:fixed;left:24px;bottom:24px;z-index:6;background:var(--surface)}
+}
 /* Móvil y tableta en vertical: barra de secciones abajo, al alcance del pulgar */
 @media (max-width:820px){
   .app{grid-template-columns:1fr}
@@ -306,7 +324,7 @@ dialog h2{margin-bottom:16px}
   nav button{flex:1;justify-content:center;padding:13px 2px;font-size:12px;min-width:0;white-space:nowrap}
   .count{display:none}
   .count.due{display:inline;margin-left:3px}
-  .mini{position:absolute;right:12px;bottom:calc(100% + 10px);background:var(--surface)}
+  .mini{position:fixed;right:12px;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:11;background:var(--surface)}
   main{padding-block:20px calc(96px + env(safe-area-inset-bottom,0px));padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}
   .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
   .grid2,.form{grid-template-columns:1fr}
@@ -352,7 +370,9 @@ dialog h2{margin-bottom:16px}
 
 <div class="gate" id="gate"></div>
 <div class="app" id="app" hidden>
-  <aside>
+  <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="side"><i></i><i></i><i></i></button>
+  <div class="scrim" id="scrim"></div>
+  <aside id="side">
     <div class="brand">Cuaderno<small>Derecho · RRII</small></div>
     <nav id="nav">
       <button data-v="hoy" aria-current="true">Hoy</button>
@@ -360,13 +380,12 @@ dialog h2{margin-bottom:16px}
       <button data-v="fichas">Fichas <span class="count" id="c-fichas"></span></button>
       <button data-v="enlaces">Enlaces <span class="count" id="c-enlaces"></span></button>
       <button data-v="eventos">Agenda <span class="count" id="c-eventos"></span></button>
-      <button data-v="cv">CV</button>
       <button data-v="ajustes">Ajustes</button>
     </nav>
-    <button class="mini" id="mini" hidden title="Ir al temporizador"></button>
     <div class="side-foot"><span id="syncSt">Tu cuaderno se guarda cifrado en este navegador.</span><button class="linkbtn" id="lockBtn">Cerrar sesión</button></div>
   </aside>
   <main id="main"></main>
+  <button class="mini" id="mini" hidden title="Ir al temporizador"></button>
   <button class="bell" id="bell" aria-label="Avisos" aria-expanded="false" aria-controls="notif"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><span class="badge" id="bellN" hidden></span></button>
   <div class="notif" id="notif" role="dialog" aria-label="Avisos" hidden></div>
 </div>
@@ -970,9 +989,14 @@ function finishP(){const len=P.len;beep();
 $("#mini").onclick=()=>{go("hoy");$("#pomo")?.scrollIntoView({block:"center"})};
 
 /* ---------- NAVEGACIÓN ---------- */
+/* Menú lateral: se cierra solo al elegir sección, al pulsar fuera o con Escape */
+function setMenu(open){document.body.classList.toggle("menu-open",open);const b=$("#burger");b.setAttribute("aria-expanded",open);b.setAttribute("aria-label",open?"Cerrar menú":"Abrir menú")}
+$("#burger").onclick=()=>setMenu(!document.body.classList.contains("menu-open"));
+$("#scrim").onclick=()=>setMenu(false);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
 const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,eventos:vEventos,cv:vCV,ajustes:vAjustes};
 function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v===view));V[view]();$("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
-function go(v){if(v!=="fichas")R=null;view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render();window.scrollTo(0,0)}
+function go(v){setMenu(false);if(v!=="fichas")R=null;view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render();window.scrollTo(0,0)}
 document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{R=null;go(b.dataset.v)});
 document.addEventListener("keydown",e=>{if(!OPEN||view!=="fichas"||!R||R.done||dlg.open||!R.shown)return;if(e.key==="1"){e.preventDefault();answer(false)}else if(e.key==="2"){e.preventDefault();answer(true)}});
 
@@ -1013,7 +1037,7 @@ function gateLogin(lk){gateShow(`<h1>Entra en tu cuaderno</h1>
 function unlock(){OPEN=true;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
 async function lock(){if(!OPEN)return;OPEN=false;clearTimeout(idle);
  if(CLOUD){clearTimeout(pushT);if(dirty)await push().catch(()=>{});await sb.auth.signOut({scope:"local"}).catch(()=>{})}else await chain;
- closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;CK=null;UID=null;S=sample();main.innerHTML="";document.title=TITLE;
+ setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;CK=null;UID=null;S=sample();main.innerHTML="";document.title=TITLE;
  if(CLOUD)return gateCloudLogin("");
  const lk=readLock();lk?gateLogin(lk):gateSetup()}
 
