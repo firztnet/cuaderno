@@ -13,8 +13,8 @@
 :root{
   --bg:#eef1f4; --surface:#ffffff; --surface-2:#f5f7f9; --line:#d9dfe6;
   --ink:#16202c; --muted:#5d6b7a; --accent:#1f4e79; --accent-soft:#e1eaf3;
-  --seal:#8a2b3a; --gold:#a57a1c;
-  --ok:#2f7a4f; --warn:#b46a10; --crit:#b3312f;
+  --seal:#8a2b3a; --gold:#86610f;
+  --ok:#2f7a4f; --warn:#96560a; --crit:#b3312f;
   --f-display:"Newsreader",Georgia,"Times New Roman",serif;
   --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
@@ -31,9 +31,9 @@
 /* Tema rosa: claro y con más color. Se activa desde Ajustes junto con data-theme="light" */
 :root[data-skin="rosa"]{
   --bg:#fdf1f5; --surface:#ffffff; --surface-2:#fbe8ef; --line:#f1cfdc;
-  --ink:#3a1f2d; --muted:#86606f; --accent:#c2337a; --accent-soft:#fbdcea;
-  --seal:#7c3aad; --gold:#b9781f;
-  --ok:#1f8a70; --warn:#c2651a; --crit:#cf2f4d; color-scheme:light}
+  --ink:#3a1f2d; --muted:#7a5562; --accent:#b0286a; --accent-soft:#fbdcea;
+  --seal:#7c3aad; --gold:#8f5c10;
+  --ok:#15755e; --warn:#a3500e; --crit:#c22643; color-scheme:light}
 :root[data-skin="rosa"] body{background:#fdf1f5}
 :root[data-skin="rosa"] body::before{content:"";position:fixed;top:0;right:0;bottom:0;left:0;z-index:-1;background:linear-gradient(160deg,#fde9f1 0%,#f8eefb 55%,#eef2ff 100%)}
 :root[data-skin="rosa"] .topbar{background:#fde9f1}
@@ -104,6 +104,7 @@ nav button:focus-visible,button:focus-visible,input:focus-visible,select:focus-v
 .count.due{color:var(--seal);font-weight:600}
 .mini{all:unset;cursor:pointer;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:14px;padding:8px 12px;border-radius:8px;border:1px solid var(--accent);color:var(--accent);background:var(--accent-soft);text-align:center}
 .side-foot{margin-top:auto;font-size:12px;color:var(--muted);padding-inline:8px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+main:focus{outline:none}
 main{padding-block:32px 64px;padding-inline:40px;min-width:0;max-width:1100px;width:100%}
 h1{font-family:var(--f-display);font-weight:400;font-size:34px;line-height:1.15;margin:0;text-wrap:balance}
 h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0;text-wrap:balance}
@@ -593,7 +594,7 @@ dialog h2{margin-bottom:16px}
     <nav id="nav" aria-label="Secciones"></nav>
     <div class="side-foot"><span id="syncSt">Tu cuaderno se guarda cifrado en este navegador.</span><button class="linkbtn" id="lockBtn">Cerrar sesión</button></div>
   </aside>
-  <main id="main"></main>
+  <main id="main" tabindex="-1"></main>
   <button class="mini" id="mini" hidden title="Ir al temporizador"></button>
   <button class="bell" id="bell" aria-label="Avisos" aria-expanded="false" aria-controls="notif"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><span class="badge" id="bellN" hidden></span></button>
   <button class="bell" id="searchBtn" aria-label="Buscar" title="Buscar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg></button>
@@ -658,6 +659,7 @@ const iso=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffse
 const today=()=>iso(new Date());
 const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return iso(d)};
 const uid=()=>Math.random().toString(36).slice(2,9);
+const sid=x=>String(x??"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,40)||uid();
 
 function sample(){
  const DIP="Derecho Internacional Público",TRI="Teoría de las Relaciones Internacionales",DC="Derecho Constitucional";
@@ -706,7 +708,7 @@ function sample(){
    {id:uid(),q:"¿Qué derechos protege el recurso de amparo?",a:"Los de los arts. 14 a 29 de la Constitución y la objeción de conciencia del art. 30.2 (art. 53.2 CE).",subject:DC,box:1,due:addDays(1)}]});
 }
 /* Acepta datos guardados por versiones anteriores o copias incompletas y los deja con todos los campos */
-const THEMES={oscuro:["Oscuro","#0f151c","#17202a","#7fb0de"],claro:["Claro","#eef1f4","#ffffff","#1f4e79"],rosa:["Rosa","#fde9f1","#ffffff","#c2337a"],gamer:["Gamer","#07070f","#171930","#22e3ff"]};
+const THEMES={oscuro:["Oscuro","#0f151c","#17202a","#7fb0de"],claro:["Claro","#eef1f4","#ffffff","#1f4e79"],rosa:["Rosa","#fde9f1","#ffffff","#b0286a"],gamer:["Gamer","#07070f","#171930","#22e3ff"]};
 let THEME="";try{THEME=localStorage.getItem("cuaderno-tema")||""}catch(e){}
 /* Sin elección guardada, la web sigue el modo claro u oscuro del dispositivo */
 function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.dataset.theme=t==="oscuro"||t==="gamer"?"dark":"light";if(t==="rosa"||t==="gamer")r.dataset.skin=t;else delete r.dataset.skin;
@@ -718,24 +720,25 @@ const HK={tratado:"Tratados y orden internacional",conflicto:"Guerras y conflict
 const HKS={tratado:"Tratado",conflicto:"Conflicto",sentencia:"Sentencia",poder:"Poder",derechos:"Derechos",espana:"España"};
 const CV_COLORS=["#1f4e79","#8a2b3a","#2f5d50","#3a3f47"], NIVELES=["Nativo","C2","C1","B2","B1","A2","A1"];
 function normCv(c){
- c=c&&typeof c==="object"?c:{};const str=x=>String(x??""), arr=x=>Array.isArray(x)?x:[], items=l=>arr(l).map(i=>({id:i.id||uid(),t:str(i.t),place:str(i.place),dates:str(i.dates),desc:str(i.desc)}));
+ c=c&&typeof c==="object"?c:{};const str=x=>String(x??""), arr=x=>Array.isArray(x)?x:[], items=l=>arr(l).map(i=>({id:sid(i.id),t:str(i.t),place:str(i.place),dates:str(i.dates),desc:str(i.desc)}));
  return {name:str(c.name),title:str(c.title),email:str(c.email),phone:str(c.phone),city:str(c.city),web:str(c.web),summary:str(c.summary),skills:str(c.skills),
   photo:/^data:image\/(jpeg|png|webp);base64,/.test(c.photo||"")?c.photo:"",accent:CV_COLORS.includes(c.accent)?c.accent:CV_COLORS[0],
-  edu:items(c.edu),exp:items(c.exp),act:items(c.act),langs:arr(c.langs).map(l=>({id:l.id||uid(),name:str(l.name),level:NIVELES.includes(l.level)?l.level:"B2"}))}}
+  edu:items(c.edu),exp:items(c.exp),act:items(c.act),langs:arr(c.langs).map(l=>({id:sid(l.id),name:str(l.name),level:NIVELES.includes(l.level)?l.level:"B2"}))}}
 function normalize(d){
  if(!d||typeof d!=="object"||!Array.isArray(d.subjects))return null;
  const arr=x=>Array.isArray(x)?x:[], str=x=>String(x??"");
  return {name:str(d.name),ejemplo:!!d.ejemplo,onboarded:d.onboarded??!d.ejemplo,goal:Math.min(600,Math.max(5,+d.goal||50)),lastBackup:str(d.lastBackup),
-  studyDays:arr(d.studyDays).map(str),minutes:d.minutes&&typeof d.minutes==="object"?d.minutes:{},
-  subjects:arr(d.subjects).map(s=>({id:s.id||uid(),name:str(s.name)||"Asignatura",area:AREAS.includes(s.area)?s.area:"Otra",topics:arr(s.topics).map(t=>({id:t.id||uid(),t:str(t.t),n:str(t.n),h:str(t.h),s:STATUS.includes(t.s)?t.s:"pendiente"}))})),
-  links:arr(d.links).map(l=>({id:l.id||uid(),title:str(l.title),url:str(l.url),note:str(l.note),subject:str(l.subject),tags:str(l.tags)})),
-  events:arr(d.events).filter(e=>/^\d{4}-\d\d-\d\d$/.test(e.date||"")).map(e=>({id:e.id||uid(),title:str(e.title),date:e.date,time:str(e.time),type:TYPES[e.type]?e.type:"otro",subject:str(e.subject),note:str(e.note),done:!!e.done,warn:e.warn===undefined||e.warn===""||isNaN(+e.warn)?(DEFW[e.type]??1):Math.max(0,+e.warn)})),
-  routine:arr(d.routine).map(r=>({id:r.id||uid(),title:str(r.title),type:TYPES[r.type]?r.type:"otro",days:arr(r.days).map(Number).filter(n=>n>=0&&n<=6),start:/^\d\d:\d\d$/.test(r.start||"")?r.start:"",end:/^\d\d:\d\d$/.test(r.end||"")?r.end:"",note:str(r.note),subject:str(r.subject)})),
+  studyDays:[...new Set(arr(d.studyDays).map(str).filter(x=>/^\d{4}-\d\d-\d\d$/.test(x)))],
+  minutes:Object.fromEntries(Object.entries(d.minutes&&typeof d.minutes==="object"?d.minutes:{}).filter(([k,v])=>/^\d{4}-\d\d-\d\d$/.test(k)&&+v>0).map(([k,v])=>[k,Math.min(1440,Math.round(+v))])),
+  subjects:arr(d.subjects).map(s=>({id:sid(s.id),name:str(s.name)||"Asignatura",area:AREAS.includes(s.area)?s.area:"Otra",topics:arr(s.topics).map(t=>({id:sid(t.id),t:str(t.t),n:str(t.n),h:str(t.h),s:STATUS.includes(t.s)?t.s:"pendiente"}))})),
+  links:arr(d.links).map(l=>({id:sid(l.id),title:str(l.title),url:str(l.url),note:str(l.note),subject:str(l.subject),tags:str(l.tags)})),
+  events:arr(d.events).filter(e=>/^\d{4}-\d\d-\d\d$/.test(e.date||"")).map(e=>({id:sid(e.id),title:str(e.title),date:e.date,time:str(e.time),type:TYPES[e.type]?e.type:"otro",subject:str(e.subject),note:str(e.note),done:!!e.done,warn:e.warn===undefined||e.warn===""||isNaN(+e.warn)?(DEFW[e.type]??1):Math.max(0,+e.warn)})),
+  routine:arr(d.routine).map(r=>({id:sid(r.id),title:str(r.title),type:TYPES[r.type]?r.type:"otro",days:arr(r.days).map(Number).filter(n=>n>=0&&n<=6),start:/^\d\d:\d\d$/.test(r.start||"")?r.start:"",end:/^\d\d:\d\d$/.test(r.end||"")?r.end:"",note:str(r.note),subject:str(r.subject)})),
   seen:arr(d.seen).map(str),cv:normCv(d.cv),theme:THEMES[d.theme]?d.theme:"",
-  hitos:arr(d.hitos).map(h=>({id:h.id||uid(),y:Math.round(+h.y)||new Date().getFullYear(),d:/^\d\d-\d\d$/.test(h.d||"")?h.d:"",k:HK[h.k]?h.k:"tratado",t:str(h.t),q:str(h.q),w:str(h.w),n:str(h.n),src:str(h.src)})),
+  hitos:arr(d.hitos).map(h=>({id:sid(h.id),y:Math.round(+h.y)||new Date().getFullYear(),d:/^\d\d-\d\d$/.test(h.d||"")?h.d:"",k:HK[h.k]?h.k:"tratado",t:str(h.t),q:str(h.q),w:str(h.w),n:str(h.n),src:str(h.src)})),
   hitoMeta:Object.fromEntries(Object.entries(d.hitoMeta&&typeof d.hitoMeta==="object"?d.hitoMeta:{}).map(([k,v])=>[k,{note:str(v&&v.note),subject:str(v&&v.subject)}])),
-  holidays:arr(d.holidays).filter(h=>/^\d{4}-\d\d-\d\d$/.test(h.date||"")).map(h=>({id:h.id||uid(),date:h.date,name:str(h.name)||"Festivo",yearly:!!h.yearly})),
-  cards:arr(d.cards).map(c=>({id:c.id||uid(),q:str(c.q),a:str(c.a),subject:str(c.subject),box:Math.min(4,Math.max(0,c.box|0)),due:/^\d{4}-\d\d-\d\d$/.test(c.due||"")?c.due:today()}))};
+  holidays:arr(d.holidays).filter(h=>/^\d{4}-\d\d-\d\d$/.test(h.date||"")).map(h=>({id:sid(h.id),date:h.date,name:str(h.name)||"Festivo",yearly:!!h.yearly})),
+  cards:arr(d.cards).map(c=>({id:sid(c.id),q:str(c.q),a:str(c.a),subject:str(c.subject),box:Math.min(4,Math.max(0,c.box|0)),due:/^\d{4}-\d\d-\d\d$/.test(c.due||"")?c.due:today()}))};
 }
 let S=null;
 try{S=normalize(JSON.parse(localStorage.getItem(KEY)))}catch(e){}
@@ -767,7 +770,24 @@ function save(){
 const HERE=location.origin+location.pathname;
 const keep=()=>{try{return localStorage.getItem("cuaderno-keep")==="1"}catch(e){return false}};
 function loadSupa(){return new Promise((ok,no)=>{if(window.supabase)return ok();const el=document.createElement("script");el.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";el.onload=ok;el.onerror=no;document.head.append(el)})}
-function mkClient(){sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storage:keep()?localStorage:sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}
+function mkClient(){sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storage:keep()?localStorage:sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT"&&OPEN)setTimeout(sessionLost,0)})}
+/* Dos dispositivos han guardado a la vez: se conserva lo de este y se añade lo que solo tenía el otro.
+   Lo borrado aquí que el otro aún tenía puede reaparecer; es preferible a perder algo escrito. */
+function mergeState(remote,local){
+ const byId=l=>new Set(l.map(x=>x.id));
+ for(const k of ["links","events","cards","routine","holidays","hitos"]){const have=byId(local[k]);remote[k].forEach(x=>{if(!have.has(x.id))local[k].push(x)})}
+ remote.subjects.forEach(rs=>{const ls=local.subjects.find(x=>x.id===rs.id)||local.subjects.find(x=>x.name===rs.name);
+  if(!ls)local.subjects.push(rs);else{const have=byId(ls.topics);rs.topics.forEach(t=>{if(!have.has(t.id))ls.topics.push(t)})}});
+ for(const k in remote.hitoMeta)if(!local.hitoMeta[k])local.hitoMeta[k]=remote.hitoMeta[k];
+ local.studyDays=[...new Set([...local.studyDays,...remote.studyDays])];
+ for(const k in remote.minutes)local.minutes[k]=Math.max(local.minutes[k]||0,remote.minutes[k]);
+ return local}
+let PENDING=null;
+/* La sesión ha caducado o se cerró desde fuera: se pide entrar de nuevo sin perder lo que estaba sin guardar */
+function sessionLost(){if(!OPEN)return;exitDemo(true);flushNote();PENDING=dirty?{uid:UID,S}:null;
+ OPEN=false;clearTimeout(idle);clearTimeout(pushT);setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;S=emptyState();main.innerHTML="";document.title=TITLE;
+ gateCloudLogin("Tu sesión ha caducado. Vuelve a entrar para seguir donde estabas.")}
 function setSync(t){const e=$("#syncSt");if(e)e.textContent=t}
 async function pull(first){
  const {data,error}=await sb.from("cuadernos").select("data,updated_at").eq("user_id",UID).maybeSingle();
@@ -776,12 +796,24 @@ async function pull(first){
  if(data.updated_at===rev)return false;
  const st=normalize(data.data);if(st)S=st;rev=data.updated_at;return !!st}
 async function push(){
- dirty=false;
+ dirty=false;let merged=false;
+ if(rev){ /* ¿ha guardado otro dispositivo desde la última vez que leímos? */
+  const {data:cur,error:e0}=await sb.from("cuadernos").select("data,updated_at").eq("user_id",UID).maybeSingle();
+  if(e0){dirty=true;throw e0}
+  if(cur&&cur.updated_at!==rev){const remote=normalize(cur.data);if(remote){mergeState(remote,S);merged=true}}}
  const {data,error}=await sb.from("cuadernos").upsert({user_id:UID,data:S,updated_at:new Date().toISOString()}).select("updated_at").single();
  if(error){dirty=true;throw error}
- rev=data.updated_at}
-function flush(){setSync("Guardando…");return push().then(()=>{warned=false;setSync("Guardado en tu cuenta")},()=>{setSync("Sin conexión. Se guardará al volver.");if(!warned){warned=true;toast("Sin conexión: los cambios se guardarán cuando vuelva.")}clearTimeout(pushT);pushT=setTimeout(flush,15000)})}
-async function openCloud(ses){UID=ses.user.id;EMAIL=ses.user.email||"";rev="";await pull(true);setSync("Guardado en tu cuenta");unlock()}
+ rev=data.updated_at;
+ if(merged&&OPEN){toast("Se han unido los cambios hechos en otro dispositivo.");if(canRefresh(true))render()}}
+/* ¿Se puede repintar sin estropear algo que se está escribiendo? */
+const canRefresh=ignoreDirty=>!DEMO&&(ignoreDirty||!dirty)&&!dlg.open&&!R&&view!=="tema"&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement&&document.activeElement.tagName||"");
+function flush(){setSync("Guardando…");return push().then(()=>{warned=false;setSync("Guardado en tu cuenta")},()=>{setSync("Sin conexión. Se guardará al volver.");if(!warned){warned=true;toast("Sin conexión: los cambios se guardarán cuando vuelva.")}clearTimeout(pushT);pushT=setTimeout(flush,15000);
+  sb.auth.getSession().then(({data})=>{if(!data.session)sessionLost()}).catch(()=>{})})}
+async function openCloud(ses){UID=ses.user.id;EMAIL=ses.user.email||"";rev="";
+ if(PENDING&&PENDING.uid===UID){S=PENDING.S;PENDING=null;rev="pendiente";await push()}else{PENDING=null;await pull(true)}
+ setSync("Guardado en tu cuenta");unlock()}
+/* Mientras la web está abierta, cada minuto se comprueba si otro dispositivo ha guardado algo */
+setInterval(()=>{if(CLOUD&&OPEN&&!document.hidden&&canRefresh())pull().then(ch=>{if(ch&&OPEN&&canRefresh())render()}).catch(()=>{})},60000);
 async function cloudPass(){const pw=$("#acPass").value;
  if(pw.length<8)return toast("La contraseña necesita al menos 8 caracteres.");if(pw!==$("#acPass2").value)return toast("Las contraseñas no coinciden.");
  const {error}=await sb.auth.updateUser({password:pw});toast(error?"No se pudo cambiar. Inténtalo de nuevo.":"Contraseña cambiada.");if(!error)render()}
@@ -1226,10 +1258,10 @@ const HELP=[
 ["ajustes","Ajustes","ajustes","Tu apariencia, tus copias y tu acceso.",["Elige entre cuatro apariencias: oscuro, claro, rosa y gamer.","Cambia tu nombre y tu objetivo de minutos al día.","«Descargar archivo» guarda una copia de todo. Hazla de vez en cuando.","«Elegir qué borrar» sirve para empezar un curso nuevo. Tus hitos, tu nombre y tu acceso no se borran.","«Ver el ejemplo» enseña Digesto lleno con datos de muestra, sin guardar nada."]]
 ];
 const HELP_FOR={hoy:"hoy",temas:"temas",asig:"temas",tema:"apuntes",fichas:"fichas",eventos:"agenda",calendario:"calendario",hitos:"hitos",hito:"hitos",enlaces:"enlaces",cv:"cv",buscar:"buscar",ajustes:"ajustes"};
-const HELP_TIPS=["En el ordenador, Ctrl + K o la tecla / abren el buscador.","En el repaso de fichas, la tecla 1 es «No la sabía» y la 2 es «La sabía».","En los apuntes, Ctrl + B pone negrita y Ctrl + I, cursiva.","La balanza de arriba lleva siempre a Hoy.","El botón «?» de arriba abre la ayuda de la pantalla en la que estás.","Lo que creas desde la página de una asignatura ya sale con esa asignatura puesta.","En el teléfono, las tarjetas de aviso de Hoy se pasan de lado con el dedo.","Si una fecha coincide con un hito, verás «Tal día como hoy» en la portada.","En el ordenador, el menú se abre con las tres rayas y se cierra solo al elegir."];
+const HELP_TIPS=["En el ordenador, Ctrl + K o la tecla / abren el buscador.","En el repaso de fichas, la tecla 1 es «No la sabía» y la 2 es «La sabía».","En los apuntes, Ctrl + B pone negrita y Ctrl + I, cursiva.","La balanza de arriba lleva siempre a Hoy.","El botón «?» de arriba abre la ayuda de la pantalla en la que estás.","Lo que creas desde la página de una asignatura ya sale con esa asignatura puesta.","En el teléfono, las tarjetas de aviso de Hoy se pasan de lado con el dedo.","Si una fecha coincide con un hito, verás «Tal día como hoy» en la portada.","En el ordenador, el menú se abre con las tres rayas y se cierra solo al elegir.","El botón Atrás del teléfono o del navegador vuelve a la sección anterior.","Al editar un tema puedes subirlo o bajarlo en la lista para dejarlo en el orden del programa."];
 const HELP_METODO=[["Recordar fija más que releer","Intentar responder de memoria es lo que consolida lo aprendido. Por eso las fichas te hacen contestar antes de mirar."],["Repasar espaciado","Es mejor ver algo cinco veces en un mes que cinco veces en una tarde. Digesto separa cada repaso un poco más que el anterior."],["Repartir el temario","Divide lo que queda entre los días que faltan. El «Plan hasta el examen» hace esa cuenta por ti y te dice el ritmo."],["Sesiones cortas con descanso","Veinticinco minutos de atención de verdad rinden más que dos horas a medias. Usa el temporizador y respeta el descanso."],["Apuntes con tus palabras","Copiar no es estudiar. Resume cada tema con tu propia estructura; las plantillas te dan el esqueleto."],["Constancia antes que intensidad","Un poco cada día gana a un atracón la víspera. La racha está para que no rompas la cadena."]];
 function helpFaq(){return [
- ["¿Dónde se guardan mis datos?",CLOUD?"En tu cuenta. Los ves en cualquier dispositivo al entrar con tu correo y tu contraseña.":"Cifrados, solo en este navegador. No pasan solos a otro dispositivo y se pierden si borras los datos de navegación."],
+ ["¿Dónde se guardan mis datos?",CLOUD?"En tu cuenta. Los ves en cualquier dispositivo al entrar con tu correo y tu contraseña.":"Cifrados, solo en este navegador. No pasan solos a otro dispositivo y se pierden si borras los datos de navegación. En iPhone, el navegador puede borrarlos si pasas varios días sin entrar, así que haz copias."],
  ["He olvidado mi contraseña",CLOUD?"En la pantalla de acceso, pulsa «He olvidado mi contraseña» y te llegará un enlace al correo para elegir otra. Si el correo no llega, avisa a quien te dio acceso a Digesto.":"No se puede recuperar: sin ella el cuaderno no se descifra. Puedes borrarlo y crear otro, y recuperar tus datos si guardaste un archivo de copia."],
  ["¿Cómo lo uso en el móvil?",CLOUD?"Abre la misma dirección en el navegador del teléfono y entra con tu cuenta. Desde el menú del navegador puedes añadirla a la pantalla de inicio.":"Descarga una copia en Ajustes, pásala al teléfono y recupérala allí. Cada dispositivo tiene su propio cuaderno."],
  ["¿Cómo hago una copia de seguridad?","En Ajustes, «Descargar archivo». Guárdala en un sitio privado, porque la copia no va cifrada. Para recuperarla, usa «Recuperar copia» en el mismo sitio."],
@@ -1569,8 +1601,11 @@ function subjForm(s){openForm(s?"Editar asignatura":"Nueva asignatura",
 function topicForm(t,s){openForm("Editar tema",
  `<label class="full" for="f-t">Tema<input id="f-t" name="t" required value="${esc(t.t)}"></label>
   <label class="full" for="f-s">Estado<select id="f-s" name="s">${STATUS.map(x=>`<option value="${x}" ${t.s===x?"selected":""}>${STATUS_TXT[x]}</option>`).join("")}</select></label>
+  <div class="full hbtns"><button type="button" class="btn ghost small" id="tUp">Subir en la lista</button><button type="button" class="btn ghost small" id="tDown">Bajar en la lista</button></div>
 `,
- d=>{Object.assign(t,d)},()=>{s.topics=s.topics.filter(x=>x!==t)})}
+ d=>{Object.assign(t,d)},()=>{s.topics=s.topics.filter(x=>x!==t)});
+ const mv=n=>{const i=s.topics.indexOf(t),j=i+n;if(j<0||j>=s.topics.length)return toast(n<0?"Ya es el primero.":"Ya es el último.");s.topics.splice(i,1);s.topics.splice(j,0,t);save();toast("Tema movido al puesto "+(j+1)+" de "+s.topics.length+".")};
+ $("#tUp").onclick=()=>mv(-1);$("#tDown").onclick=()=>mv(1)}
 function linkForm(l,pre){openForm(l?"Editar enlace":"Nuevo enlace",
  `<label class="full" for="f-url">Dirección web<input id="f-url" name="url" type="url" required value="${esc(l?.url)}" placeholder="https://"></label>
   <label class="full" for="f-title">Título<input id="f-title" name="title" value="${esc(l?.title)}" placeholder="Ej.: STC 31/2010 sobre el Estatut"></label>
@@ -1637,9 +1672,16 @@ $("#side").addEventListener("wheel",e=>{if(!menuOpen())return;const a=e.currentT
 $("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
 const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,ayuda:vAyuda,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
-function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R?"repaso":view;V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><span class="hbtns"><button class="btn ghost small" id="demoHelp">Cómo se usa</button><button class="btn small" id="demoOut">Salir del ejemplo</button></span></div>`);$("#demoOut").onclick=()=>exitDemo();$("#demoHelp").onclick=()=>openHelp("")}
+function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R?"repaso":view;DAY=today();V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><span class="hbtns"><button class="btn ghost small" id="demoHelp">Cómo se usa</button><button class="btn small" id="demoOut">Salir del ejemplo</button></span></div>`);$("#demoOut").onclick=()=>exitDemo();$("#demoHelp").onclick=()=>openHelp("")}
  $("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-hito]").forEach(b=>b.onclick=()=>openHito(b.dataset.hito));main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
-function go(v){flushNote();setMenu(false);if(v!=="fichas")R=null;view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render();window.scrollTo(0,0)}
+function go(v,fromHistory){flushNote();setMenu(false);if(v!=="fichas")R=null;const changed=v!==view;view=v;
+ if(!fromHistory)try{history[changed?"pushState":"replaceState"](null,"","#"+v)}catch(e){}
+ try{main.focus({preventScroll:true})}catch(e){}
+ render();window.scrollTo(0,0)}
+window.addEventListener("popstate",()=>{if(!OPEN)return;if(dlg.open)dlg.close();closeNotif();const v=(location.hash||"").slice(1);go(V[v]?v:"hoy",true)});
+/* Si la web se quedó abierta de un día para otro, al volver se repinta con la fecha nueva */
+let DAY=today();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&OPEN&&today()!==DAY&&!dlg.open&&view!=="tema")render()});
 document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;go(b.dataset.v)});
 function openMore(){F.onsubmit=e=>e.preventDefault();
  F.innerHTML=`<h2>Más</h2><div class="mlist">${[["calendario","Calendario","El mes entero, con los festivos"],["hitos","Hitos","Lo que cambió el derecho y el mundo"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ayuda","Ayuda","Cómo se usa cada sección"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
@@ -1689,7 +1731,7 @@ function gateLogin(lk){gateShow(`<h1>Entra en Digesto</h1>
   S=st;SALT=salt;CK=k;unlock()});
  $("#gwipe").onclick=()=>{const b=$("#gwipe");if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Pulsa otra vez para borrarlo todo";return}try{localStorage.removeItem(LOCK)}catch(e){}S=emptyState();gateSetup()};
 }
-function unlock(){OPEN=true;if(S.theme&&S.theme!==THEME){THEME=S.theme;try{localStorage.setItem("cuaderno-tema",THEME)}catch(e){}applyTheme(THEME)}else if(!S.theme)S.theme=THEME;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
+function unlock(){OPEN=true;try{history.replaceState(null,"","#hoy")}catch(e){}if(S.theme&&S.theme!==THEME){THEME=S.theme;try{localStorage.setItem("cuaderno-tema",THEME)}catch(e){}applyTheme(THEME)}else if(!S.theme)S.theme=THEME;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
 async function lock(){if(!OPEN)return;exitDemo(true);flushNote();OPEN=false;clearTimeout(idle);
  if(CLOUD){clearTimeout(pushT);if(dirty)await push().catch(()=>{});await sb.auth.signOut({scope:"local"}).catch(()=>{})}else await chain;
  setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;CK=null;UID=null;S=emptyState();main.innerHTML="";document.title=TITLE;
@@ -1750,7 +1792,7 @@ async function bootCloud(){
 document.addEventListener("visibilitychange",()=>{if(!CLOUD||!OPEN)return;
  if(DEMO)return;
  if(document.hidden){if(dirty){clearTimeout(pushT);flush()}}
- else if(!dirty&&!dlg.open&&!R&&view!=="tema")pull().then(ch=>{if(ch&&OPEN)render()}).catch(()=>{})});
+ else if(canRefresh())pull().then(ch=>{if(ch&&OPEN&&canRefresh())render()}).catch(()=>{})});
 window.addEventListener("online",()=>{if(CLOUD&&OPEN&&dirty)flush()});
 /* Se cierra sola tras 20 minutos sin tocar nada, salvo con el temporizador en marcha */
 let idle=null;
