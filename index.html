@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4e79">
 <meta name="robots" content="noindex,nofollow">
-<title>Cuaderno de Derecho y RRII</title>
+<title>Digesto de Derecho y RRII</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Chakra+Petch:wght@500;600;700&display=swap">
 <style>
 /* Layout: barra lateral de secciones (barra inferior en móvil) + área de trabajo; "Hoy" abre con el siguiente paso, la máxima del día y el plan hasta el examen */
 :root{
@@ -37,6 +37,43 @@
 :root[data-skin="rosa"] body{background:#fdf1f5}
 :root[data-skin="rosa"] body::before{content:"";position:fixed;top:0;right:0;bottom:0;left:0;z-index:-1;background:linear-gradient(160deg,#fde9f1 0%,#f8eefb 55%,#eef2ff 100%)}
 :root[data-skin="rosa"] .topbar{background:#fde9f1}
+/* Tema gamer: negro profundo, neón cian y magenta, brillo en bordes y letra técnica. Va con data-theme="dark" */
+:root[data-skin="gamer"]{
+  --bg:#07070f; --surface:#10111f; --surface-2:#171930; --line:#2a2d55;
+  --ink:#eef0ff; --muted:#9aa0c7; --accent:#22e3ff; --accent-soft:#0f2a44;
+  --seal:#ff3df2; --gold:#ffd23f;
+  --ok:#39ff88; --warn:#ffb020; --crit:#ff4d6d;
+  --f-display:"Chakra Petch","Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:6px; color-scheme:dark}
+:root[data-skin="gamer"] body{background:#07070f}
+:root[data-skin="gamer"] body::before{content:"";position:fixed;top:0;right:0;bottom:0;left:0;z-index:-1;
+  background:radial-gradient(900px 520px at 88% -10%,rgba(255,61,242,.15),transparent 60%),radial-gradient(820px 520px at 0% 0%,rgba(34,227,255,.13),transparent 60%),
+  linear-gradient(rgba(34,227,255,.045) 1px,transparent 1px) 0 0/100% 32px,linear-gradient(90deg,rgba(34,227,255,.045) 1px,transparent 1px) 0 0/32px 100%}
+:root[data-skin="gamer"] h1{font-weight:600}
+:root[data-skin="gamer"] h2{font-size:17px;text-transform:uppercase;letter-spacing:.06em}
+:root[data-skin="gamer"] .brand,:root[data-skin="gamer"] .topbar{text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+:root[data-skin="gamer"] .topbar{background:#07070f;border-bottom-color:var(--accent);box-shadow:0 0 20px -6px var(--accent)}
+:root[data-skin="gamer"] .btn{border-radius:6px}
+:root[data-skin="gamer"] .btn:not(.ghost):not(.miss){box-shadow:0 0 16px -3px var(--accent);text-transform:uppercase;letter-spacing:.05em;font-size:13px}
+:root[data-skin="gamer"] .btn.good{box-shadow:0 0 16px -3px var(--ok)}
+:root[data-skin="gamer"] .panel,:root[data-skin="gamer"] .stat,:root[data-skin="gamer"] .subj,:root[data-skin="gamer"] .link,:root[data-skin="gamer"] .maxim,:root[data-skin="gamer"] .gate-card{background:linear-gradient(180deg,var(--surface),#0b0c19)}
+:root[data-skin="gamer"] .stat b,:root[data-skin="gamer"] .pomo .time,:root[data-skin="gamer"] .duebox b{color:var(--accent);text-shadow:0 0 16px rgba(34,227,255,.55)}
+:root[data-skin="gamer"] button.stat.hot b{color:var(--seal);text-shadow:0 0 16px rgba(255,61,242,.55)}
+:root[data-skin="gamer"] .bar{height:8px;border-radius:2px;background:#0a0b17;border:1px solid var(--line)}
+:root[data-skin="gamer"] .bar i{background:linear-gradient(90deg,var(--accent),var(--seal));box-shadow:0 0 10px var(--accent)}
+:root[data-skin="gamer"] .week .col i{background:linear-gradient(0deg,var(--accent),var(--seal))}
+:root[data-skin="gamer"] nav button[aria-current="true"]{box-shadow:inset 0 0 0 1px var(--accent),0 0 14px -4px var(--accent)}
+:root[data-skin="gamer"] .acard{border-color:var(--accent);background:linear-gradient(150deg,#14162e,#0a0b18)}
+:root[data-skin="gamer"] .acard.warm{border-color:var(--warn)} :root[data-skin="gamer"] .acard.hot{border-color:var(--crit)}
+:root[data-skin="gamer"] .acard .num{box-shadow:0 0 22px -2px var(--accent)}
+:root[data-skin="gamer"] .acard.warm .num{box-shadow:0 0 22px -2px var(--warn)}
+:root[data-skin="gamer"] .acard.hot .num{box-shadow:0 0 22px -2px var(--crit)}
+:root[data-skin="gamer"] .seal{box-shadow:0 0 16px -2px var(--seal),inset 0 0 10px -4px var(--seal)}
+:root[data-skin="gamer"] .bell,:root[data-skin="gamer"] .burger{box-shadow:0 0 12px -4px var(--accent)}
+:root[data-skin="gamer"] .home{box-shadow:0 0 12px -3px var(--seal)}
+:root[data-skin="gamer"] .cd.hoy,:root[data-skin="gamer"] .th[aria-pressed="true"]{box-shadow:inset 0 0 0 1px var(--accent),0 0 12px -2px var(--accent)}
+:root[data-skin="gamer"] .status.dominado{box-shadow:0 0 8px var(--ok)}
+:root[data-skin="gamer"] .maxim q{font-style:normal}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -183,7 +220,7 @@ button.stat.hot{border-color:var(--seal)} button.stat.hot b{color:var(--seal)}
 .days label{flex-direction:row;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;text-transform:capitalize;color:var(--ink)}
 /* Currículum: una hoja de papel, siempre clara, con columna lateral del color elegido */
 .cv-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
-.cv-sheet{--cva:#1f4e79;background:#fff;color:#1b2430;border:1px solid var(--line);border-radius:6px;box-shadow:0 24px 40px -26px rgba(0,0,0,.45);display:grid;grid-template-columns:34% 1fr;min-width:0;font-size:13.5px;line-height:1.45;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cv-sheet{--cva:#1f4e79;--f-display:"Newsreader",Georgia,"Times New Roman",serif;background:#fff;color:#1b2430;border:1px solid var(--line);border-radius:6px;box-shadow:0 24px 40px -26px rgba(0,0,0,.45);display:grid;grid-template-columns:34% 1fr;min-width:0;font-size:13.5px;line-height:1.45;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .cv-side{background:#eef2f7;background:color-mix(in srgb,var(--cva) 11%,#fff);padding:28px 22px;display:flex;flex-direction:column;gap:22px;min-width:0}
 .cv-main{padding:32px 30px;display:flex;flex-direction:column;gap:22px;min-width:0}
 .cv-photo{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #fff;display:block}
@@ -249,7 +286,7 @@ button.stat.hot{border-color:var(--seal)} button.stat.hot b{color:var(--seal)}
   .cdots i{width:5px;height:5px}
 }
 /* Apariencia: tres temas con su muestra */
-.themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px}
 .th{all:unset;cursor:pointer;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:14px;min-width:0}
 .th[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
 .th .pv{height:46px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:flex;align-items:flex-end;gap:5px;padding:7px}
@@ -458,9 +495,9 @@ dialog h2{margin-bottom:16px}
   <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="side"><i></i><i></i><i></i></button>
   <button class="home" id="home" aria-label="Ir a la página principal" title="Página principal"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5V20"></path><path d="M8 20h8"></path><path d="M5 7.5h14"></path><circle cx="12" cy="4" r="1"></circle><path d="M5 7.5 2.5 14h5L5 7.5Z"></path><path d="M2.5 14a2.5 2.5 0 0 0 5 0"></path><path d="M19 7.5 16.5 14h5L19 7.5Z"></path><path d="M16.5 14a2.5 2.5 0 0 0 5 0"></path></svg></button>
   <div class="scrim" id="scrim"></div>
-  <div class="topbar" aria-hidden="true">Cuaderno<small>Derecho · RRII</small></div>
+  <div class="topbar" aria-hidden="true">Digesto<small>Derecho · RRII</small></div>
   <aside id="side">
-    <div class="brand">Cuaderno<small>Derecho · RRII</small></div>
+    <div class="brand">Digesto<small>Derecho · RRII</small></div>
     <nav id="nav" aria-label="Secciones"></nav>
     <div class="side-foot"><span id="syncSt">Tu cuaderno se guarda cifrado en este navegador.</span><button class="linkbtn" id="lockBtn">Cerrar sesión</button></div>
   </aside>
@@ -575,10 +612,10 @@ function sample(){
    {id:uid(),q:"¿Qué derechos protege el recurso de amparo?",a:"Los de los arts. 14 a 29 de la Constitución y la objeción de conciencia del art. 30.2 (art. 53.2 CE).",subject:DC,box:1,due:addDays(1)}]});
 }
 /* Acepta datos guardados por versiones anteriores o copias incompletas y los deja con todos los campos */
-const THEMES={oscuro:["Oscuro","#0f151c","#17202a","#7fb0de"],claro:["Claro","#eef1f4","#ffffff","#1f4e79"],rosa:["Rosa","#fde9f1","#ffffff","#c2337a"]};
+const THEMES={oscuro:["Oscuro","#0f151c","#17202a","#7fb0de"],claro:["Claro","#eef1f4","#ffffff","#1f4e79"],rosa:["Rosa","#fde9f1","#ffffff","#c2337a"],gamer:["Gamer","#07070f","#171930","#22e3ff"]};
 let THEME="";try{THEME=localStorage.getItem("cuaderno-tema")||""}catch(e){}
 /* Sin elección guardada, la web sigue el modo claro u oscuro del dispositivo */
-function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.dataset.theme=t==="oscuro"?"dark":"light";if(t==="rosa")r.dataset.skin="rosa";else delete r.dataset.skin;
+function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.dataset.theme=t==="oscuro"||t==="gamer"?"dark":"light";if(t==="rosa"||t==="gamer")r.dataset.skin=t;else delete r.dataset.skin;
  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",THEMES[t][1])}
 applyTheme(THEME);
 const themeNow=()=>THEME||(matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro");
@@ -767,7 +804,7 @@ function vHoy(){
  <div class="head"><div><div class="eyebrow">${now.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"})}</div>
  <h1>${saludo}${S.name?", "+esc(S.name):""}</h1><p>${esc(nextTxt)} ${esc(paso)}</p></div>
  <div class="hbtns"><button class="btn" data-go="cv">Currículum</button>${due?`<button class="btn" id="goRev">Repasar ${due} ${due===1?"ficha":"fichas"}</button>`:""}</div></div>
- ${!S.onboarded?`<div class="welcome"><h2>Este es tu cuaderno de la carrera</h2>
+ ${!S.onboarded?`<div class="welcome"><h2>Esto es Digesto, tu cuaderno de la carrera</h2>
   <p>Guarda aquí tus temas, tus enlaces con notas, tus fichas de repaso y tus exámenes. Lo que ves ahora son datos de ejemplo para que veas cómo queda.</p>
   <label for="nameIn">¿Cómo te llamas?</label>
   <div class="addline"><input id="nameIn" value="${esc(S.name)}" placeholder="Ej.: Lucía" autocomplete="given-name"><button class="btn" id="startOwn">Empezar con mi cuaderno</button><button class="btn ghost" id="keepSample">Ver antes el ejemplo</button></div></div>`
@@ -1045,7 +1082,7 @@ function vAjustes(){
  const data=()=>{S.lastBackup=today();save();return JSON.stringify(S)};
  const showText=()=>{const t=$("#bk");t.value=data();t.hidden=false;t.focus();t.select();return t};
  $("#bkCopy").onclick=()=>{const t=showText();(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast("Copia copiada. Pégala en un correo o una nota."),()=>toast("Copia el texto seleccionado y guárdalo."))};
- $("#bkFile").onclick=async()=>{const name="cuaderno-copia-"+today()+".json";
+ $("#bkFile").onclick=async()=>{const name="digesto-copia-"+today()+".json";
   if(window.claude?.use){const dl=await DL;if(!dl){showText();return toast("Aquí no se pueden descargar archivos. Copia el texto y guárdalo.")}
    try{await dl.save({filename:name,data:data()});toast("Copia guardada");render()}catch(e){if(e?.code!=="declined"){showText();toast("No se pudo descargar. Copia el texto y guárdalo.")}}return}
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data()],{type:"application/json"}));a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);toast("Copia descargada");render()};
@@ -1121,7 +1158,7 @@ const P={len:25,left:25*60,run:false,end:0,tm:null,ac:null};
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 function paintP(){const el=$("#ptime");if(el)el.textContent=fmt(P.left);const b=$("#pgo");if(b)b.textContent=P.run?"Pausar":P.left<P.len*60?"Seguir":"Empezar";
  const mini=$("#mini"),on=P.run||P.left<P.len*60;mini.hidden=!on;mini.textContent=(P.len===5?"Descanso ":"Estudio ")+fmt(P.left)+(P.run?"":" (pausa)");
- document.title=P.run?fmt(P.left)+" · Cuaderno":TITLE}
+ document.title=P.run?fmt(P.left)+" · Digesto":TITLE}
 function startP(){try{P.ac=P.ac||new (window.AudioContext||window.webkitAudioContext)();P.ac.resume()}catch(e){}
  P.run=true;P.end=Date.now()+P.left*1000;clearInterval(P.tm);P.tm=setInterval(tickP,500);paintP()}
 function tickP(){P.left=Math.max(0,Math.round((P.end-Date.now())/1000));paintP();if(P.left<=0)finishP()}
@@ -1163,7 +1200,7 @@ document.addEventListener("keydown",e=>{if(!OPEN||view!=="fichas"||!R||R.done||d
 const gate=$("#gate"), app=$("#app");
 function gateShow(html,onSubmit){
  app.hidden=true;gate.hidden=false;
- gate.innerHTML=`<form class="gate-card" id="gateForm"><div class="seal">§</div><div class="brand" style="padding:0">Cuaderno<small>Derecho · RRII</small></div>${html}</form>`;
+ gate.innerHTML=`<form class="gate-card" id="gateForm"><div class="seal">§</div><div class="brand" style="padding:0">Digesto<small>Derecho · RRII</small></div>${html}</form>`;
  const f=$("#gateForm");
  f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector("[type=submit]"),txt=b.textContent,err=$("#gerr");if(b.dataset.busy)return;b.dataset.busy=1;b.textContent="Un momento…";err.textContent="";
   let msg="";try{msg=await onSubmit(Object.fromEntries(new FormData(f)))}catch(x){msg="No se pudo completar. Inténtalo de nuevo."}
@@ -1181,7 +1218,7 @@ function gateSetup(){gateShow(`<h1>Crea tu acceso</h1><p class="sub">Tu cuaderno
   SALT=crypto.getRandomValues(new Uint8Array(16));CK=await deriveKey(d.user,d.pass,SALT);if(!S.name)S.name=d.user.trim();
   try{await encState(JSON.stringify(S));localStorage.removeItem(KEY)}catch(e){toast("Este navegador no deja guardar datos. Lo que apuntes se perderá al cerrar.")}
   unlock()})}
-function gateLogin(lk){gateShow(`<h1>Entra en tu cuaderno</h1>
+function gateLogin(lk){gateShow(`<h1>Entra en Digesto</h1>
  <label for="g-user">Usuario<input id="g-user" name="user" autocomplete="username" required></label>
  <label for="g-pass">Contraseña<input id="g-pass" name="pass" type="password" autocomplete="current-password" required></label>
  <div class="gerr" id="gerr" role="alert"></div>
@@ -1204,7 +1241,7 @@ async function lock(){if(!OPEN)return;OPEN=false;clearTimeout(idle);
 const authErr=e=>{const m=(e?.message||"").toLowerCase();
  return m.includes("invalid login")?"Correo o contraseña incorrectos.":m.includes("not confirmed")?"Confirma antes tu correo con el enlace que te enviamos.":m.includes("already registered")?"Ese correo ya tiene cuenta. Entra con él.":m.includes("signups not allowed")||m.includes("signup is disabled")?"El registro está cerrado. Pide acceso a quien te dio esta web.":m.includes("rate limit")?"Demasiados intentos. Espera unos minutos.":m.includes("different from the old")?"Elige una contraseña distinta de la anterior.":"No se pudo completar. Revisa tu conexión e inténtalo de nuevo."};
 function gateMsg(title,text,retry){app.hidden=true;gate.hidden=false;gate.innerHTML=`<div class="gate-card"><div class="seal">§</div><h1>${title}</h1><p class="sub">${text}</p>${retry?`<button class="btn" id="gretry">Reintentar</button>`:""}</div>`;if(retry)$("#gretry").onclick=retry}
-function gateCloudLogin(info){gateShow(`<h1>Entra en tu cuaderno</h1>${info?`<p class="sub">${info}</p>`:""}
+function gateCloudLogin(info){gateShow(`<h1>Entra en Digesto</h1>${info?`<p class="sub">${info}</p>`:""}
  <label for="g-mail">Correo<input id="g-mail" name="email" type="email" autocomplete="username" required></label>
  <label for="g-pass">Contraseña<input id="g-pass" name="pass" type="password" autocomplete="current-password" required></label>
  <label for="g-keep" style="flex-direction:row;align-items:center;gap:8px"><input id="g-keep" name="keep" type="checkbox" style="width:auto" ${keep()?"checked":""}>Mantener la sesión abierta (solo en tu propio dispositivo)</label>
@@ -1245,7 +1282,7 @@ function gateNewPass(){gateShow(`<h1>Elige tu nueva contraseña</h1>
   await openCloud(data.session)})}
 async function bootCloud(){
  const h=location.hash, rec=/type=recovery/.test(h), bad=/error=/.test(h);
- gateMsg("Abriendo tu cuaderno","Un momento…");
+ gateMsg("Abriendo Digesto","Un momento…");
  try{await loadSupa();mkClient();const {data}=await sb.auth.getSession();
   if(data.session&&rec)return gateNewPass();
   if(data.session)return await openCloud(data.session);
@@ -1261,7 +1298,7 @@ function poke(){clearTimeout(idle);if(OPEN&&!(CLOUD&&keep()))idle=setTimeout(()=
 ["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,poke,{passive:true}));
 $("#lockBtn").onclick=lock;
 if(CLOUD)bootCloud();
-else if(!window.crypto?.subtle)gate.innerHTML=`<div class="gate-card"><div class="seal">§</div><h1>Abre el cuaderno por https</h1><p class="sub">Para cifrar tus datos, el navegador exige una dirección segura (https) o abrir el archivo directamente desde tu ordenador.</p></div>`;
+else if(!window.crypto?.subtle)gate.innerHTML=`<div class="gate-card"><div class="seal">§</div><h1>Abre Digesto por https</h1><p class="sub">Para cifrar tus datos, el navegador exige una dirección segura (https) o abrir el archivo directamente desde tu ordenador.</p></div>`;
 else{const lk=readLock();lk?gateLogin(lk):gateSetup()}
 </script>
 </body>
