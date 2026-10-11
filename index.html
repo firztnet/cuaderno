@@ -383,6 +383,11 @@ button.status::after{content:"";position:absolute;inset:-13px}
   .hb{padding-left:18px}
   .hb strong{font-size:18px}
 }
+/* Modo ejemplo: franja fija en cada pantalla mientras se mira la muestra */
+.demo{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:14px}
+.wipe{display:flex;flex-direction:column;gap:2px;margin:4px 0 8px}
+.wipe label{flex-direction:row;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:400}
+.wipe label:first-child{border-top:0}
 /* Enlaces y fichas */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .toolbar input{flex:1;min-width:180px}
@@ -693,7 +698,7 @@ function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.d
  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",THEMES[t][1])}
 applyTheme(THEME);
 const themeNow=()=>THEME||(matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro");
-function setTheme(t){THEME=t;try{localStorage.setItem("cuaderno-tema",t)}catch(e){}applyTheme(t);S.theme=t;save();render()}
+function setTheme(t){THEME=t;try{localStorage.setItem("cuaderno-tema",t)}catch(e){}applyTheme(t);S.theme=t;if(DEMO){REAL.theme=t;exitDemo(true);save();enterDemo();return go("ajustes")}save();render()}
 const HK={tratado:"Tratados y orden internacional",conflicto:"Guerras y conflictos",sentencia:"Juicios y sentencias",poder:"Poder y Estado de derecho",derechos:"Derechos",espana:"España"};
 const HKS={tratado:"Tratado",conflicto:"Conflicto",sentencia:"Sentencia",poder:"Poder",derechos:"Derechos",espana:"España"};
 const CV_COLORS=["#1f4e79","#8a2b3a","#2f5d50","#3a3f47"], NIVELES=["Nativo","C2","C1","B2","B1","A2","A1"];
@@ -719,7 +724,12 @@ function normalize(d){
 }
 let S=null;
 try{S=normalize(JSON.parse(localStorage.getItem(KEY)))}catch(e){}
-if(!S)S=sample();
+const emptyState=()=>normalize({subjects:[],onboarded:false});
+if(!S)S=emptyState();
+/* Modo ejemplo: se muestra una muestra en pantalla y el cuaderno real queda guardado aparte, sin tocar */
+let DEMO=false, REAL=null;
+function enterDemo(){if(DEMO)return;flushNote();REAL=S;S=sample();S.name=REAL.name;S.theme=REAL.theme;S.onboarded=true;DEMO=true;R=null;go("hoy")}
+function exitDemo(silent){if(!DEMO)return;S=REAL;REAL=null;DEMO=false;R=null;if(!silent)go("hoy")}
 /* ---------- ACCESO: el cuaderno se guarda cifrado (AES-GCM) con una clave derivada del usuario y la contraseña (PBKDF2). La clave solo vive en memoria. ---------- */
 const LOCK=KEY+"-lock";
 let CK=null, SALT=null, chain=Promise.resolve();
@@ -733,6 +743,7 @@ async function encState(json){
 function readLock(){try{const l=JSON.parse(localStorage.getItem(LOCK));return l&&l.salt&&l.iv&&l.data?l:null}catch(e){return null}}
 let OPEN=false, sb=null, UID=null, EMAIL="", dirty=false, pushT=null, rev="", warned=false;
 function save(){
+ if(DEMO){counts();return}
  if(CLOUD){if(OPEN){dirty=true;clearTimeout(pushT);pushT=setTimeout(flush,900)}}
  else if(CK){const j=JSON.stringify(S);chain=chain.then(()=>encState(j)).catch(()=>{})}
  counts()}
@@ -746,7 +757,7 @@ function setSync(t){const e=$("#syncSt");if(e)e.textContent=t}
 async function pull(first){
  const {data,error}=await sb.from("cuadernos").select("data,updated_at").eq("user_id",UID).maybeSingle();
  if(error)throw error;
- if(!data){if(first){S=sample();await push()}return first}
+ if(!data){if(first){S=emptyState();await push()}return first}
  if(data.updated_at===rev)return false;
  const st=normalize(data.data);if(st)S=st;rev=data.updated_at;return !!st}
 async function push(){
@@ -883,9 +894,9 @@ function vHoy(){
  <h1>${saludo}${S.name?", "+esc(S.name):""}</h1><p>${esc(nextTxt)} ${esc(paso)}</p></div>
  <div class="hbtns"><button class="btn" data-go="cv">Currículum</button>${due?`<button class="btn" id="goRev">Repasar ${due} ${due===1?"ficha":"fichas"}</button>`:""}</div></div>
  ${!S.onboarded?`<div class="welcome"><h2>Esto es Digesto, tu cuaderno de la carrera</h2>
-  <p>Guarda aquí tus temas, tus enlaces con notas, tus fichas de repaso y tus exámenes. Lo que ves ahora son datos de ejemplo para que veas cómo queda.</p>
+  <p>Guarda aquí tus temas y apuntes, tus fichas de repaso, tus enlaces y tus exámenes. ${S.ejemplo?"Lo que ves ahora son datos de ejemplo para que veas cómo queda.":"Está vacío, listo para lo tuyo. Si quieres ver cómo queda lleno, mira antes el ejemplo: no se guarda nada."}</p>
   <label for="nameIn">¿Cómo te llamas?</label>
-  <div class="addline"><input id="nameIn" value="${esc(S.name)}" placeholder="Ej.: Lucía" autocomplete="given-name"><button class="btn" id="startOwn">Empezar con mi cuaderno</button><button class="btn ghost" id="keepSample">Ver antes el ejemplo</button></div></div>`
+  <div class="addline"><input id="nameIn" value="${esc(S.name)}" placeholder="Ej.: Lucía" autocomplete="given-name"><button class="btn" id="startOwn">Empezar con mi cuaderno</button><button class="btn ghost" id="keepSample">Ver un ejemplo</button></div></div>`
  :S.ejemplo?`<div class="notice"><span>Estás viendo datos de ejemplo.</span><button class="btn ghost small" id="clearSample">Borrarlos y empezar con los míos</button></div>`:""}
  ${alertCards()}
  ${hoyHito()}
@@ -918,9 +929,10 @@ function vHoy(){
  </div>`;
  $("#markDay").onclick=()=>{markStudied();render()};
  const gr=$("#goRev");if(gr)gr.onclick=()=>startReview(dueCards(),false);
- const clear=()=>{S={...normalize({subjects:[]}),name:S.name,goal:S.goal,onboarded:true};save();render()};
- const so=$("#startOwn");if(so){so.onclick=()=>{S.name=$("#nameIn").value.trim();clear();toast("Listo. Empieza por crear tu primera asignatura en Temas.")};
-  $("#keepSample").onclick=()=>{S.name=$("#nameIn").value.trim();S.onboarded=true;save();render()}}
+ /* Quitar datos de muestra antiguos: se van enteros, salvo los hitos, sus notas y el tema elegido */
+ const clear=()=>{S={...normalize({subjects:[]}),name:S.name,goal:S.goal,onboarded:true,hitos:S.hitos,hitoMeta:S.hitoMeta,theme:S.theme};save();render()};
+ const so=$("#startOwn");if(so){so.onclick=()=>{S.name=$("#nameIn").value.trim();if(S.ejemplo)clear();else{S.onboarded=true;save();render()}toast("Listo. Empieza por crear tu primera asignatura en Temas.")};
+  $("#keepSample").onclick=()=>{S.name=$("#nameIn").value.trim();save();enterDemo()}}
  const cs=$("#clearSample");if(cs)cs.onclick=()=>confirmBox("Se borrarán los datos de ejemplo y lo que hayas añadido mientras tanto.",clear);
  main.querySelectorAll("[data-min]").forEach(b=>b.onclick=()=>{P.len=+b.dataset.min;resetP();render()});
  $("#pgo").onclick=()=>P.run?pauseP():startP();$("#preset").onclick=resetP;
@@ -1401,7 +1413,31 @@ function cvLang(l){openForm(l?"Editar idioma":"Añadir idioma",
 function cvSkills(){openForm("Competencias",
  `<label class="full" for="f-sk">Separadas por comas<textarea id="f-sk" name="skills" style="min-height:110px" placeholder="Investigación jurídica, Oratoria, Trabajo en equipo…">${esc(S.cv.skills)}</textarea></label>`,
  d=>{S.cv.skills=d.skills})}
+/* Borrado por partes. Los hitos propios y sus notas no figuran: no se borran desde aquí */
+const WIPE=[["curso","Asignaturas, temas y apuntes",1],["fichas","Fichas de repaso",1],["enlaces","Enlaces",1],["agenda","Agenda y horario semanal",1],["cv","Currículum",0],["festivos","Festivos que añadiste",0],["racha","Racha y minutos de estudio",0]];
+function wipeForm(){F.onsubmit=e=>e.preventDefault();
+ F.innerHTML=`<h2>¿Qué quieres borrar?</h2><p class="sub" style="margin:0">Vienen marcadas las cosas de un curso. Lo que borres no se puede recuperar sin una copia.</p>
+ <div class="wipe">${WIPE.map(([k,l,on])=>`<label for="w-${k}"><input id="w-${k}" type="checkbox" name="${k}" ${on?"checked":""}>${l}</label>`).join("")}</div>
+ <p class="sub" style="margin:0 0 4px">No se borran nunca: tus hitos y sus notas, tu nombre, tu apariencia y tu acceso.</p>
+ <div class="form"><div class="actions"><button type="button" class="btn ghost small" id="fcan">Cancelar</button><button type="button" class="btn ghost small danger" id="wGo">Borrar lo marcado</button></div></div>`;
+ $("#fcan").onclick=()=>dlg.close();
+ $("#wGo").onclick=()=>{const b=$("#wGo"),on=k=>$("#w-"+k).checked,sel=WIPE.filter(x=>on(x[0]));
+  if(!sel.length)return toast("No has marcado nada.");
+  if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Pulsa otra vez para borrar";return}
+  if(on("curso")){S.subjects=[];fSubj="";[S.links,S.events,S.cards,S.routine,Object.values(S.hitoMeta)].forEach(l=>l.forEach(x=>{x.subject=""}))}
+  if(on("fichas"))S.cards=[];
+  if(on("enlaces"))S.links=[];
+  if(on("agenda")){S.events=[];S.routine=[];S.seen=[]}
+  if(on("cv"))S.cv=normCv();
+  if(on("festivos"))S.holidays=[];
+  if(on("racha")){S.studyDays=[];S.minutes={}}
+  S.ejemplo=false;S.onboarded=true;save();dlg.close();toast("Borrado: "+sel.map(x=>x[1].toLowerCase()).join(", ")+".");go("hoy")};
+ F.querySelectorAll("input").forEach(i=>i.onchange=()=>{const b=$("#wGo");delete b.dataset.sure;b.textContent="Borrar lo marcado"});
+ dlg.showModal()}
 function vAjustes(){
+ if(DEMO){main.innerHTML=`<div class="head"><div><div class="eyebrow">Ajustes</div><h1>Ajustes del ejemplo</h1><p>Desde el ejemplo solo puedes cambiar la apariencia. Para tu acceso, tus copias o borrar datos, sal del ejemplo.</p></div></div>
+  <div class="panel stack" style="max-width:520px"><h2>Apariencia</h2><div class="themes">${Object.entries(THEMES).map(([k,[n,bg,sf,ac]])=>`<button class="th" data-theme-pick="${k}" aria-pressed="${themeNow()===k}"><span class="pv" style="background:${bg}"><i style="background:${sf}"></i><i style="background:${ac}"></i></span>${n}</button>`).join("")}</div></div>`;
+  main.querySelectorAll("[data-theme-pick]").forEach(b=>b.onclick=()=>setTheme(b.dataset.themePick));return}
  const mono="min-height:120px;font-family:var(--f-mono);font-size:12px";
  main.innerHTML=`<div class="head"><div><div class="eyebrow">Ajustes</div><h1>Tu cuaderno y sus copias</h1><p>${CLOUD?"Tu cuaderno se guarda en tu cuenta y lo ves igual en el móvil y en el portátil. Una copia de vez en cuando sigue siendo buena idea.":"Tus datos viven cifrados solo en este navegador: no pasan del portátil al móvil y se pierden si borras los datos de navegación. Una copia lo resuelve."}</p></div><button class="btn ghost" id="acLock2">Cerrar sesión</button></div>
  <div class="grid2"><div class="stack">
@@ -1424,7 +1460,8 @@ function vAjustes(){
    <label for="acPass">Nueva contraseña (mínimo 8 caracteres)<input id="acPass" type="password" autocomplete="new-password"></label>
    <label for="acPass2">Repite la contraseña<input id="acPass2" type="password" autocomplete="new-password"></label>
    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="acSave">${CLOUD?"Cambiar contraseña":"Cambiar acceso"}</button><button class="btn ghost small" id="acLock">Cerrar sesión</button></div></div>
-  <div class="panel stack"><h2>Empezar de cero</h2><p class="sub" style="margin:0">Borra asignaturas, fichas, enlaces, agenda y racha. Tu acceso se mantiene.</p><div><button class="btn ghost small danger" id="wipe">Borrar todo</button></div></div>
+  <div class="panel stack"><h2>Ver un ejemplo</h2><p class="sub" style="margin:0">Mira cómo queda Digesto lleno, con datos de muestra. No se guarda nada y tu cuaderno no se toca.</p><div><button class="btn ghost small" id="demoIn">Ver el ejemplo</button></div></div>
+  <div class="panel stack"><h2>Empezar de cero</h2><p class="sub" style="margin:0">Para un curso nuevo. Eliges qué se borra; tus hitos, tu nombre, tu apariencia y tu acceso se mantienen siempre.</p><div><button class="btn ghost small danger" id="wipe">Elegir qué borrar</button></div></div>
  </div></div>`;
  main.querySelectorAll("[data-theme-pick]").forEach(b=>b.onclick=()=>setTheme(b.dataset.themePick));
  $("#setSave").onclick=()=>{S.name=$("#setName").value.trim();S.goal=Math.min(600,Math.max(5,+$("#setGoal").value||50));save();toast("Guardado");render()};
@@ -1443,7 +1480,8 @@ function vAjustes(){
   const b=$("#acSave");b.textContent="Un momento…";await chain;const salt=crypto.getRandomValues(new Uint8Array(16)),k=await deriveKey(u,p,salt);SALT=salt;CK=k;save();await chain;toast("Acceso cambiado. Úsalo la próxima vez que entres.");render()};
  $("#rsFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(r.result);r.onerror=()=>toast("No se pudo leer el archivo.");r.readAsText(f)};
  $("#rsb").onclick=()=>restore($("#rs").value);
- $("#wipe").onclick=()=>confirmBox("Se borrará todo tu cuaderno. Si no tienes copia, no se puede recuperar.",()=>{S={...normalize({subjects:[]}),name:S.name,goal:S.goal,onboarded:true};save();toast("Cuaderno vacío");go("hoy")});
+ $("#demoIn").onclick=enterDemo;
+ $("#wipe").onclick=wipeForm;
 }
 const DL=window.claude?.use?window.claude.use("downloads").catch(()=>null):Promise.resolve(null);
 
@@ -1534,7 +1572,8 @@ $("#side").addEventListener("wheel",e=>{if(!menuOpen())return;const a=e.currentT
 $("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
 const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
-function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R?"repaso":view;V[view]();$("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-hito]").forEach(b=>b.onclick=()=>openHito(b.dataset.hito));main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
+function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R?"repaso":view;V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><button class="btn small" id="demoOut">Salir del ejemplo</button></div>`);$("#demoOut").onclick=()=>exitDemo()}
+ $("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-hito]").forEach(b=>b.onclick=()=>openHito(b.dataset.hito));main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
 function go(v){flushNote();setMenu(false);if(v!=="fichas")R=null;view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render();window.scrollTo(0,0)}
 document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;go(b.dataset.v)});
 function openMore(){F.onsubmit=e=>e.preventDefault();
@@ -1583,12 +1622,12 @@ function gateLogin(lk){gateShow(`<h1>Entra en Digesto</h1>
   try{st=normalize(JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(lk.iv)},k,unb64(lk.data)))))}catch(e){}
   if(!st)return "Usuario o contraseña incorrectos.";
   S=st;SALT=salt;CK=k;unlock()});
- $("#gwipe").onclick=()=>{const b=$("#gwipe");if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Pulsa otra vez para borrarlo todo";return}try{localStorage.removeItem(LOCK)}catch(e){}S=sample();gateSetup()};
+ $("#gwipe").onclick=()=>{const b=$("#gwipe");if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Pulsa otra vez para borrarlo todo";return}try{localStorage.removeItem(LOCK)}catch(e){}S=emptyState();gateSetup()};
 }
 function unlock(){OPEN=true;if(S.theme&&S.theme!==THEME){THEME=S.theme;try{localStorage.setItem("cuaderno-tema",THEME)}catch(e){}applyTheme(THEME)}else if(!S.theme)S.theme=THEME;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
-async function lock(){if(!OPEN)return;flushNote();OPEN=false;clearTimeout(idle);
+async function lock(){if(!OPEN)return;exitDemo(true);flushNote();OPEN=false;clearTimeout(idle);
  if(CLOUD){clearTimeout(pushT);if(dirty)await push().catch(()=>{});await sb.auth.signOut({scope:"local"}).catch(()=>{})}else await chain;
- setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;CK=null;UID=null;S=sample();main.innerHTML="";document.title=TITLE;
+ setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;CK=null;UID=null;S=emptyState();main.innerHTML="";document.title=TITLE;
  if(CLOUD)return gateCloudLogin("");
  const lk=readLock();lk?gateLogin(lk):gateSetup()}
 
@@ -1644,6 +1683,7 @@ async function bootCloud(){
   gateCloudLogin(bad?"Ese enlace ha caducado o ya se usó. Pide otro.":"")}
  catch(e){gateMsg("No se pudo conectar","Revisa tu conexión a internet. Tu cuaderno sigue a salvo en tu cuenta.",bootCloud)}}
 document.addEventListener("visibilitychange",()=>{if(!CLOUD||!OPEN)return;
+ if(DEMO)return;
  if(document.hidden){if(dirty){clearTimeout(pushT);flush()}}
  else if(!dirty&&!dlg.open&&!R&&view!=="tema")pull().then(ch=>{if(ch&&OPEN)render()}).catch(()=>{})});
 window.addEventListener("online",()=>{if(CLOUD&&OPEN&&dirty)flush()});
