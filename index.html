@@ -133,6 +133,11 @@ h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0;text-wra
 .gate-card h1{font-size:28px}
 .gate-card p{margin:0}
 .gate-card .seal{width:48px;height:48px;font-size:22px}
+.ghead{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;margin-bottom:6px}
+.pw{display:block;position:relative}
+.pw input{padding-right:46px}
+.pwbtn{all:unset;cursor:pointer;position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border-radius:8px;color:var(--muted)}
+.pwbtn:hover{color:var(--ink);background:var(--surface-2)}
 .gerr{color:var(--crit);font-size:14px;font-weight:500;min-height:1.5em}
 .gate-card details{font-size:14px;color:var(--muted)}
 .gate-card details p{margin:8px 0 12px}
@@ -506,7 +511,7 @@ dialog h2{margin-bottom:16px}
   .welcome .addline input{flex-basis:100%}
   .duebox .btn{flex:1}
   aside{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;flex-direction:row;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));border-right:0;border-top:1px solid var(--line);z-index:10}
-  .brand,.side-foot{display:none}
+  aside .brand,.side-foot{display:none}
   nav{flex-direction:row;flex:1;min-width:0}
   nav button{flex:1;justify-content:center;padding:13px 2px;font-size:12px;min-width:0;white-space:nowrap}
   .count{display:none}
@@ -824,8 +829,14 @@ let view=(location.hash||"").slice(1)||"hoy", q="", fSubj="", R=null;
 if(view==="copia")view="ajustes";
 const $=s=>document.querySelector(s), main=$("#main");
 /* Iconos de línea y menú: la misma lista sirve para el cajón de escritorio y las pestañas del teléfono */
-const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',ayuda:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 1.9"/><path d="M12 16.7h.01"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
+const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',ayuda:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 1.9"/><path d="M12 16.7h.01"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',ojo:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/>',ojono:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path d="M4 4l16 16"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
 const ico=k=>`<svg class="ni" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+/* Añade a cada campo de contraseña un botón para verla u ocultarla */
+function pwToggles(root){root.querySelectorAll('input[type="password"]').forEach(inp=>{
+ const w=document.createElement("span");w.className="pw";inp.before(w);w.append(inp);
+ const b=document.createElement("button");b.type="button";b.className="pwbtn";b.innerHTML=ico("ojo");b.setAttribute("aria-label","Ver la contraseña");b.setAttribute("aria-pressed","false");
+ b.onclick=()=>{const show=inp.type==="password";inp.type=show?"text":"password";b.innerHTML=ico(show?"ojono":"ojo");b.setAttribute("aria-label",show?"Ocultar la contraseña":"Ver la contraseña");b.setAttribute("aria-pressed",String(show));inp.focus()};
+ w.append(b)})}
 const MORE=["calendario","hitos","enlaces","cv","ayuda","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
 $("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["hitos","Hitos"],["enlaces","Enlaces","c-enlaces"],["ayuda","Ayuda"],["ajustes","Ajustes"]]
  .map(([v,l,c])=>`<button data-v="${v}" class="${MORE.includes(v)?"in-more":""}"><span class="nx">${ico(v)}<span>${l}</span></span>${c?`<span class="count" id="${c}"></span>`:""}</button>`).join("")
@@ -1564,6 +1575,7 @@ function vAjustes(){
   <div class="panel stack"><h2>Empezar de cero</h2><p class="sub" style="margin:0">Para un curso nuevo. Eliges qué se borra; tus hitos, tu nombre, tu apariencia y tu acceso se mantienen siempre.</p><div><button class="btn ghost small danger" id="wipe">Elegir qué borrar</button></div></div>
  </div></div>`;
  main.querySelectorAll("[data-theme-pick]").forEach(b=>b.onclick=()=>setTheme(b.dataset.themePick));
+ pwToggles(main);
  $("#setSave").onclick=()=>{S.name=$("#setName").value.trim();S.goal=Math.min(600,Math.max(5,+$("#setGoal").value||50));save();toast("Guardado");render()};
  const data=()=>{S.lastBackup=today();save();return JSON.stringify(S)};
  const showText=()=>{const t=$("#bk");t.value=data();t.hidden=false;t.focus();t.select();return t};
@@ -1704,7 +1716,8 @@ document.addEventListener("keydown",e=>{if(!OPEN||view!=="fichas"||!R||R.done||d
 const gate=$("#gate"), app=$("#app");
 function gateShow(html,onSubmit){
  app.hidden=true;gate.hidden=false;
- gate.innerHTML=`<form class="gate-card" id="gateForm"><div class="seal">§</div><div class="brand" style="padding:0">Digesto<small>Derecho · RRII</small></div>${html}</form>`;
+ gate.innerHTML=`<form class="gate-card" id="gateForm" aria-label="Acceso a Digesto"><div class="ghead"><div class="seal">§</div><div class="brand" style="padding:0">Digesto<small>Derecho · RRII</small></div></div>${html}</form>`;
+ pwToggles(gate);
  const f=$("#gateForm");
  f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector("[type=submit]"),txt=b.textContent,err=$("#gerr");if(b.dataset.busy)return;b.dataset.busy=1;b.textContent="Un momento…";err.textContent="";
   let msg="";try{msg=await onSubmit(Object.fromEntries(new FormData(f)))}catch(x){msg="No se pudo completar. Inténtalo de nuevo."}
@@ -1722,7 +1735,7 @@ function gateSetup(){gateShow(`<h1>Crea tu acceso</h1><p class="sub">Tu cuaderno
   SALT=crypto.getRandomValues(new Uint8Array(16));CK=await deriveKey(d.user,d.pass,SALT);if(!S.name)S.name=d.user.trim();
   try{await encState(JSON.stringify(S));localStorage.removeItem(KEY)}catch(e){toast("Este navegador no deja guardar datos. Lo que apuntes se perderá al cerrar.")}
   unlock()})}
-function gateLogin(lk){gateShow(`<h1>Entra en Digesto</h1>
+function gateLogin(lk){gateShow(`
  <label for="g-user">Usuario<input id="g-user" name="user" autocomplete="username" required></label>
  <label for="g-pass">Contraseña<input id="g-pass" name="pass" type="password" autocomplete="current-password" required></label>
  <div class="gerr" id="gerr" role="alert"></div>
@@ -1745,7 +1758,7 @@ async function lock(){if(!OPEN)return;exitDemo(true);flushNote();OPEN=false;clea
 const authErr=e=>{const m=(e?.message||"").toLowerCase();
  return m.includes("invalid login")?"Correo o contraseña incorrectos.":m.includes("not confirmed")?"Confirma antes tu correo con el enlace que te enviamos.":m.includes("already registered")?"Ese correo ya tiene cuenta. Entra con él.":m.includes("signups not allowed")||m.includes("signup is disabled")?"El registro está cerrado. Pide acceso a quien te dio esta web.":m.includes("rate limit")?"Demasiados intentos. Espera unos minutos.":m.includes("different from the old")?"Elige una contraseña distinta de la anterior.":"No se pudo completar. Revisa tu conexión e inténtalo de nuevo."};
 function gateMsg(title,text,retry){app.hidden=true;gate.hidden=false;gate.innerHTML=`<div class="gate-card"><div class="seal">§</div><h1>${title}</h1><p class="sub">${text}</p>${retry?`<button class="btn" id="gretry">Reintentar</button>`:""}</div>`;if(retry)$("#gretry").onclick=retry}
-function gateCloudLogin(info){gateShow(`<h1>Entra en Digesto</h1>${info?`<p class="sub">${info}</p>`:""}
+function gateCloudLogin(info){gateShow(`${info?`<p class="sub">${info}</p>`:""}
  <label for="g-mail">Correo<input id="g-mail" name="email" type="email" autocomplete="username" required></label>
  <label for="g-pass">Contraseña<input id="g-pass" name="pass" type="password" autocomplete="current-password" required></label>
  <label for="g-keep" style="flex-direction:row;align-items:center;gap:8px"><input id="g-keep" name="keep" type="checkbox" style="width:auto" ${keep()?"checked":""}>Mantener la sesión abierta (solo en tu propio dispositivo)</label>
