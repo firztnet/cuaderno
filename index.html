@@ -648,10 +648,10 @@ let view=(location.hash||"").slice(1)||"hoy", q="", fSubj="", R=null;
 if(view==="copia")view="ajustes";
 const $=s=>document.querySelector(s), main=$("#main");
 /* Iconos de línea y menú: la misma lista sirve para el cajón de escritorio y las pestañas del teléfono */
-const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
+const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
 const ico=k=>`<svg class="ni" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
-const MORE=["enlaces","cv","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
-$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["eventos","Agenda","c-eventos"],["enlaces","Enlaces","c-enlaces"],["ajustes","Ajustes"]]
+const MORE=["calendario","enlaces","cv","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
+$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["enlaces","Enlaces","c-enlaces"],["ajustes","Ajustes"]]
  .map(([v,l,c])=>`<button data-v="${v}" class="${MORE.includes(v)?"in-more":""}"><span class="nx">${ico(v)}<span>${l}</span></span>${c?`<span class="count" id="${c}"></span>`:""}</button>`).join("")
  +`<button id="moreBtn" class="only-more" aria-haspopup="dialog"><span class="nx">${ico("mas")}<span>Más</span></span></button>`;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -883,52 +883,50 @@ function answer(known){
  if(R.i>=R.queue.length){R.done=true;save();markStudied()}else save();
  render();
 }
-let wkOff=0, monOff=0, calMode="mes";
+let wkOff=0, monOff=0;
 const mondayOf=x=>{const z=new Date(x);z.setHours(12,0,0,0);z.setDate(z.getDate()-(z.getDay()+6)%7);return z};
 function vEventos(){
  const up=upcoming(), t=today(), past=S.events.filter(e=>e.date<t||e.done).sort((a,b)=>b.date.localeCompare(a.date));
  const groups=[["Hoy y mañana",e=>daysTo(e.date)<=1],["Esta semana",e=>{const n=daysTo(e.date);return n>1&&n<=7}],["Más adelante",e=>daysTo(e.date)>7]];
- const f=d=>d.toLocaleDateString("es-ES",{day:"numeric",month:"short"});
- let title="",body="";
- if(calMode==="mes"){
-  const base=new Date();base.setDate(1);base.setMonth(base.getMonth()+monOff);
-  const y=base.getFullYear(),m=base.getMonth(),lead=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),start=new Date(y,m,1-lead,12);
-  const cells=[...Array(Math.ceil((lead+dim)/7)*7)].map((_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const k=iso(d),it=dayItems(d),fe=holidayOf(k),ev=it.filter(x=>x.eid);
-   return `<button class="cd ${d.getMonth()!==m?"out":""} ${k===t?"hoy":""} ${fe?"fest":""} ${d.getDay()%6===0?"finde":""}" data-day="${k}" aria-label="${esc(d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"})+(fe?", festivo: "+fe:"")+(it.length?", "+it.length+" en la agenda":""))}"><span class="dn">${d.getDate()}</span>${fe?`<span class="fn">${esc(fe)}</span>`:""}${it.length?`<span class="cdots">${it.slice(0,6).map(x=>`<i class="${x.type} ${x.eid?"e":""}"></i>`).join("")}</span>`:""}${ev.slice(0,2).map(x=>`<span class="cev ${x.type}">${esc(x.title)}</span>`).join("")}${ev.length>2?`<span class="cev otro">+${ev.length-2}</span>`:""}</button>`}).join("");
-  const fm=[...Array(dim)].map((_,i)=>{const k=iso(new Date(y,m,i+1,12));return [k,holidayOf(k)]}).filter(x=>x[1]);
-  const mt=base.toLocaleDateString("es-ES",{month:"long",year:"numeric"});title=mt[0].toUpperCase()+mt.slice(1);
-  const nota=y===2026?"Festivos de la Comunidad de Madrid según el calendario oficial de 2026.":y===2027?"Festivos de la Comunidad de Madrid según el calendario publicado para 2027. Confírmalo en comunidad.madrid.":`Festivos de ${y} calculados con la regla general. Los traslados cambian cada año: confírmalos con el calendario oficial.`;
-  body=`<div class="sub">Toca un día para ver su semana. Los puntos son tu horario; con aro, las fechas apuntadas.</div>
-  <div class="cal">${["lun","mar","mié","jue","vie","sáb","dom"].map(x=>`<div class="cal-h">${x}</div>`).join("")}${cells}</div>
-  <div class="group"><div class="eyebrow">Festivos de este mes</div>${fm.map(([k,nm])=>{const own=ownHoliday(k);return `<div class="src"><div style="min-width:0;overflow-wrap:anywhere"><b>${+k.slice(8)}</b> · ${esc(nm)}</div>${own?`<button class="iconbtn" data-edh="${own.id}">Editar</button>`:`<span class="sub">Oficial</span>`}</div>`}).join("")||`<div class="empty">Ninguno este mes.</div>`}</div>
-  <div class="hbtns" style="margin-top:12px"><button class="btn ghost small" id="addHol">Añadir festivo local o de la universidad</button>${S.holidays.some(h=>h.date.slice(5)==="05-15")?"":`<button class="btn ghost small" id="addMad">Añadir los de Madrid capital</button>`}</div>
-  <p class="sub" style="margin:12px 0 0">${nota} Los dos festivos locales dependen de cada municipio. En festivo no se muestran tus clases.</p>`;
- }else{
-  const wd=weekDays(wkOff);
-  title=wkOff===0?"Esta semana":wkOff===1?"La semana que viene":wkOff===-1?"La semana pasada":"Semana del "+f(wd[0]);
-  body=`<div class="sub">Del ${f(wd[0])} al ${f(wd[6])}. Con borde, lo que tiene fecha. Sin borde, tu horario de cada semana. Toca cualquiera para cambiarlo.</div>
-  ${S.routine.length?"":`<div class="notice" style="margin:12px 0 0"><span>Aún no has apuntado tu horario fijo.</span><button class="btn small" id="addRt2">Añadir clases, trabajo o deporte</button></div>`}
-  <div class="wk">${wd.map(d=>{const it=dayItems(d),fe=holidayOf(iso(d));return `<div class="wd ${iso(d)===t?"hoy":""}"><div class="wd-h">${DIAS[d.getDay()].slice(0,3)} <b>${d.getDate()}</b>${fe?`<span class="fn">${esc(fe)}</span>`:""}</div><div class="wd-b">${it.map(i=>`<button class="slot ${i.type} ${i.eid?"ev":""}" ${i.eid?`data-ede="${i.eid}"`:`data-edr="${i.rid}"`}><span class="st">${esc(i.t||"Sin hora")}${i.end?"–"+esc(i.end):""}</span>${esc(i.title)}</button>`).join("")||`<span class="sub">${fe?"Festivo":"Libre"}</span>`}</div></div>`}).join("")}</div>`;
- }
- const off=calMode==="mes"?monOff:wkOff;
- main.innerHTML=`<div class="head"><div><div class="eyebrow">Agenda</div><h1>Tu calendario y tus fechas</h1><p>Apunta una vez tus clases, tu trabajo y tu patinaje y se repiten cada semana. Los exámenes y entregas van con fecha y te avisan antes. Los festivos ya vienen marcados.</p></div><div class="hbtns"><button class="btn ghost" id="addRt">Añadir al horario</button><button class="btn" id="addEv">Nueva fecha</button></div></div>
- <div class="panel"><div class="phead"><h2>${title}</h2><div class="acts"><button class="chip" data-mode="mes" aria-pressed="${calMode==="mes"}">Mes</button><button class="chip" data-mode="semana" aria-pressed="${calMode==="semana"}">Semana</button><button class="iconbtn" id="calPrev">Anterior</button>${off?`<button class="iconbtn" id="calNow">Hoy</button>`:""}<button class="iconbtn" id="calNext">Siguiente</button></div></div>
- ${body}</div>
+ const wd=weekDays(wkOff), f=d=>d.toLocaleDateString("es-ES",{day:"numeric",month:"short"});
+ const week=wd.map(d=>{const it=dayItems(d),fe=holidayOf(iso(d));return `<div class="wd ${iso(d)===t?"hoy":""}"><div class="wd-h">${DIAS[d.getDay()].slice(0,3)} <b>${d.getDate()}</b>${fe?`<span class="fn">${esc(fe)}</span>`:""}</div><div class="wd-b">${it.map(i=>`<button class="slot ${i.type} ${i.eid?"ev":""}" ${i.eid?`data-ede="${i.eid}"`:`data-edr="${i.rid}"`}><span class="st">${esc(i.t||"Sin hora")}${i.end?"–"+esc(i.end):""}</span>${esc(i.title)}</button>`).join("")||`<span class="sub">${fe?"Festivo":"Libre"}</span>`}</div></div>`}).join("");
+ main.innerHTML=`<div class="head"><div><div class="eyebrow">Agenda</div><h1>Tu semana y tus fechas</h1><p>Apunta una vez tus clases, tu trabajo y tu patinaje y se repiten cada semana. Los exámenes y entregas van con fecha y te avisan antes.</p></div><div class="hbtns"><button class="btn ghost" id="addRt">Añadir al horario</button><button class="btn" id="addEv">Nueva fecha</button></div></div>
+ <div class="panel"><div class="phead"><h2>${wkOff===0?"Esta semana":wkOff===1?"La semana que viene":wkOff===-1?"La semana pasada":"Semana del "+f(wd[0])}</h2><div class="acts"><button class="iconbtn" id="wkPrev">Anterior</button>${wkOff?`<button class="iconbtn" id="wkNow">Hoy</button>`:""}<button class="iconbtn" id="wkNext">Siguiente</button></div></div>
+ <div class="sub">Del ${f(wd[0])} al ${f(wd[6])}. Con borde, lo que tiene fecha. Sin borde, tu horario de cada semana. Toca cualquiera para cambiarlo.</div>
+ ${S.routine.length?"":`<div class="notice" style="margin:12px 0 0"><span>Aún no has apuntado tu horario fijo.</span><button class="btn small" id="addRt2">Añadir clases, trabajo o deporte</button></div>`}
+ <div class="wk">${week}</div></div>
  <div class="panel" style="margin-top:20px"><h2>Próximas fechas</h2>${up.length?groups.map(([name,fn])=>{const g=up.filter(fn);return g.length?`<div class="group"><div class="eyebrow">${name}</div><div class="list">${g.map(e=>eventRow(e,true)).join("")}</div></div>`:""}).join(""):`<div class="empty">No hay fechas próximas. Apunta tu siguiente examen y te avisaré cuando se acerque.</div>`}</div>
  ${past.length?`<div class="panel" style="margin-top:20px"><h2>Pasados y entregados</h2><div class="list" style="opacity:.75">${past.slice(0,12).map(e=>eventRow(e,true)).join("")}</div></div>`:""}`;
  $("#addEv").onclick=()=>eventForm();$("#addRt").onclick=()=>routineForm();
  const r2=$("#addRt2");if(r2)r2.onclick=()=>routineForm();
- const step=n=>{if(calMode==="mes")monOff+=n;else wkOff+=n;render()};
- $("#calPrev").onclick=()=>step(-1);$("#calNext").onclick=()=>step(1);
- const cn=$("#calNow");if(cn)cn.onclick=()=>{monOff=0;wkOff=0;render()};
- main.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{calMode=b.dataset.mode;render()});
- main.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{wkOff=Math.round((mondayOf(new Date(b.dataset.day+"T12:00"))-mondayOf(new Date()))/6048e5);calMode="semana";render()});
- const ah=$("#addHol");if(ah)ah.onclick=()=>holidayForm();
- const am=$("#addMad");if(am)am.onclick=()=>{const y=new Date().getFullYear();S.holidays.push({id:uid(),date:y+"-05-15",name:"San Isidro (Madrid capital)",yearly:true},{id:uid(),date:y+"-11-09",name:"La Almudena (Madrid capital)",yearly:true});save();toast("Añadidos: 15 de mayo y 9 de noviembre, cada año.");render()};
- main.querySelectorAll("[data-edh]").forEach(b=>b.onclick=()=>holidayForm(S.holidays.find(h=>h.id===b.dataset.edh)));
+ $("#wkPrev").onclick=()=>{wkOff--;render()};$("#wkNext").onclick=()=>{wkOff++;render()};
+ const wn=$("#wkNow");if(wn)wn.onclick=()=>{wkOff=0;render()};
  main.querySelectorAll("[data-ede]").forEach(b=>b.onclick=()=>eventForm(S.events.find(e=>e.id===b.dataset.ede)));
  main.querySelectorAll("[data-edr]").forEach(b=>b.onclick=()=>routineForm(S.routine.find(r=>r.id===b.dataset.edr)));
  main.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{S.events.find(e=>e.id===b.dataset.done).done=true;save();toast("Entregado. Una cosa menos.");render()});
+}
+/* Calendario de mes con los festivos; tocar un día abre su semana en la Agenda */
+function vCalendario(){
+ const t=today(), base=new Date();base.setDate(1);base.setMonth(base.getMonth()+monOff);
+ const y=base.getFullYear(),m=base.getMonth(),lead=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),start=new Date(y,m,1-lead,12);
+ const cells=[...Array(Math.ceil((lead+dim)/7)*7)].map((_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const k=iso(d),it=dayItems(d),fe=holidayOf(k),ev=it.filter(x=>x.eid);
+  return `<button class="cd ${d.getMonth()!==m?"out":""} ${k===t?"hoy":""} ${fe?"fest":""} ${d.getDay()%6===0?"finde":""}" data-day="${k}" aria-label="${esc(d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"})+(fe?", festivo: "+fe:"")+(it.length?", "+it.length+" en la agenda":""))}"><span class="dn">${d.getDate()}</span>${fe?`<span class="fn">${esc(fe)}</span>`:""}${it.length?`<span class="cdots">${it.slice(0,6).map(x=>`<i class="${x.type} ${x.eid?"e":""}"></i>`).join("")}</span>`:""}${ev.slice(0,2).map(x=>`<span class="cev ${x.type}">${esc(x.title)}</span>`).join("")}${ev.length>2?`<span class="cev otro">+${ev.length-2}</span>`:""}</button>`}).join("");
+ const fm=[...Array(dim)].map((_,i)=>{const k=iso(new Date(y,m,i+1,12));return [k,holidayOf(k)]}).filter(x=>x[1]);
+ const mt=base.toLocaleDateString("es-ES",{month:"long",year:"numeric"});
+ const nota=y===2026?"Festivos de la Comunidad de Madrid según el calendario oficial de 2026.":y===2027?"Festivos de la Comunidad de Madrid según el calendario publicado para 2027. Confírmalo en comunidad.madrid.":`Festivos de ${y} calculados con la regla general. Los traslados cambian cada año: confírmalos con el calendario oficial.`;
+ main.innerHTML=`<div class="head"><div><div class="eyebrow">Calendario</div><h1>Tu mes y los festivos</h1><p>Los festivos de la Comunidad de Madrid ya vienen marcados. Toca un día para ver su semana en la Agenda.</p></div><button class="btn" id="addHol">Añadir festivo</button></div>
+ <div class="panel"><div class="phead"><h2>${mt[0].toUpperCase()+mt.slice(1)}</h2><div class="acts"><button class="iconbtn" id="calPrev">Anterior</button>${monOff?`<button class="iconbtn" id="calNow">Hoy</button>`:""}<button class="iconbtn" id="calNext">Siguiente</button></div></div>
+ <div class="sub">Los puntos son tu horario; con aro, las fechas apuntadas.</div>
+ <div class="cal">${["lun","mar","mié","jue","vie","sáb","dom"].map(x=>`<div class="cal-h">${x}</div>`).join("")}${cells}</div></div>
+ <div class="panel" style="margin-top:20px"><h2>Festivos de este mes</h2>${fm.map(([k,nm])=>{const own=ownHoliday(k);return `<div class="src"><div style="min-width:0;overflow-wrap:anywhere"><b>${+k.slice(8)}</b> · ${esc(nm)}</div>${own?`<button class="iconbtn" data-edh="${own.id}">Editar</button>`:`<span class="sub">Oficial</span>`}</div>`}).join("")||`<div class="empty">Ninguno este mes.</div>`}
+ ${S.holidays.some(h=>h.date.slice(5)==="05-15")?"":`<div style="margin-top:12px"><button class="btn ghost small" id="addMad">Añadir los de Madrid capital</button></div>`}
+ <p class="sub" style="margin:12px 0 0">${nota} Los dos festivos locales dependen de cada municipio. En festivo no se muestran tus clases.</p></div>`;
+ $("#calPrev").onclick=()=>{monOff--;render()};$("#calNext").onclick=()=>{monOff++;render()};
+ const cn=$("#calNow");if(cn)cn.onclick=()=>{monOff=0;render()};
+ main.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{wkOff=Math.round((mondayOf(new Date(b.dataset.day+"T12:00"))-mondayOf(new Date()))/6048e5);go("eventos")});
+ $("#addHol").onclick=()=>holidayForm();
+ const am=$("#addMad");if(am)am.onclick=()=>{const yy=new Date().getFullYear();S.holidays.push({id:uid(),date:yy+"-05-15",name:"San Isidro (Madrid capital)",yearly:true},{id:uid(),date:yy+"-11-09",name:"La Almudena (Madrid capital)",yearly:true});save();toast("Añadidos: 15 de mayo y 9 de noviembre, cada año.");render()};
+ main.querySelectorAll("[data-edh]").forEach(b=>b.onclick=()=>holidayForm(S.holidays.find(h=>h.id===b.dataset.edh)));
 }
 function holidayForm(h){openForm(h?"Editar festivo":"Añadir festivo",
  `<label class="full" for="f-hn">Nombre<input id="f-hn" name="name" required value="${esc(h?.name)}" placeholder="Fiesta local, patrón de la facultad, día no lectivo…"></label>
@@ -1143,12 +1141,12 @@ $("#burger").onclick=()=>setMenu(!document.body.classList.contains("menu-open"))
 $("#scrim").onclick=()=>setMenu(false);
 $("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
-const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,eventos:vEventos,cv:vCV,ajustes:vAjustes};
+const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
 function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view:MORE.includes(view)));main.dataset.view=R?"repaso":view;V[view]();$("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
 function go(v){setMenu(false);if(v!=="fichas")R=null;view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render();window.scrollTo(0,0)}
 document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;go(b.dataset.v)});
 function openMore(){F.onsubmit=e=>e.preventDefault();
- F.innerHTML=`<h2>Más</h2><div class="mlist">${[["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
+ F.innerHTML=`<h2>Más</h2><div class="mlist">${[["calendario","Calendario","El mes entero, con los festivos"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
  <div class="form"><div class="actions"><button type="button" class="btn ghost small" id="fcan">Cerrar</button></div></div>`;
  F.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{dlg.close();R=null;go(b.dataset.mv)});
  $("#mOut").onclick=()=>{dlg.close();lock()};$("#fcan").onclick=()=>dlg.close();
