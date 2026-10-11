@@ -28,6 +28,14 @@
   --bg:#0f151c; --surface:#17202a; --surface-2:#1c2733; --line:#2a3644;
   --ink:#e6ebf0; --muted:#94a3b3; --accent:#7fb0de; --accent-soft:#1d3247;
   --seal:#d98292; --gold:#d8b25a; --ok:#6cc292; --warn:#e3a453; --crit:#ec7b78; color-scheme:dark}
+/* Tema rosa: claro y con más color. Se activa desde Ajustes junto con data-theme="light" */
+:root[data-skin="rosa"]{
+  --bg:#fdf1f5; --surface:#ffffff; --surface-2:#fbe8ef; --line:#f1cfdc;
+  --ink:#3a1f2d; --muted:#86606f; --accent:#c2337a; --accent-soft:#fbdcea;
+  --seal:#7c3aad; --gold:#b9781f;
+  --ok:#1f8a70; --warn:#c2651a; --crit:#cf2f4d; color-scheme:light}
+:root[data-skin="rosa"] body{background:linear-gradient(160deg,#fde9f1 0%,#f8eefb 55%,#eef2ff 100%) fixed}
+:root[data-skin="rosa"] .topbar{background:#fde9f1}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -231,6 +239,13 @@ button.stat.hot{border-color:var(--seal)} button.stat.hot b{color:var(--seal)}
   .cdots{justify-content:center;gap:3px}
   .cdots i{width:5px;height:5px}
 }
+/* Apariencia: tres temas con su muestra */
+.themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.th{all:unset;cursor:pointer;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:14px;min-width:0}
+.th[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+.th .pv{height:46px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:flex;align-items:flex-end;gap:5px;padding:7px}
+.th .pv i{display:block;height:14px;border-radius:4px;flex:1}
+.th .pv i:last-child{flex:0 0 14px;border-radius:50%}
 /* Temas */
 .subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
 .subj{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -526,6 +541,14 @@ function sample(){
    {id:uid(),q:"¿Qué derechos protege el recurso de amparo?",a:"Los de los arts. 14 a 29 de la Constitución y la objeción de conciencia del art. 30.2 (art. 53.2 CE).",subject:DC,box:1,due:addDays(1)}]});
 }
 /* Acepta datos guardados por versiones anteriores o copias incompletas y los deja con todos los campos */
+const THEMES={oscuro:["Oscuro","#0f151c","#17202a","#7fb0de"],claro:["Claro","#eef1f4","#ffffff","#1f4e79"],rosa:["Rosa","#fde9f1","#ffffff","#c2337a"]};
+let THEME="";try{THEME=localStorage.getItem("cuaderno-tema")||""}catch(e){}
+/* Sin elección guardada, la web sigue el modo claro u oscuro del dispositivo */
+function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.dataset.theme=t==="oscuro"?"dark":"light";if(t==="rosa")r.dataset.skin="rosa";else delete r.dataset.skin;
+ document.querySelector('meta[name="theme-color"]')?.setAttribute("content",THEMES[t][1])}
+applyTheme(THEME);
+const themeNow=()=>THEME||(matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro");
+function setTheme(t){THEME=t;try{localStorage.setItem("cuaderno-tema",t)}catch(e){}applyTheme(t);S.theme=t;save();render()}
 const CV_COLORS=["#1f4e79","#8a2b3a","#2f5d50","#3a3f47"], NIVELES=["Nativo","C2","C1","B2","B1","A2","A1"];
 function normCv(c){
  c=c&&typeof c==="object"?c:{};const str=x=>String(x??""), arr=x=>Array.isArray(x)?x:[], items=l=>arr(l).map(i=>({id:i.id||uid(),t:str(i.t),place:str(i.place),dates:str(i.dates),desc:str(i.desc)}));
@@ -541,7 +564,7 @@ function normalize(d){
   links:arr(d.links).map(l=>({id:l.id||uid(),title:str(l.title),url:str(l.url),note:str(l.note),subject:str(l.subject),tags:str(l.tags)})),
   events:arr(d.events).filter(e=>/^\d{4}-\d\d-\d\d$/.test(e.date||"")).map(e=>({id:e.id||uid(),title:str(e.title),date:e.date,time:str(e.time),type:TYPES[e.type]?e.type:"otro",subject:str(e.subject),note:str(e.note),done:!!e.done,warn:e.warn===undefined||e.warn===""||isNaN(+e.warn)?(DEFW[e.type]??1):Math.max(0,+e.warn)})),
   routine:arr(d.routine).map(r=>({id:r.id||uid(),title:str(r.title),type:TYPES[r.type]?r.type:"otro",days:arr(r.days).map(Number).filter(n=>n>=0&&n<=6),start:/^\d\d:\d\d$/.test(r.start||"")?r.start:"",end:/^\d\d:\d\d$/.test(r.end||"")?r.end:"",note:str(r.note)})),
-  seen:arr(d.seen).map(str),cv:normCv(d.cv),
+  seen:arr(d.seen).map(str),cv:normCv(d.cv),theme:THEMES[d.theme]?d.theme:"",
   holidays:arr(d.holidays).filter(h=>/^\d{4}-\d\d-\d\d$/.test(h.date||"")).map(h=>({id:h.id||uid(),date:h.date,name:str(h.name)||"Festivo",yearly:!!h.yearly})),
   cards:arr(d.cards).map(c=>({id:c.id||uid(),q:str(c.q),a:str(c.a),subject:str(c.subject),box:Math.min(4,Math.max(0,c.box|0)),due:/^\d{4}-\d\d-\d\d$/.test(c.due||"")?c.due:today()}))};
 }
@@ -961,6 +984,9 @@ function vAjustes(){
    <label for="setName">Tu nombre, para el saludo<input id="setName" value="${esc(S.name)}" placeholder="Ej.: Lucía" autocomplete="given-name"></label>
    <label for="setGoal">Objetivo de estudio al día, en minutos<input id="setGoal" type="number" min="5" max="600" step="5" value="${S.goal}"></label>
    <div><button class="btn small" id="setSave">Guardar</button></div></div>
+  <div class="panel stack"><h2>Apariencia</h2>
+   <div class="themes">${Object.entries(THEMES).map(([k,[n,bg,sf,ac]])=>`<button class="th" data-theme-pick="${k}" aria-pressed="${themeNow()===k}"><span class="pv" style="background:${bg}"><i style="background:${sf}"></i><i style="background:${ac}"></i></span>${n}</button>`).join("")}</div>
+   <p class="sub" style="margin:0">${THEME?"Se guarda con tu cuaderno y se aplica en todos tus dispositivos.":"Ahora sigue el modo de tu dispositivo. Elige uno para fijarlo."}</p></div>
   <div class="panel stack"><h2>Guardar copia</h2><p class="sub" style="margin:0">${S.lastBackup?"Última copia: "+new Date(S.lastBackup+"T12:00").toLocaleDateString("es-ES",{day:"numeric",month:"long",year:"numeric"})+".":"Aún no has hecho ninguna copia."} Sirve también para pasar el cuaderno a otro dispositivo. La copia no va cifrada: guárdala en un sitio privado.</p>
    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="bkFile">Descargar archivo</button><button class="btn ghost small" id="bkCopy">Copiar como texto</button></div>
    <textarea id="bk" readonly aria-label="Texto de la copia" style="${mono}" hidden></textarea></div>
@@ -975,6 +1001,7 @@ function vAjustes(){
    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="acSave">${CLOUD?"Cambiar contraseña":"Cambiar acceso"}</button><button class="btn ghost small" id="acLock">Cerrar sesión</button></div></div>
   <div class="panel stack"><h2>Empezar de cero</h2><p class="sub" style="margin:0">Borra asignaturas, fichas, enlaces, agenda y racha. Tu acceso se mantiene.</p><div><button class="btn ghost small danger" id="wipe">Borrar todo</button></div></div>
  </div></div>`;
+ main.querySelectorAll("[data-theme-pick]").forEach(b=>b.onclick=()=>setTheme(b.dataset.themePick));
  $("#setSave").onclick=()=>{S.name=$("#setName").value.trim();S.goal=Math.min(600,Math.max(5,+$("#setGoal").value||50));save();toast("Guardado");render()};
  const data=()=>{S.lastBackup=today();save();return JSON.stringify(S)};
  const showText=()=>{const t=$("#bk");t.value=data();t.hidden=false;t.focus();t.select();return t};
@@ -1115,7 +1142,7 @@ function gateLogin(lk){gateShow(`<h1>Entra en tu cuaderno</h1>
   S=st;SALT=salt;CK=k;unlock()});
  $("#gwipe").onclick=()=>{const b=$("#gwipe");if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Pulsa otra vez para borrarlo todo";return}try{localStorage.removeItem(LOCK)}catch(e){}S=sample();gateSetup()};
 }
-function unlock(){OPEN=true;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
+function unlock(){OPEN=true;if(S.theme&&S.theme!==THEME){THEME=S.theme;try{localStorage.setItem("cuaderno-tema",THEME)}catch(e){}applyTheme(THEME)}else if(!S.theme)S.theme=THEME;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
 async function lock(){if(!OPEN)return;OPEN=false;clearTimeout(idle);
  if(CLOUD){clearTimeout(pushT);if(dirty)await push().catch(()=>{});await sb.auth.signOut({scope:"local"}).catch(()=>{})}else await chain;
  setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;CK=null;UID=null;S=sample();main.innerHTML="";document.title=TITLE;
