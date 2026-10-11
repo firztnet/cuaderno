@@ -201,7 +201,7 @@ button.stat.hot{border-color:var(--seal)} button.stat.hot b{color:var(--seal)}
 @media print{
   @page{size:A4;margin:0}
   html,body{height:auto!important;background:#fff!important}
-  aside,.burger,.scrim,.mini,.bell,.notif,.toast,.gate,dialog,.no-print{display:none!important}
+  aside,.burger,.home,.scrim,.mini,.bell,.notif,.toast,.gate,dialog,.no-print{display:none!important}
   .app{display:block!important;min-height:0!important}
   main{padding:0!important;max-width:none!important}
   .cv-wrap{display:block!important}
@@ -311,15 +311,16 @@ dialog h2{margin-bottom:16px}
   main{padding-inline:28px}
 }
 /* Escritorio: el menú vive escondido a la izquierda y se abre con el botón de tres rayas */
-.burger,.scrim{display:none}
+.burger,.scrim,.home{display:none}
 @media (min-width:821px){
   .app{grid-template-columns:1fr}
-  main{padding-left:88px;margin-inline:auto}
+  main{padding-left:136px;margin-inline:auto}
   aside{position:fixed;top:0;left:0;bottom:0;height:auto;width:260px;padding-top:calc(84px + env(safe-area-inset-top,0px));z-index:30;box-shadow:0 0 40px -10px rgba(0,0,0,.5);
     transform:translateX(-100%);visibility:hidden;transition:transform .22s ease,visibility 0s .22s}
   .menu-open aside{transform:none;visibility:visible;transition:transform .22s ease,visibility 0s}
   .burger{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;position:fixed;top:calc(24px + env(safe-area-inset-top,0px));left:24px;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line);color:var(--ink);z-index:31}
-  .burger:hover{border-color:var(--accent);color:var(--accent)}
+  .burger:hover,.home:hover{border-color:var(--accent);color:var(--accent)}
+  .home{all:unset;cursor:pointer;box-sizing:border-box;display:grid;place-items:center;position:fixed;top:calc(24px + env(safe-area-inset-top,0px));left:72px;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--seal);color:var(--seal);z-index:31}
   .burger i{display:block;width:18px;height:2px;border-radius:2px;background:currentColor;transition:transform .22s ease,opacity .15s ease}
   .menu-open .burger i:nth-child(1){transform:translateY(6px) rotate(45deg)}
   .menu-open .burger i:nth-child(2){opacity:0}
@@ -395,6 +396,7 @@ dialog h2{margin-bottom:16px}
 <div class="gate" id="gate"></div>
 <div class="app" id="app" hidden>
   <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="side"><i></i><i></i><i></i></button>
+  <button class="home" id="home" aria-label="Ir a la página principal" title="Página principal"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5V20"></path><path d="M8 20h8"></path><path d="M5 7.5h14"></path><circle cx="12" cy="4" r="1"></circle><path d="M5 7.5 2.5 14h5L5 7.5Z"></path><path d="M2.5 14a2.5 2.5 0 0 0 5 0"></path><path d="M19 7.5 16.5 14h5L19 7.5Z"></path><path d="M16.5 14a2.5 2.5 0 0 0 5 0"></path></svg></button>
   <div class="scrim" id="scrim"></div>
   <aside id="side">
     <div class="brand">Cuaderno<small>Derecho · RRII</small></div>
@@ -1066,6 +1068,7 @@ $("#mini").onclick=()=>{go("hoy");$("#pomo")?.scrollIntoView({block:"center"})};
 function setMenu(open){document.body.classList.toggle("menu-open",open);const b=$("#burger");b.setAttribute("aria-expanded",open);b.setAttribute("aria-label",open?"Cerrar menú":"Abrir menú")}
 $("#burger").onclick=()=>setMenu(!document.body.classList.contains("menu-open"));
 $("#scrim").onclick=()=>setMenu(false);
+$("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
 const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,eventos:vEventos,cv:vCV,ajustes:vAjustes};
 function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v===view));V[view]();$("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
