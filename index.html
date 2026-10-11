@@ -346,6 +346,19 @@ button.status::after{content:"";position:absolute;inset:-13px}
   .ed{min-height:50vh}
   .ed h2{font-size:22px}
 }
+/* Buscador, página de asignatura y plantillas */
+#searchBtn{right:76px}
+.sres .panel{margin-bottom:16px}
+.sres h2 .sub{font-family:var(--f-body);font-weight:400;letter-spacing:0;text-transform:none}
+.tplbox{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.tplbox .hbtns .btn{flex:0 1 auto}
+.mini-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);min-width:0}
+.mini-row:first-of-type{border-top:0}
+.mini-row a{color:var(--accent);font-weight:600;text-decoration:none;word-break:break-word;overflow-wrap:anywhere}
+@media (max-width:820px){
+  #searchBtn{right:60px}
+  .topbar{padding-right:112px}
+}
 /* Enlaces y fichas */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .toolbar input{flex:1;min-width:180px}
@@ -540,6 +553,7 @@ dialog h2{margin-bottom:16px}
   <main id="main"></main>
   <button class="mini" id="mini" hidden title="Ir al temporizador"></button>
   <button class="bell" id="bell" aria-label="Avisos" aria-expanded="false" aria-controls="notif"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><span class="badge" id="bellN" hidden></span></button>
+  <button class="bell" id="searchBtn" aria-label="Buscar" title="Buscar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg></button>
   <div class="notif" id="notif" role="dialog" aria-label="Avisos" hidden></div>
 </div>
 
@@ -628,9 +642,9 @@ function sample(){
    {id:uid(),title:"Modelo ONU: reunión de delegación",date:addDays(2),time:"17:30",type:"conferencia",subject:"",note:""},
    {id:uid(),title:"Seminario de Constitucional",date:addDays(1),time:"12:00",type:"clase",subject:DC,note:"Leer STC 11/1981"}],
   routine:[
-   {id:uid(),title:"Clase de Derecho Internacional Público",type:"clase",days:[1,3],start:"09:00",end:"11:00",note:"Aula 2.4"},
-   {id:uid(),title:"Clase de Teoría de las RRII",type:"clase",days:[2,4],start:"10:00",end:"12:00",note:""},
-   {id:uid(),title:"Clase de Derecho Constitucional",type:"clase",days:[1,5],start:"12:00",end:"14:00",note:""},
+   {id:uid(),title:"Clase de Derecho Internacional Público",type:"clase",days:[1,3],start:"09:00",end:"11:00",note:"Aula 2.4",subject:DIP},
+   {id:uid(),title:"Clase de Teoría de las RRII",type:"clase",days:[2,4],start:"10:00",end:"12:00",note:"",subject:TRI},
+   {id:uid(),title:"Clase de Derecho Constitucional",type:"clase",days:[1,5],start:"12:00",end:"14:00",note:"",subject:DC},
    {id:uid(),title:"Trabajo",type:"trabajo",days:[5,6],start:"16:00",end:"20:00",note:""},
    {id:uid(),title:"Patinaje",type:"deporte",days:[2,4],start:"18:30",end:"20:00",note:""}],
   cv:{title:"Estudiante de Derecho y Relaciones Internacionales",email:"tu.correo@ejemplo.com",phone:"600 000 000",city:"Madrid",web:"linkedin.com/in/tu-nombre",
@@ -670,7 +684,7 @@ function normalize(d){
   subjects:arr(d.subjects).map(s=>({id:s.id||uid(),name:str(s.name)||"Asignatura",area:AREAS.includes(s.area)?s.area:"Otra",topics:arr(s.topics).map(t=>({id:t.id||uid(),t:str(t.t),n:str(t.n),h:str(t.h),s:STATUS.includes(t.s)?t.s:"pendiente"}))})),
   links:arr(d.links).map(l=>({id:l.id||uid(),title:str(l.title),url:str(l.url),note:str(l.note),subject:str(l.subject),tags:str(l.tags)})),
   events:arr(d.events).filter(e=>/^\d{4}-\d\d-\d\d$/.test(e.date||"")).map(e=>({id:e.id||uid(),title:str(e.title),date:e.date,time:str(e.time),type:TYPES[e.type]?e.type:"otro",subject:str(e.subject),note:str(e.note),done:!!e.done,warn:e.warn===undefined||e.warn===""||isNaN(+e.warn)?(DEFW[e.type]??1):Math.max(0,+e.warn)})),
-  routine:arr(d.routine).map(r=>({id:r.id||uid(),title:str(r.title),type:TYPES[r.type]?r.type:"otro",days:arr(r.days).map(Number).filter(n=>n>=0&&n<=6),start:/^\d\d:\d\d$/.test(r.start||"")?r.start:"",end:/^\d\d:\d\d$/.test(r.end||"")?r.end:"",note:str(r.note)})),
+  routine:arr(d.routine).map(r=>({id:r.id||uid(),title:str(r.title),type:TYPES[r.type]?r.type:"otro",days:arr(r.days).map(Number).filter(n=>n>=0&&n<=6),start:/^\d\d:\d\d$/.test(r.start||"")?r.start:"",end:/^\d\d:\d\d$/.test(r.end||"")?r.end:"",note:str(r.note),subject:str(r.subject)})),
   seen:arr(d.seen).map(str),cv:normCv(d.cv),theme:THEMES[d.theme]?d.theme:"",
   holidays:arr(d.holidays).filter(h=>/^\d{4}-\d\d-\d\d$/.test(h.date||"")).map(h=>({id:h.id||uid(),date:h.date,name:str(h.name)||"Festivo",yearly:!!h.yearly})),
   cards:arr(d.cards).map(c=>({id:c.id||uid(),q:str(c.q),a:str(c.a),subject:str(c.subject),box:Math.min(4,Math.max(0,c.box|0)),due:/^\d{4}-\d\d-\d\d$/.test(c.due||"")?c.due:today()}))};
@@ -883,15 +897,16 @@ function vHoy(){
  $("#pgo").onclick=()=>P.run?pauseP():startP();$("#preset").onclick=resetP;
 }
 function vTemas(){
- main.innerHTML=`<div class="head"><div><div class="eyebrow">Temario</div><h1>Temas por asignatura</h1><p>Toca el círculo de un tema para cambiar su estado, y su nombre para abrir sus apuntes.</p></div><button class="btn" id="addSubj">Nueva asignatura</button></div>
+ main.innerHTML=`<div class="head"><div><div class="eyebrow">Temario</div><h1>Temas por asignatura</h1><p>Toca el círculo de un tema para cambiar su estado y su nombre para abrir sus apuntes. El nombre de la asignatura reúne todo lo suyo en una página.</p></div><button class="btn" id="addSubj">Nueva asignatura</button></div>
  <div class="legend">${STATUS.map(s=>`<span><i class="status ${s}"></i>${STATUS_TXT[s]}</span>`).join("")}</div>
  <div class="subjects">${S.subjects.map(s=>{const d=s.topics.filter(t=>t.s==="dominado").length,p=s.topics.length?Math.round(d/s.topics.length*100):0,nl=S.links.filter(l=>l.subject===s.name).length,nc=S.cards.filter(c=>c.subject===s.name).length;
- return `<div class="subj"><div class="subj-h"><div style="min-width:0"><div class="area ${esc(s.area)}">${esc(s.area)}</div><h2>${esc(s.name)}</h2></div><button class="iconbtn" data-edsubj="${s.id}">Editar</button></div>
+ return `<div class="subj"><div class="subj-h"><div style="min-width:0"><div class="area ${esc(s.area)}">${esc(s.area)}</div><h2><button class="tlink" data-subj="${s.id}">${esc(s.name)}</button></h2></div><button class="iconbtn" data-edsubj="${s.id}">Editar</button></div>
   <div><div class="sub">${d} de ${s.topics.length} dominados</div><div class="bar"><i style="width:${p}%"></i></div></div>
   <div>${s.topics.map(t=>`<div class="topic"><button class="status ${t.s}" data-st="${s.id}|${t.id}" title="${STATUS_TXT[t.s]}. Toca para cambiar" aria-label="${esc(t.t)}: ${STATUS_TXT[t.s]}. Cambiar estado"></button><div style="min-width:0"><button class="tlink" data-open="${s.id}|${t.id}">${esc(t.t)}</button>${t.n?`<div class="n">${esc(t.n)}</div>`:""}</div><button class="iconbtn" data-open="${s.id}|${t.id}">Apuntes</button></div>`).join("")}</div>
   <div class="addline"><input id="nt-${s.id}" placeholder="Añadir tema…" aria-label="Nuevo tema de ${esc(s.name)}"><button class="btn small" data-addt="${s.id}">Añadir</button></div>
   <div class="subj-foot"><button class="iconbtn" data-subjgo="enlaces|${s.id}">${nl} ${nl===1?"enlace":"enlaces"}</button><button class="iconbtn" data-subjgo="fichas|${s.id}">${nc} ${nc===1?"ficha":"fichas"}</button></div></div>`}).join("")||`<div class="panel empty">Aún no hay asignaturas. Crea la primera, por ejemplo «Derecho Civil I», y añade los temas del programa.</div>`}</div>`;
  $("#addSubj").onclick=()=>subjForm();
+ main.querySelectorAll("[data-subj]").forEach(b=>b.onclick=()=>openSubject(b.dataset.subj));
  main.querySelectorAll("[data-edsubj]").forEach(b=>b.onclick=()=>subjForm(S.subjects.find(s=>s.id===b.dataset.edsubj)));
  main.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const[t]=findT(b.dataset.st);t.s=STATUS[(STATUS.indexOf(t.s)+1)%3];save();if(t.s==="dominado")toast("Tema dominado. Uno menos.");render()});
  main.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openTopic(...b.dataset.open.split("|")));
@@ -911,11 +926,25 @@ function sanitizeNote(html){const tp=document.createElement("template");tp.inner
   const keep=tag==="UL"&&c.classList.contains("chk")?"chk":tag==="LI"&&c.classList.contains("done")?"done":"";
   [...c.attributes].forEach(a=>c.removeAttribute(a.name));if(keep)c.className=keep})};
  walk(tp.content);return tp.innerHTML}
-function noteExcerpt(h){const d=document.createElement("div");d.innerHTML=h.replace(/<\/(p|h2|h3|li|blockquote|pre)>|<br>/g,"$& ");return d.textContent.replace(/\s+/g," ").trim().slice(0,180)}
+function noteText(h){const d=document.createElement("div");d.innerHTML=String(h||"").replace(/<\/(p|h2|h3|li|blockquote|pre)>|<br>/g,"$& ");return d.textContent.replace(/\s+/g," ").trim()}
+const noteExcerpt=h=>noteText(h).slice(0,180);
+/* Plantillas de la carrera: esqueletos para no empezar con la página en blanco */
+const E="<p><br></p>";
+const TPL={
+ sentencia:["Comentario de sentencia","Hechos, cuestión jurídica, fallo y valoración",`<h2>Comentario de sentencia</h2><h3>Datos</h3><ul><li>Tribunal y fecha: </li><li>Número de resolución: </li><li>Ponente: </li></ul><h3>Hechos</h3>${E}<h3>Cuestión jurídica</h3>${E}<h3>Fallo</h3>${E}<h3>Fundamentos jurídicos</h3><pre>Fundamento clave, con su número: </pre>${E}<h3>Doctrina que fija</h3>${E}<h3>Valoración crítica</h3>${E}`],
+ teoria:["Tema de teoría","Concepto, regulación, elementos y jurisprudencia",`<h3>Concepto</h3>${E}<h3>Regulación</h3><pre>Artículos clave: </pre><h3>Elementos o requisitos</h3><ul><li><br></li></ul><h3>Clases</h3>${E}<h3>Jurisprudencia y doctrina</h3>${E}<h3>Dudas para preguntar en clase</h3><ul class="chk"><li><br></li></ul>`],
+ caso:["Caso práctico","Hechos, normas aplicables, razonamiento y solución",`<h3>Hechos relevantes</h3>${E}<h3>Cuestiones que plantea</h3><ol><li><br></li></ol><h3>Normas aplicables</h3><pre>Artículo y texto: </pre><h3>Razonamiento</h3>${E}<h3>Solución</h3>${E}<h3>Antes de entregar</h3><ul class="chk"><li>He citado los artículos exactos</li><li>He separado los hechos de mi valoración</li><li>He respondido a todas las cuestiones</li></ul>`],
+ lectura:["Lectura o ensayo de RRII","Tesis del autor, argumentos, escuela y crítica",`<h3>Autor, obra y año</h3>${E}<h3>Tesis principal</h3>${E}<h3>Argumentos</h3><ul><li><br></li></ul><h3>Escuela teórica</h3><p>Realismo, liberalismo, constructivismo… y por qué.</p><h3>Cita útil</h3><blockquote>«…»</blockquote><h3>Crítica y relación con otros autores</h3>${E}`]};
+function insertTpl(k){const ed=$("#ed");if(!ed||!TPL[k])return;if(noteText(ed.innerHTML))ed.insertAdjacentHTML("beforeend",TPL[k][2]);else ed.innerHTML=TPL[k][2];$("#tplBox")?.remove();noteChanged();toast("Plantilla añadida. Rellena cada apartado.")}
+function pickTpl(){F.onsubmit=e=>e.preventDefault();
+ F.innerHTML=`<h2>Plantillas</h2><p class="sub" style="margin:0 0 8px">Se añade al final de tus apuntes.</p><div class="mlist">${Object.entries(TPL).map(([k,[n,d]])=>`<button type="button" class="mrow" data-tpl="${k}"><span><b>${n}</b><small>${d}</small></span></button>`).join("")}</div>
+ <div class="form"><div class="actions"><button type="button" class="btn ghost small" id="fcan">Cerrar</button></div></div>`;
+ F.querySelectorAll("[data-tpl]").forEach(b=>b.onclick=()=>{dlg.close();insertTpl(b.dataset.tpl)});$("#fcan").onclick=()=>dlg.close();
+ dlg.dataset.light="1";dlg.showModal()}
 const noteFromPlain=n=>n?n.split("\n").map(l=>`<p>${esc(l)||"<br>"}</p>`).join(""):"";
 let TOPIC=null, noteT=null, noteDirty=false, edRange=null;
 const curTopic=()=>{const sj=S.subjects.find(x=>x.id===TOPIC?.sid);return [sj?.topics.find(x=>x.id===TOPIC.tid),sj]};
-function openTopic(sid,tid){TOPIC={sid,tid};go("tema")}
+function openTopic(sid,tid){TOPIC={sid,tid,back:view==="asig"?"asig":"temas"};go("tema")}
 function noteChanged(){noteDirty=true;const st=$("#edSt");if(st)st.textContent="Guardando…";clearTimeout(noteT);noteT=setTimeout(flushNote,600)}
 function flushNote(){clearTimeout(noteT);noteT=null;if(!noteDirty)return;noteDirty=false;const ed=$("#ed"),[t]=curTopic();if(!ed||!t)return;
  fixLists(ed);t.h=sanitizeNote(ed.innerHTML);t.n=noteExcerpt(t.h);save();const st=$("#edSt");if(st)st.textContent="Guardado."}
@@ -926,6 +955,7 @@ function edCmd(cmd){const ed=$("#ed");if(!ed)return;
  const blockOf=()=>{let n=getSelection().anchorNode;while(n&&n!==ed&&n.parentNode!==ed)n=n.parentNode;return n&&n!==ed&&n.nodeType===1?n:null};
  const X=(c,v)=>document.execCommand(c,false,v);
  if(cmd==="ficha")return makeCard();
+ if(cmd==="tpl"){flushNote();return pickTpl()}
  if(cmd==="b")X("bold");else if(cmd==="i")X("italic");
  else if(cmd==="ul")X("insertUnorderedList");else if(cmd==="ol")X("insertOrderedList");
  else if(cmd==="chk"){const list=()=>{const a=getSelection().anchorNode,l=a&&(a.nodeType===1?a:a.parentElement).closest("ul,ol");return l&&ed.contains(l)?l:null};
@@ -951,9 +981,10 @@ function makeCard(){const ed=$("#ed"),sel=getSelection(),[,sj]=curTopic();
  flushNote();cardForm(null,{a:txt,subject:sj?sj.name:""})}
 function vTema(){
  const [t,sj]=curTopic();if(!t){view="temas";return vTemas()}
- main.innerHTML=`<div class="head"><div><button class="iconbtn" id="tBack" style="margin-left:-6px">Volver a Temas</button><div class="eyebrow">${esc(sj.name)}</div><h1>${esc(t.t)}</h1></div>
+ main.innerHTML=`<div class="head"><div><button class="iconbtn" id="tBack" style="margin-left:-6px">${TOPIC.back==="asig"?"Volver a la asignatura":"Volver a Temas"}</button><div class="eyebrow">${esc(sj.name)}</div><h1>${esc(t.t)}</h1></div>
  <div class="hbtns"><button class="btn ghost" id="tStatus"><i class="status ${t.s}"></i>${STATUS_TXT[t.s]}</button><button class="btn ghost" id="tEdit">Editar tema</button></div></div>
- <div class="tb" id="tb" role="toolbar" aria-label="Formato de los apuntes">${[["h2","Título"],["h3","Subtítulo"],["p","Texto"],0,["ul","Lista"],["ol","Numerada"],["chk","Casillas"],0,["blockquote","Cita"],["pre","Texto legal"],0,["b","Negrita"],["i","Cursiva"],["mark","Resaltar"]].map(x=>x?`<button type="button" data-cmd="${x[0]}">${x[1]}</button>`:`<span class="sep"></span>`).join("")}<button type="button" class="mk" data-cmd="ficha">Hacer ficha</button></div>
+ <div class="tb" id="tb" role="toolbar" aria-label="Formato de los apuntes">${[["h2","Título"],["h3","Subtítulo"],["p","Texto"],0,["ul","Lista"],["ol","Numerada"],["chk","Casillas"],0,["blockquote","Cita"],["pre","Texto legal"],0,["b","Negrita"],["i","Cursiva"],["mark","Resaltar"],0,["tpl","Plantilla"]].map(x=>x?`<button type="button" data-cmd="${x[0]}">${x[1]}</button>`:`<span class="sep"></span>`).join("")}<button type="button" class="mk" data-cmd="ficha">Hacer ficha</button></div>
+ ${noteText(t.h||t.n)?"":`<div class="tplbox" id="tplBox"><span class="sub">Página en blanco. Escribe directamente o empieza con una plantilla:</span><div class="hbtns">${Object.entries(TPL).map(([k,[n]])=>`<button type="button" class="btn ghost small" data-tpl="${k}">${n}</button>`).join("")}</div></div>`}
  <div class="panel"><div id="ed" class="ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Apuntes de ${esc(t.t)}"></div>
  <div class="sub" id="edSt" style="margin-top:14px">Se guarda solo mientras escribes. Para crear una ficha, selecciona un texto y pulsa «Hacer ficha».</div></div>`;
  const ed=$("#ed");ed.innerHTML=sanitizeNote(t.h||noteFromPlain(t.n));edRange=null;
@@ -964,10 +995,80 @@ function vTema(){
  const tb=$("#tb");
  tb.addEventListener("mousedown",e=>{if(e.target.closest("[data-cmd]"))e.preventDefault()});
  tb.addEventListener("click",e=>{const b=e.target.closest("[data-cmd]");if(b)edCmd(b.dataset.cmd)});
- $("#tBack").onclick=()=>go("temas");
+ $("#tBack").onclick=()=>{if(TOPIC.back==="asig")SUBJ=TOPIC.sid;go(TOPIC.back||"temas")};
+ const tplBox=$("#tplBox");if(tplBox)tplBox.querySelectorAll("[data-tpl]").forEach(b=>b.onclick=()=>insertTpl(b.dataset.tpl));
  $("#tStatus").onclick=()=>{flushNote();t.s=STATUS[(STATUS.indexOf(t.s)+1)%3];save();if(t.s==="dominado")toast("Tema dominado. Uno menos.");render()};
  $("#tEdit").onclick=()=>{flushNote();topicForm(t,sj)};
 }
+/* ---------- ASIGNATURA: todo lo suyo en una página ---------- */
+let SUBJ=null;
+function openSubject(id){SUBJ=id;go("asig")}
+function vAsig(){
+ const sj=S.subjects.find(x=>x.id===SUBJ);if(!sj){view="temas";return vTemas()}
+ const n=sj.topics.length,dom=sj.topics.filter(t=>t.s==="dominado").length,pct=n?Math.round(dom/n*100):0,nm=sj.name;
+ const ev=upcoming().filter(e=>e.subject===nm),exam=ev.find(e=>e.type==="examen");
+ const cards=S.cards.filter(c=>c.subject===nm),due=cards.filter(c=>c.due<=today()),links=S.links.filter(l=>l.subject===nm),rt=S.routine.filter(r=>r.subject===nm);
+ const dias=r=>ORDEN.filter(d=>r.days.includes(d)).map(d=>DIAS[d].slice(0,3)).join(", ");
+ main.innerHTML=`<div class="head"><div><button class="iconbtn" id="aBack" style="margin-left:-6px">Volver a Temas</button><div class="area ${esc(sj.area)}">${esc(sj.area)}</div><h1>${esc(nm)}</h1>
+ <p>${dom} de ${n} ${n===1?"tema dominado":"temas dominados"}${exam?`. Examen ${soonTxt(daysTo(exam.date))}.`:"."}</p></div><div class="hbtns"><button class="btn ghost" id="aEdit">Editar asignatura</button></div></div>
+ <div class="bar" style="margin:-8px 0 20px"><i style="width:${pct}%"></i></div>
+ <div class="grid2"><div class="stack">
+  <div class="panel"><div class="phead"><h2>Temas</h2><span class="sub">${n}</span></div>
+   ${sj.topics.map(t=>`<div class="topic"><button class="status ${t.s}" data-st="${sj.id}|${t.id}" title="${STATUS_TXT[t.s]}. Toca para cambiar" aria-label="${esc(t.t)}: ${STATUS_TXT[t.s]}. Cambiar estado"></button><div style="min-width:0"><button class="tlink" data-open="${sj.id}|${t.id}">${esc(t.t)}</button>${t.n?`<div class="n">${esc(t.n)}</div>`:""}</div><button class="iconbtn" data-open="${sj.id}|${t.id}">Apuntes</button></div>`).join("")||`<div class="empty">Sin temas todavía. Añade los del programa.</div>`}
+   <div class="addline" style="margin-top:12px"><input id="aNew" placeholder="Añadir tema…" aria-label="Nuevo tema"><button class="btn small" id="aAdd">Añadir</button></div></div>
+  <div class="panel"><div class="phead"><h2>Fichas</h2><div class="acts">${due.length?`<button class="btn small" id="aRev">Repasar ${due.length}</button>`:""}${cards.length?`<button class="iconbtn" id="aPrac">Practicar todas</button>`:""}<button class="iconbtn" id="aCard">Nueva</button></div></div>
+   ${cards.slice(0,6).map(c=>`<div class="mini-row"><div style="min-width:0;overflow-wrap:anywhere">${esc(c.q)}<div class="sub">nivel ${c.box+1} de 5</div></div><button class="iconbtn" data-edc="${c.id}">Editar</button></div>`).join("")||`<div class="empty">Sin fichas. Créalas desde tus apuntes con «Hacer ficha».</div>`}
+   ${cards.length>6?`<div class="sub" style="margin-top:8px">Y ${cards.length-6} más en Fichas.</div>`:""}</div>
+ </div><div class="stack">
+  ${exam?`<div class="panel"><h2>Plan hasta el examen</h2><div class="plan"><div class="plan-h"><span class="t">${esc(exam.title)}</span><span class="soon ${daysTo(exam.date)<=3?"hot":""}">${soonTxt(daysTo(exam.date))}</span></div><p>${n?esc(paceTxt(n-dom,daysTo(exam.date))):"Añade los temas para ver tu ritmo."}</p></div></div>`:""}
+  <div class="panel"><div class="phead"><h2>Fechas</h2><button class="iconbtn" id="aEv">Nueva</button></div><div class="list">${ev.map(e=>eventRow(e,true)).join("")||`<div class="empty">Sin fechas próximas. Apunta el examen para ver tu plan.</div>`}</div></div>
+  <div class="panel"><div class="phead"><h2>Clases</h2><button class="iconbtn" id="aRt">Añadir</button></div>
+   ${rt.map(r=>`<div class="mini-row"><div style="min-width:0"><span style="text-transform:capitalize">${dias(r)}</span> · ${esc(r.start)}${r.end?"–"+esc(r.end):""}${r.note?`<div class="sub">${esc(r.note)}</div>`:""}</div><button class="iconbtn" data-edr="${r.id}">Editar</button></div>`).join("")||`<div class="empty">Sin clases en el horario.</div>`}</div>
+  <div class="panel"><div class="phead"><h2>Enlaces</h2><button class="iconbtn" id="aLink">Nuevo</button></div>
+   ${links.map(l=>`<div class="mini-row"><div style="min-width:0"><a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.title||l.url)}</a>${l.note?`<div class="sub">${esc(l.note)}</div>`:""}</div><button class="iconbtn" data-edl="${l.id}">Editar</button></div>`).join("")||`<div class="empty">Sin enlaces guardados.</div>`}</div>
+ </div></div>`;
+ $("#aBack").onclick=()=>go("temas");$("#aEdit").onclick=()=>subjForm(sj);
+ main.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const[t]=findT(b.dataset.st);t.s=STATUS[(STATUS.indexOf(t.s)+1)%3];save();if(t.s==="dominado")toast("Tema dominado. Uno menos.");render()});
+ main.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openTopic(...b.dataset.open.split("|")));
+ const inp=$("#aNew"),add=()=>{const v=inp.value.trim();if(!v)return;sj.topics.push({id:uid(),t:v,n:"",h:"",s:"pendiente"});save();render();$("#aNew")?.focus()};$("#aAdd").onclick=add;inp.onkeydown=e=>{if(e.key==="Enter")add()};
+ const rv=$("#aRev");if(rv)rv.onclick=()=>startReview(due,false);
+ const pr=$("#aPrac");if(pr)pr.onclick=()=>startReview(cards,true);
+ $("#aCard").onclick=()=>cardForm(null,{a:"",subject:nm});
+ $("#aEv").onclick=()=>eventForm(null,nm);$("#aRt").onclick=()=>routineForm(null,nm);$("#aLink").onclick=()=>linkForm(null,nm);
+ main.querySelectorAll("[data-edc]").forEach(b=>b.onclick=()=>cardForm(S.cards.find(c=>c.id===b.dataset.edc)));
+ main.querySelectorAll("[data-ede]").forEach(b=>b.onclick=()=>eventForm(S.events.find(e=>e.id===b.dataset.ede)));
+ main.querySelectorAll("[data-done]").forEach(b=>b.onclick=()=>{S.events.find(e=>e.id===b.dataset.done).done=true;save();toast("Entregado. Una cosa menos.");render()});
+ main.querySelectorAll("[data-edr]").forEach(b=>b.onclick=()=>routineForm(S.routine.find(r=>r.id===b.dataset.edr)));
+ main.querySelectorAll("[data-edl]").forEach(b=>b.onclick=()=>linkForm(S.links.find(l=>l.id===b.dataset.edl)));
+}
+/* ---------- BUSCADOR: temas, apuntes, fichas, enlaces, fechas y horario; sin distinguir mayúsculas ni acentos ---------- */
+let SQ="", SACT=[];
+const fold=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function searchAll(q){const f=fold(q.trim());if(f.length<2)return null;
+ const hit=(...xs)=>xs.some(x=>fold(x).includes(f));
+ const snip=txt=>{txt=String(txt||"");const i=fold(txt).indexOf(f);if(i<0)return txt.slice(0,110);const a=Math.max(0,i-45),b=i+f.length+65;return (a?"…":"")+txt.slice(a,b)+(b<txt.length?"…":"")};
+ const weekOf=d=>Math.round((mondayOf(new Date(d+"T12:00"))-mondayOf(new Date()))/6048e5);
+ return [
+  ["Asignaturas",S.subjects.filter(x=>hit(x.name)).map(x=>({t:x.name,s:x.area+" · "+x.topics.length+(x.topics.length===1?" tema":" temas"),go:()=>openSubject(x.id)}))],
+  ["Temas y apuntes",S.subjects.flatMap(x=>x.topics.map(t=>({t,x,txt:noteText(t.h)||t.n}))).filter(o=>hit(o.t.t,o.txt)).map(o=>({t:o.t.t,s:o.x.name+(hit(o.txt)?" · "+snip(o.txt):""),go:()=>openTopic(o.x.id,o.t.id)}))],
+  ["Fichas",S.cards.filter(c=>hit(c.q,c.a)).map(c=>({t:c.q,s:snip(c.a),go:()=>cardForm(c)}))],
+  ["Enlaces",S.links.filter(l=>hit(l.title,l.note,l.tags,l.url)).map(l=>({t:l.title||l.url,s:[l.subject,snip(l.note||l.tags||l.url)].filter(Boolean).join(" · "),go:()=>linkForm(l)}))],
+  ["Fechas",S.events.filter(e=>hit(e.title,e.note)).map(e=>({t:e.title,s:[TYPES[e.type],whenTxt(e),e.subject].filter(Boolean).join(" · "),go:()=>{wkOff=weekOf(e.date);go("eventos")}}))],
+  ["Horario",S.routine.filter(r=>hit(r.title,r.note)).map(r=>({t:r.title,s:TYPES[r.type]+" · "+r.start+(r.end?"–"+r.end:""),go:()=>routineForm(r)}))]
+ ].filter(g=>g[1].length)}
+function paintSearch(){const box=$("#sres");if(!box)return;const g=searchAll(SQ);SACT=[];
+ box.innerHTML=!g?`<div class="empty">Escribe al menos dos letras. Por ejemplo, un artículo, un autor o el nombre de una sentencia.</div>`
+  :!g.length?`<div class="panel empty">Nada coincide con «${esc(SQ.trim())}». Prueba con otra palabra o con menos letras.</div>`
+  :g.map(([name,items])=>`<div class="panel"><h2>${name} <span class="sub">${items.length}</span></h2>${items.slice(0,8).map(it=>{SACT.push(it.go);return `<button class="nrow" data-r="${SACT.length-1}"><strong>${esc(it.t)}</strong>${it.s?`<span class="sub">${esc(it.s)}</span>`:""}</button>`}).join("")}${items.length>8?`<div class="sub" style="margin-top:8px">Y ${items.length-8} más. Afina la búsqueda para verlos.</div>`:""}</div>`).join("");
+ box.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>SACT[+b.dataset.r]())}
+function vBuscar(){
+ main.innerHTML=`<div class="head"><div><div class="eyebrow">Buscar</div><h1>Encuentra cualquier cosa</h1><p>Busca en temas, apuntes, fichas, enlaces, fechas y horario. No distingue mayúsculas ni acentos.</p></div></div>
+ <div class="toolbar"><input id="sq" type="search" placeholder="Artículo, autor, sentencia, asignatura…" aria-label="Buscar en todo Digesto" autocomplete="off" value="${esc(SQ)}"></div><div class="sres" id="sres"></div>`;
+ const q=$("#sq");q.oninput=()=>{SQ=q.value;paintSearch()};paintSearch();q.focus();try{q.setSelectionRange(SQ.length,SQ.length)}catch(e){}
+}
+$("#searchBtn").onclick=()=>go("buscar");
+document.addEventListener("keydown",e=>{if(!OPEN||dlg.open)return;const typing=/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||e.target.isContentEditable;
+ if(((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k")||(e.key==="/"&&!typing)){e.preventDefault();go("buscar")}});
 function findT(k){const[sid,tid]=k.split("|"),s=S.subjects.find(x=>x.id===sid);return[s.topics.find(t=>t.id===tid),s]}
 function vEnlaces(){
  const term=q.toLowerCase();
@@ -1218,17 +1319,17 @@ function subjForm(s){openForm(s?"Editar asignatura":"Nueva asignatura",
  `<label class="full" for="f-name">Nombre<input id="f-name" name="name" required value="${esc(s?.name)}" placeholder="Derecho Civil I"></label>
   <label class="full" for="f-area">Área<select id="f-area" name="area">${AREAS.map(a=>`<option ${s?.area===a?"selected":""}>${a}</option>`).join("")}</select></label>`,
  d=>{if(S.subjects.some(x=>x!==s&&x.name===d.name)){toast("Ya tienes una asignatura con ese nombre.");return false}
-  if(s){[S.links,S.events,S.cards].forEach(l=>l.forEach(x=>{if(x.subject===s.name)x.subject=d.name}));if(fSubj===s.name)fSubj=d.name;Object.assign(s,d)}else S.subjects.push({id:uid(),topics:[],...d})},
- s&&(()=>{S.subjects=S.subjects.filter(x=>x!==s);[S.links,S.events,S.cards].forEach(l=>l.forEach(x=>{if(x.subject===s.name)x.subject=""}));if(fSubj===s.name)fSubj=""}))}
+  if(s){[S.links,S.events,S.cards,S.routine].forEach(l=>l.forEach(x=>{if(x.subject===s.name)x.subject=d.name}));if(fSubj===s.name)fSubj=d.name;Object.assign(s,d)}else S.subjects.push({id:uid(),topics:[],...d})},
+ s&&(()=>{S.subjects=S.subjects.filter(x=>x!==s);[S.links,S.events,S.cards,S.routine].forEach(l=>l.forEach(x=>{if(x.subject===s.name)x.subject=""}));if(fSubj===s.name)fSubj=""}))}
 function topicForm(t,s){openForm("Editar tema",
  `<label class="full" for="f-t">Tema<input id="f-t" name="t" required value="${esc(t.t)}"></label>
   <label class="full" for="f-s">Estado<select id="f-s" name="s">${STATUS.map(x=>`<option value="${x}" ${t.s===x?"selected":""}>${STATUS_TXT[x]}</option>`).join("")}</select></label>
 `,
  d=>{Object.assign(t,d)},()=>{s.topics=s.topics.filter(x=>x!==t)})}
-function linkForm(l){openForm(l?"Editar enlace":"Nuevo enlace",
+function linkForm(l,pre){openForm(l?"Editar enlace":"Nuevo enlace",
  `<label class="full" for="f-url">Dirección web<input id="f-url" name="url" type="url" required value="${esc(l?.url)}" placeholder="https://"></label>
   <label class="full" for="f-title">Título<input id="f-title" name="title" value="${esc(l?.title)}" placeholder="Ej.: STC 31/2010 sobre el Estatut"></label>
-  <label for="f-subj">Asignatura<select id="f-subj" name="subject">${subjOptions(l?l.subject:fSubj)}</select></label>
+  <label for="f-subj">Asignatura<select id="f-subj" name="subject">${subjOptions(l?l.subject:pre||fSubj)}</select></label>
   <label for="f-tags">Etiquetas<input id="f-tags" name="tags" value="${esc(l?.tags)}" placeholder="sentencia, examen"></label>
   <label class="full" for="f-note">Mi nota<textarea id="f-note" name="note" placeholder="¿Para qué me sirve? ¿Qué parte leer?">${esc(l?.note)}</textarea></label>`,
  d=>{if(!/^https?:\/\//i.test(d.url)){toast("La dirección debe empezar por https://");return false}if(l)Object.assign(l,d);else S.links.unshift({id:uid(),...d})},l&&(()=>{S.links=S.links.filter(x=>x!==l)}))}
@@ -1237,24 +1338,25 @@ function cardForm(c,pre){openForm(c?"Editar ficha":"Nueva ficha",
   <label class="full" for="f-a">Respuesta<textarea id="f-a" name="a" required style="min-height:110px" placeholder="Corta y con el artículo o el autor exacto.">${esc(c?c.a:pre?.a)}</textarea></label>
   <label class="full" for="f-cs">Asignatura<select id="f-cs" name="subject">${subjOptions(c?c.subject:pre?pre.subject:fSubj)}</select></label>`,
  d=>{if(c)Object.assign(c,d);else{S.cards.unshift({id:uid(),box:0,due:today(),...d});if(pre)toast("Ficha creada. La tienes en Fichas para repasar.")}},c&&(()=>{S.cards=S.cards.filter(x=>x!==c)}))}
-function routineForm(r){openForm(r?"Editar horario":"Añadir al horario",
+function routineForm(r,pre){openForm(r?"Editar horario":"Añadir al horario",
  `<label class="full" for="f-rt">Qué es<input id="f-rt" name="title" required value="${esc(r?.title)}" placeholder="Patinaje, clase de Penal, trabajo…"></label>
   <label class="full" for="f-rty">Tipo<select id="f-rty" name="type">${["clase","trabajo","deporte","otro"].map(k=>`<option value="${k}" ${r?.type===k?"selected":""}>${TYPES[k]}</option>`).join("")}</select></label>
   <fieldset class="full days"><legend>Días de la semana</legend>${ORDEN.map(n=>`<label for="f-d${n}"><input id="f-d${n}" type="checkbox" name="day" value="${n}" ${r?.days.includes(n)?"checked":""}>${DIAS[n].slice(0,3)}</label>`).join("")}</fieldset>
   <label for="f-rs">Empieza<input id="f-rs" name="start" type="time" required value="${esc(r?.start)}"></label>
   <label for="f-re">Termina<input id="f-re" name="end" type="time" value="${esc(r?.end)}"></label>
+  <label class="full" for="f-rsj">Asignatura, si es una clase<select id="f-rsj" name="subject">${subjOptions(r?r.subject:pre)}</select></label>
   <label class="full" for="f-rn">Notas<input id="f-rn" name="note" value="${esc(r?.note)}" placeholder="Aula, lugar…"></label>`,
  d=>{const days=[...F.querySelectorAll("[name=day]:checked")].map(x=>+x.value);
   if(!days.length){toast("Elige al menos un día.");return false}
   if(d.end&&d.end<=d.start){toast("La hora de fin debe ser posterior a la de inicio.");return false}
   delete d.day;const v={...d,days};if(r)Object.assign(r,v);else S.routine.push({id:uid(),...v})},
  r&&(()=>{S.routine=S.routine.filter(x=>x!==r)}))}
-function eventForm(e){openForm(e?"Editar fecha":"Nueva fecha",
+function eventForm(e,pre){openForm(e?"Editar fecha":"Nueva fecha",
  `<label class="full" for="f-et">Qué es<input id="f-et" name="title" required value="${esc(e?.title)}" placeholder="Examen final de Derecho Penal"></label>
   <label for="f-ed">Fecha<input id="f-ed" name="date" type="date" required value="${esc(e?.date||today())}"></label>
   <label for="f-eh">Hora<input id="f-eh" name="time" type="time" value="${esc(e?.time)}"></label>
   <label for="f-ety">Tipo<select id="f-ety" name="type">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${e?.type===k?"selected":""}>${v}</option>`).join("")}</select></label>
-  <label for="f-es">Asignatura<select id="f-es" name="subject">${subjOptions(e?.subject)}</select></label>
+  <label for="f-es">Asignatura<select id="f-es" name="subject">${subjOptions(e?e.subject:pre)}</select></label>
   <label class="full" for="f-en">Notas<input id="f-en" name="note" value="${esc(e?.note)}" placeholder="Aula, temas que entran…"></label>
   <label class="full" for="f-ew">Avísame<select id="f-ew" name="warn">${[[0,"El mismo día"],[1,"Desde el día antes"],[3,"Desde 3 días antes"],[7,"Desde una semana antes"],[14,"Desde dos semanas antes"]].map(([k,v])=>`<option value="${k}" ${(e?e.warn:7)===k?"selected":""}>${v}</option>`).join("")}</select></label>`,
  d=>{d.warn=+d.warn;if(e)Object.assign(e,d);else S.events.push({id:uid(),done:false,...d})},e&&(()=>{S.events=S.events.filter(x=>x!==e)}))}
@@ -1289,8 +1391,8 @@ $("#side").addEventListener("wheel",e=>{if(!menuOpen())return;const a=e.currentT
  if(a.scrollHeight<=a.clientHeight||(up&&a.scrollTop<=0)||(!up&&a.scrollTop+a.clientHeight>=a.scrollHeight-1))e.preventDefault()},{passive:false});
 $("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
-const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
-function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||(view==="tema"&&b.dataset.v==="temas"):MORE.includes(view)));main.dataset.view=R?"repaso":view;V[view]();$("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
+const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
+function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas"):MORE.includes(view)));main.dataset.view=R?"repaso":view;V[view]();$("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
 function go(v){flushNote();setMenu(false);if(v!=="fichas")R=null;view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render();window.scrollTo(0,0)}
 document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;go(b.dataset.v)});
 function openMore(){F.onsubmit=e=>e.preventDefault();
