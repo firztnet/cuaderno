@@ -74,6 +74,9 @@
 :root[data-skin="gamer"] .cd.hoy,:root[data-skin="gamer"] .th[aria-pressed="true"]{box-shadow:inset 0 0 0 1px var(--accent),0 0 12px -2px var(--accent)}
 :root[data-skin="gamer"] .status.dominado{box-shadow:0 0 8px var(--ok)}
 :root[data-skin="gamer"] .maxim q{font-style:normal}
+/* Sin barras de desplazamiento a la vista en la página ni en el menú lateral; se sigue desplazando igual */
+html,body,aside{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar,aside::-webkit-scrollbar{display:none;width:0;height:0}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
