@@ -411,6 +411,24 @@ button.status::after{content:"";position:absolute;inset:-13px}
 .wipe{display:flex;flex-direction:column;gap:2px;margin:4px 0 8px}
 .wipe label{flex-direction:row;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:400}
 .wipe label:first-child{border-top:0}
+/* Calificaciones: barra de 0 a 10 con lo acumulado y una marca en el objetivo */
+.gbar{position:relative;height:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;margin:14px 0 22px}
+.gbar i{display:block;height:100%;border-radius:4px;background:var(--ok)}
+.gbar i.low{background:var(--warn)}
+.gbar .gt{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ink)}
+.gbar .gl{position:absolute;top:14px;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.gbig{font-family:var(--f-display);font-size:34px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.grow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.grow .gs{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:600;min-width:44px;text-align:right}
+.grow .gw{font-family:var(--f-mono);font-size:12px;color:var(--muted);min-width:38px;text-align:right}
+.ghead2{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.ghead2 select{width:auto}
+/* Simulacro de examen */
+.mclock{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:15px;padding:4px 10px;border-radius:99px;border:1px solid var(--line)}
+.mclock.hot{color:var(--crit);border-color:var(--crit)}
+.mfail{padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.mfail:first-of-type{border-top:0}
+@media (max-width:560px){.grow{grid-template-columns:minmax(0,1fr) auto auto}.grow .iconbtn{grid-column:1/-1;justify-self:start;margin:-6px 0 0 -6px}}
 /* Enlaces y fichas */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .toolbar input{flex:1;min-width:180px}
@@ -701,6 +719,10 @@ function sample(){
    {id:uid(),title:"Clase de Derecho Constitucional",type:"clase",days:[1,5],start:"12:00",end:"14:00",note:"",subject:DC},
    {id:uid(),title:"Trabajo",type:"trabajo",days:[5,6],start:"16:00",end:"20:00",note:""},
    {id:uid(),title:"Patinaje",type:"deporte",days:[2,4],start:"18:30",end:"20:00",note:""}],
+  grades:[{subject:DIP,title:"Parcial de noviembre",type:"parcial",weight:30,score:7.5,date:addDays(-20)},{subject:DIP,title:"Prácticas y casos",type:"practica",weight:20,score:8,date:addDays(-6)},{subject:DIP,title:"Examen final",type:"examen",weight:50,score:null},
+   {subject:TRI,title:"Ensayo sobre realismo",type:"trabajo",weight:40,score:6.5,date:addDays(-12)},{subject:TRI,title:"Examen final",type:"examen",weight:60,score:null},
+   {subject:DC,title:"Parcial del Título I",type:"parcial",weight:40,score:4.5,date:addDays(-9)},{subject:DC,title:"Examen final",type:"examen",weight:60,score:null}],
+  mocks:[{d:addDays(-3),s:DIP,n:10,ok:7,secs:540}],
   cv:{title:"Estudiante de Derecho y Relaciones Internacionales",email:"tu.correo@ejemplo.com",phone:"600 000 000",city:"Madrid",web:"linkedin.com/in/tu-nombre",
    summary:"Estudiante de tercer curso del doble grado en Derecho y Relaciones Internacionales, con interés en el derecho internacional público y los derechos humanos. Busco unas primeras prácticas donde aplicar mi capacidad de análisis jurídico y mi nivel de inglés.",
    skills:"Investigación jurídica, Redacción de dictámenes, Oratoria y debate, Trabajo en equipo, Paquete Office",
@@ -724,6 +746,7 @@ function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.d
 applyTheme(THEME);
 const themeNow=()=>THEME||(matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro");
 function setTheme(t){THEME=t;try{localStorage.setItem("cuaderno-tema",t)}catch(e){}applyTheme(t);S.theme=t;if(DEMO){REAL.theme=t;exitDemo(true);save();enterDemo();return go("ajustes")}save();render()}
+const GT={examen:"Examen final",parcial:"Parcial",trabajo:"Trabajo",practica:"Prácticas",otro:"Otro"};
 const HK={tratado:"Tratados y orden internacional",conflicto:"Guerras y conflictos",sentencia:"Juicios y sentencias",poder:"Poder y Estado de derecho",derechos:"Derechos",espana:"España"};
 const HKS={tratado:"Tratado",conflicto:"Conflicto",sentencia:"Sentencia",poder:"Poder",derechos:"Derechos",espana:"España"};
 const CV_COLORS=["#1f4e79","#8a2b3a","#2f5d50","#3a3f47"], NIVELES=["Nativo","C2","C1","B2","B1","A2","A1"];
@@ -743,6 +766,10 @@ function normalize(d){
   events:arr(d.events).filter(e=>/^\d{4}-\d\d-\d\d$/.test(e.date||"")).map(e=>({id:sid(e.id),title:str(e.title),date:e.date,time:str(e.time),type:TYPES[e.type]?e.type:"otro",subject:str(e.subject),note:str(e.note),done:!!e.done,warn:e.warn===undefined||e.warn===""||isNaN(+e.warn)?(DEFW[e.type]??1):Math.max(0,+e.warn)})),
   routine:arr(d.routine).map(r=>({id:sid(r.id),title:str(r.title),type:TYPES[r.type]?r.type:"otro",days:arr(r.days).map(Number).filter(n=>n>=0&&n<=6),start:/^\d\d:\d\d$/.test(r.start||"")?r.start:"",end:/^\d\d:\d\d$/.test(r.end||"")?r.end:"",note:str(r.note),subject:str(r.subject)})),
   seen:arr(d.seen).map(str),cv:normCv(d.cv),theme:THEMES[d.theme]?d.theme:"",
+  grades:arr(d.grades).map(g=>({id:sid(g.id),subject:str(g.subject),title:str(g.title),type:GT[g.type]?g.type:"examen",weight:Math.min(100,Math.max(0,+g.weight||0)),
+   score:g.score===null||g.score===undefined||g.score===""||isNaN(+g.score)?null:Math.min(10,Math.max(0,+g.score)),date:/^\d{4}-\d\d-\d\d$/.test(g.date||"")?g.date:""})),
+  gradeGoal:Object.fromEntries(Object.entries(d.gradeGoal&&typeof d.gradeGoal==="object"?d.gradeGoal:{}).filter(([,v])=>+v>=5&&+v<=10).map(([k,v])=>[k,+v])),
+  mocks:arr(d.mocks).slice(0,20).map(m=>({d:/^\d{4}-\d\d-\d\d$/.test(m.d||"")?m.d:today(),s:str(m.s),n:Math.max(1,Math.round(+m.n)||1),ok:Math.max(0,Math.round(+m.ok)||0),secs:Math.max(0,Math.round(+m.secs)||0)})),
   hitos:arr(d.hitos).map(h=>({id:sid(h.id),y:Math.round(+h.y)||new Date().getFullYear(),d:/^\d\d-\d\d$/.test(h.d||"")?h.d:"",k:HK[h.k]?h.k:"tratado",t:str(h.t),q:str(h.q),w:str(h.w),n:str(h.n),src:str(h.src)})),
   hitoMeta:Object.fromEntries(Object.entries(d.hitoMeta&&typeof d.hitoMeta==="object"?d.hitoMeta:{}).map(([k,v])=>[k,{note:str(v&&v.note),subject:str(v&&v.subject)}])),
   holidays:arr(d.holidays).filter(h=>/^\d{4}-\d\d-\d\d$/.test(h.date||"")).map(h=>({id:sid(h.id),date:h.date,name:str(h.name)||"Festivo",yearly:!!h.yearly})),
@@ -794,7 +821,7 @@ function mergeState(remote,local){
 let PENDING=null;
 /* La sesión ha caducado o se cerró desde fuera: se pide entrar de nuevo sin perder lo que estaba sin guardar */
 function sessionLost(){if(!OPEN)return;exitDemo(true);flushNote();PENDING=dirty?{uid:UID,S}:null;
- OPEN=false;clearTimeout(idle);clearTimeout(pushT);setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;S=emptyState();main.innerHTML="";document.title=TITLE;
+ OPEN=false;clearTimeout(idle);clearTimeout(pushT);setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;endMock();S=emptyState();main.innerHTML="";document.title=TITLE;
  gateCloudLogin("Tu sesión ha caducado. Vuelve a entrar para seguir donde estabas.")}
 function setSync(t){const e=$("#syncSt");if(e)e.textContent=t}
 async function pull(first){
@@ -814,7 +841,7 @@ async function push(){
  rev=data.updated_at;
  if(merged&&OPEN){toast("Se han unido los cambios hechos en otro dispositivo.");if(canRefresh(true))render()}}
 /* ¿Se puede repintar sin estropear algo que se está escribiendo? */
-const canRefresh=ignoreDirty=>!DEMO&&(ignoreDirty||!dirty)&&!dlg.open&&!R&&view!=="tema"&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement&&document.activeElement.tagName||"");
+const canRefresh=ignoreDirty=>!DEMO&&(ignoreDirty||!dirty)&&!dlg.open&&!R&&!X&&view!=="tema"&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement&&document.activeElement.tagName||"");
 function flush(){setSync("Guardando…");return push().then(()=>{warned=false;setSync("Guardado en tu cuenta")},()=>{setSync("Sin conexión. Se guardará al volver.");if(!warned){warned=true;toast("Sin conexión: los cambios se guardarán cuando vuelva.")}clearTimeout(pushT);pushT=setTimeout(flush,15000);
   sb.auth.getSession().then(({data})=>{if(!data.session)sessionLost()}).catch(()=>{})})}
 async function openCloud(ses){UID=ses.user.id;EMAIL=ses.user.email||"";rev="";
@@ -829,7 +856,7 @@ let view=(location.hash||"").slice(1)||"hoy", q="", fSubj="", R=null;
 if(view==="copia")view="ajustes";
 const $=s=>document.querySelector(s), main=$("#main");
 /* Iconos de línea y menú: la misma lista sirve para el cajón de escritorio y las pestañas del teléfono */
-const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',ayuda:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 1.9"/><path d="M12 16.7h.01"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',ojo:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/>',ojono:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path d="M4 4l16 16"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
+const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',ayuda:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 1.9"/><path d="M12 16.7h.01"/>',notas:'<path d="M7 3h10v18H7z"/><path d="m10 9 1.5 1.5L14.5 8M10 15h4.5"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',ojo:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/>',ojono:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path d="M4 4l16 16"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
 const ico=k=>`<svg class="ni" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 /* Añade a cada campo de contraseña un botón para verla u ocultarla */
 function pwToggles(root){root.querySelectorAll('input[type="password"]').forEach(inp=>{
@@ -837,8 +864,8 @@ function pwToggles(root){root.querySelectorAll('input[type="password"]').forEach
  const b=document.createElement("button");b.type="button";b.className="pwbtn";b.innerHTML=ico("ojo");b.setAttribute("aria-label","Ver la contraseña");b.setAttribute("aria-pressed","false");
  b.onclick=()=>{const show=inp.type==="password";inp.type=show?"text":"password";b.innerHTML=ico(show?"ojono":"ojo");b.setAttribute("aria-label",show?"Ocultar la contraseña":"Ver la contraseña");b.setAttribute("aria-pressed",String(show));inp.focus()};
  w.append(b)})}
-const MORE=["calendario","hitos","enlaces","cv","ayuda","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
-$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["hitos","Hitos"],["enlaces","Enlaces","c-enlaces"],["ayuda","Ayuda"],["ajustes","Ajustes"]]
+const MORE=["notas","calendario","hitos","enlaces","cv","ayuda","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
+$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["notas","Calificaciones"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["hitos","Hitos"],["enlaces","Enlaces","c-enlaces"],["ayuda","Ayuda"],["ajustes","Ajustes"]]
  .map(([v,l,c])=>`<button data-v="${v}" class="${MORE.includes(v)?"in-more":""}"><span class="nx">${ico(v)}<span>${l}</span></span>${c?`<span class="count" id="${c}"></span>`:""}</button>`).join("")
  +`<button id="moreBtn" class="only-more" aria-haspopup="dialog"><span class="nx">${ico("mas")}<span>Más</span></span></button>`;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1229,11 +1256,12 @@ function vAsig(){
   <div class="panel"><div class="phead"><h2>Temas</h2><span class="sub">${n}</span></div>
    ${sj.topics.map(t=>`<div class="topic"><button class="status ${t.s}" data-st="${sj.id}|${t.id}" title="${STATUS_TXT[t.s]}. Toca para cambiar" aria-label="${esc(t.t)}: ${STATUS_TXT[t.s]}. Cambiar estado"></button><div style="min-width:0"><button class="tlink" data-open="${sj.id}|${t.id}">${esc(t.t)}</button>${t.n?`<div class="n">${esc(t.n)}</div>`:""}</div><button class="iconbtn" data-open="${sj.id}|${t.id}">Apuntes</button></div>`).join("")||`<div class="empty">Sin temas todavía. Añade los del programa.</div>`}
    <div class="addline" style="margin-top:12px"><input id="aNew" placeholder="Añadir tema…" aria-label="Nuevo tema"><button class="btn small" id="aAdd">Añadir</button></div></div>
-  <div class="panel"><div class="phead"><h2>Fichas</h2><div class="acts">${due.length?`<button class="btn small" id="aRev">Repasar ${due.length}</button>`:""}${cards.length?`<button class="iconbtn" id="aPrac">Practicar todas</button>`:""}<button class="iconbtn" id="aCard">Nueva</button></div></div>
+  <div class="panel"><div class="phead"><h2>Fichas</h2><div class="acts">${due.length?`<button class="btn small" id="aRev">Repasar ${due.length}</button>`:""}${cards.length?`<button class="iconbtn" id="aPrac">Practicar todas</button>`:""}${cards.length>=2?`<button class="iconbtn" id="aMock">Simulacro</button>`:""}<button class="iconbtn" id="aCard">Nueva</button></div></div>
    ${cards.slice(0,6).map(c=>`<div class="mini-row"><div style="min-width:0;overflow-wrap:anywhere">${esc(c.q)}<div class="sub">nivel ${c.box+1} de 5</div></div><button class="iconbtn" data-edc="${c.id}">Editar</button></div>`).join("")||`<div class="empty">Sin fichas. Créalas desde tus apuntes con «Hacer ficha».</div>`}
    ${cards.length>6?`<div class="sub" style="margin-top:8px">Y ${cards.length-6} más en Fichas.</div>`:""}</div>
  </div><div class="stack">
   ${exam?`<div class="panel"><h2>Plan hasta el examen</h2><div class="plan"><div class="plan-h"><span class="t">${esc(exam.title)}</span><span class="soon ${daysTo(exam.date)<=3?"hot":""}">${soonTxt(daysTo(exam.date))}</span></div><p>${n?esc(paceTxt(n-dom,daysTo(exam.date))):"Añade los temas para ver tu ritmo."}</p></div></div>`:""}
+  <div class="panel"><div class="phead"><h2>Calificaciones</h2><button class="iconbtn" id="aGrade">Añadir</button></div>${S.grades.some(g=>g.subject===nm)?gradePanel(nm,true):`<div class="empty">Sin calificaciones. Apunta el examen final con su porcentaje para ver qué necesitas.</div>`}</div>
   <div class="panel"><div class="phead"><h2>Fechas</h2><button class="iconbtn" id="aEv">Nueva</button></div><div class="list">${ev.map(e=>eventRow(e,true)).join("")||`<div class="empty">Sin fechas próximas. Apunta el examen para ver tu plan.</div>`}</div></div>
   <div class="panel"><div class="phead"><h2>Clases</h2><button class="iconbtn" id="aRt">Añadir</button></div>
    ${rt.map(r=>`<div class="mini-row"><div style="min-width:0"><span style="text-transform:capitalize">${dias(r)}</span> · ${esc(r.start)}${r.end?"–"+esc(r.end):""}${r.note?`<div class="sub">${esc(r.note)}</div>`:""}</div><button class="iconbtn" data-edr="${r.id}">Editar</button></div>`).join("")||`<div class="empty">Sin clases en el horario.</div>`}</div>
@@ -1247,6 +1275,8 @@ function vAsig(){
  const inp=$("#aNew"),add=()=>{const v=inp.value.trim();if(!v)return;sj.topics.push({id:uid(),t:v,n:"",h:"",s:"pendiente"});save();render();$("#aNew")?.focus()};$("#aAdd").onclick=add;inp.onkeydown=e=>{if(e.key==="Enter")add()};
  const rv=$("#aRev");if(rv)rv.onclick=()=>startReview(due,false);
  const pr=$("#aPrac");if(pr)pr.onclick=()=>startReview(cards,true);
+ const am=$("#aMock");if(am)am.onclick=()=>mockForm(nm);
+ $("#aGrade").onclick=()=>gradeForm(null,nm);bindGrades();
  $("#aCard").onclick=()=>cardForm(null,{a:"",subject:nm});
  $("#aEv").onclick=()=>eventForm(null,nm);$("#aRt").onclick=()=>routineForm(null,nm);$("#aLink").onclick=()=>linkForm(null,nm);
  main.querySelectorAll("[data-edc]").forEach(b=>b.onclick=()=>cardForm(S.cards.find(c=>c.id===b.dataset.edc)));
@@ -1261,7 +1291,8 @@ const HELP=[
 ["hoy","Hoy","hoy","Tu portada: lo que toca hoy y cómo vas.",["Las tarjetas de arriba avisan de las fechas que se acercan. Tócalas para ir a la Agenda.","«Tu día» muestra tus clases y compromisos de hoy y tu mejor hueco para estudiar.","«Plan hasta el examen» calcula cuántos temas te quedan y a qué ritmo llegar.","El temporizador cuenta sesiones de 25 o 50 minutos. Al terminar suma los minutos a tu semana y el día cuenta para tu racha.","El botón «Currículum» abre tu CV."]],
 ["temas","Temas y asignaturas","temas","El temario de cada asignatura y lo que ya dominas.",["Crea una asignatura con «Nueva asignatura» y añade sus temas.","Toca el círculo de un tema para cambiar su estado: pendiente, en curso o dominado.","Toca el nombre de un tema para abrir sus apuntes.","Toca el nombre de la asignatura para ver todo lo suyo en una página: temas, fichas, fechas, clases, enlaces e hitos.","El porcentaje de «temario dominado» de Hoy sale de aquí."]],
 ["apuntes","Apuntes de un tema","temas","La página donde escribes cada tema.",["Da formato con la barra: título, subtítulo, listas, casillas, cita, texto legal, negrita y resaltado.","Se guarda solo mientras escribes. No hay botón de guardar.","En un tema vacío puedes empezar con una plantilla: comentario de sentencia, tema de teoría, caso práctico o lectura de RRII.","Selecciona un texto y pulsa «Hacer ficha»: ese texto será la respuesta y tú escribes la pregunta.","En una lista de casillas, toca el cuadrado para marcarla como hecha."]],
-["fichas","Fichas de repaso","fichas","Preguntas y respuestas para memorizar sin releer.",["Crea una ficha con «Nueva ficha» o desde tus apuntes con «Hacer ficha».","«Repasar ahora» te pregunta las que tocan hoy. Intenta responder antes de mirar la respuesta.","Si la sabías, la ficha sube de nivel y vuelve más tarde: al día siguiente, a los 3, 7, 14 y 30 días. Si no, vuelve mañana.","«Practicar todas» sirve para la víspera del examen y no cambia las fechas de repaso.","Terminar un repaso cuenta como día estudiado."]],
+["fichas","Fichas de repaso","fichas","Preguntas y respuestas para memorizar sin releer.",["Crea una ficha con «Nueva ficha» o desde tus apuntes con «Hacer ficha».","«Repasar ahora» te pregunta las que tocan hoy. Intenta responder antes de mirar la respuesta.","Si la sabías, la ficha sube de nivel y vuelve más tarde: al día siguiente, a los 3, 7, 14 y 30 días. Si no, vuelve mañana.","«Practicar todas» sirve para la víspera del examen y no cambia las fechas de repaso.","Terminar un repaso cuenta como día estudiado.","«Simulacro de examen» te pregunta fichas al azar con tiempo y te pone nota sobre 10. No cambia las fechas de repaso."]],
+["notas","Calificaciones","notas","Tus notas y lo que necesitas sacar en lo que queda.",["Apunta cada examen, parcial o trabajo con «Nueva calificación», con su asignatura y el porcentaje que vale.","Deja la nota vacía si aún no la tienes: contará como pendiente.","Con los porcentajes puestos, Digesto calcula cuánto llevas y qué media necesitas en lo que queda para llegar a tu objetivo.","Cambia el objetivo de cada asignatura: aprobar con un 5 o aspirar a más.","Es un cálculo orientativo. Si tu asignatura exige una nota mínima en el examen final, tenlo en cuenta."]],
 ["agenda","Agenda","eventos","Tu semana y tus fechas importantes.",["«Añadir al horario» es para lo que se repite cada semana: clases, trabajo y deporte. Se apunta una sola vez.","«Nueva fecha» es para exámenes, entregas y eventos. Tú eliges desde cuándo te avisa.","Asigna cada examen a su asignatura: así Hoy te calcula el plan.","En una entrega, pulsa «Entregado» cuando la termines.","Con borde, lo que tiene fecha. Sin borde, tu horario fijo. Toca cualquiera para cambiarlo."]],
 ["calendario","Calendario","calendario","El mes entero, con los festivos.",["Los festivos de la Comunidad de Madrid ya vienen marcados en rojo.","Toca un día para ver su semana en la Agenda.","Añade los festivos de tu ciudad o los días no lectivos de tu universidad con «Añadir festivo».","En un día festivo no se muestran tus clases.","Los festivos son orientativos: confírmalos con el calendario oficial de cada año."]],
 ["hitos","Hitos","hitos","Los acontecimientos que cambiaron el derecho y el orden internacional.",["Recorre la línea del tiempo, filtra por tipo o busca un año, un caso o un artículo.","En cada hito puedes escribir tu nota y elegir la asignatura con la que se relaciona.","«Hacer ficha» crea una ficha con la pregunta ya escrita.","Añade tus propios hitos con «Añadir hito».","Es material de apoyo: contrasta fechas y citas con tu manual antes de un examen."]],
@@ -1271,7 +1302,7 @@ const HELP=[
 ["avisos","Avisos","hoy","La campana de arriba.",["Reúne las fechas que se acercan y las fichas que tocan hoy.","El número rojo indica cuántos avisos no has visto.","Los avisos aparecen cuando abres Digesto. No llegan al teléfono con la web cerrada."]],
 ["ajustes","Ajustes","ajustes","Tu apariencia, tus copias y tu acceso.",["Elige entre cuatro apariencias: oscuro, claro, rosa y gamer.","Cambia tu nombre y tu objetivo de minutos al día.","«Descargar archivo» guarda una copia de todo. Hazla de vez en cuando.","«Elegir qué borrar» sirve para empezar un curso nuevo. Tus hitos, tu nombre y tu acceso no se borran.","«Ver el ejemplo» enseña Digesto lleno con datos de muestra, sin guardar nada."]]
 ];
-const HELP_FOR={hoy:"hoy",temas:"temas",asig:"temas",tema:"apuntes",fichas:"fichas",eventos:"agenda",calendario:"calendario",hitos:"hitos",hito:"hitos",enlaces:"enlaces",cv:"cv",buscar:"buscar",ajustes:"ajustes"};
+const HELP_FOR={hoy:"hoy",temas:"temas",asig:"temas",tema:"apuntes",fichas:"fichas",notas:"notas",eventos:"agenda",calendario:"calendario",hitos:"hitos",hito:"hitos",enlaces:"enlaces",cv:"cv",buscar:"buscar",ajustes:"ajustes"};
 const HELP_TIPS=["En el ordenador, Ctrl + K o la tecla / abren el buscador.","En el repaso de fichas, la tecla 1 es «No la sabía» y la 2 es «La sabía».","En los apuntes, Ctrl + B pone negrita y Ctrl + I, cursiva.","La balanza de arriba lleva siempre a Hoy.","El botón «?» de arriba abre la ayuda de la pantalla en la que estás.","Lo que creas desde la página de una asignatura ya sale con esa asignatura puesta.","En el teléfono, las tarjetas de aviso de Hoy se pasan de lado con el dedo.","Si una fecha coincide con un hito, verás «Tal día como hoy» en la portada.","En el ordenador, el menú se abre con las tres rayas y se cierra solo al elegir.","El botón Atrás del teléfono o del navegador vuelve a la sección anterior.","Al editar un tema puedes subirlo o bajarlo en la lista para dejarlo en el orden del programa."];
 const HELP_METODO=[["Recordar fija más que releer","Intentar responder de memoria es lo que consolida lo aprendido. Por eso las fichas te hacen contestar antes de mirar."],["Repasar espaciado","Es mejor ver algo cinco veces en un mes que cinco veces en una tarde. Digesto separa cada repaso un poco más que el anterior."],["Repartir el temario","Divide lo que queda entre los días que faltan. El «Plan hasta el examen» hace esa cuenta por ti y te dice el ritmo."],["Sesiones cortas con descanso","Veinticinco minutos de atención de verdad rinden más que dos horas a medias. Usa el temporizador y respeta el descanso."],["Apuntes con tus palabras","Copiar no es estudiar. Resume cada tema con tu propia estructura; las plantillas te dan el esqueleto."],["Constancia antes que intensidad","Un poco cada día gana a un atracón la víspera. La racha está para que no rompas la cadena."]];
 function helpFaq(){return [
@@ -1318,6 +1349,7 @@ function searchAll(q){const f=fold(q.trim());if(f.length<2)return null;
   ["Enlaces",S.links.filter(l=>hit(l.title,l.note,l.tags,l.url)).map(l=>({t:l.title||l.url,s:[l.subject,snip(l.note||l.tags||l.url)].filter(Boolean).join(" · "),go:()=>linkForm(l)}))],
   ["Fechas",S.events.filter(e=>hit(e.title,e.note)).map(e=>({t:e.title,s:[TYPES[e.type],whenTxt(e),e.subject].filter(Boolean).join(" · "),go:()=>{wkOff=weekOf(e.date);go("eventos")}}))],
   ["Horario",S.routine.filter(r=>hit(r.title,r.note)).map(r=>({t:r.title,s:TYPES[r.type]+" · "+r.start+(r.end?"–"+r.end:""),go:()=>routineForm(r)}))],
+  ["Calificaciones",S.grades.filter(g=>hit(g.title,g.subject)).map(g=>({t:g.title,s:[g.subject,g.score===null?"pendiente":nf(g.score)].filter(Boolean).join(" · "),go:()=>gradeForm(g)}))],
   ["Hitos",allHitos().filter(h=>hit(h.t,h.q,h.w,h.n)).map(h=>({t:h.t,s:h.y+" · "+snip(h.q),go:()=>openHito(h.id)}))],
   ["Ayuda",[...HELP.filter(h=>hit(h[1],h[3],h[4].join(" "))).map(h=>({t:"Cómo se usa: "+h[1],s:h[3],go:()=>openHelp(h[0])})),...helpFaq().filter(x=>hit(x[0],x[1])).map(x=>({t:x[0],s:snip(x[1]),go:()=>{HP="preguntas";HOPEN="";go("ayuda")}}))]]
  ].filter(g=>g[1].length)}
@@ -1352,11 +1384,13 @@ function vEnlaces(){
  main.querySelectorAll("[data-edl]").forEach(b=>b.onclick=()=>linkForm(S.links.find(l=>l.id===b.dataset.edl)));
 }
 function vFichas(){
+ if(X)return vMock();
  if(R)return vRepaso();
  const due=dueCards(), L=S.cards.filter(c=>!fSubj||c.subject===fSubj);
  main.innerHTML=`<div class="head"><div><div class="eyebrow">Repaso</div><h1>Fichas de pregunta y respuesta</h1><p>Intentar recordar una respuesta fija más que releerla. Cada ficha que aciertas vuelve más tarde: al día siguiente, a los 3, 7, 14 y 30 días.</p></div><button class="btn" id="addCard">Nueva ficha</button></div>
  <div class="panel duebox"><div><b>${due.length}</b> ${due.length===1?"ficha toca hoy":"fichas tocan hoy"}<div class="sub">${due.length?"Unos "+Math.max(1,Math.round(due.length/2))+" minutos.":S.cards.length?"Estás al día. Vuelve mañana o practica las que quieras.":"Crea tu primera ficha con una definición o un artículo que te cueste."}</div></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">${due.length?`<button class="btn" id="revDue">Repasar ahora</button>`:""}${L.length?`<button class="btn ghost" id="revAll">Practicar ${fSubj?"esta asignatura":"todas"} (${L.length})</button>`:""}</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">${due.length?`<button class="btn" id="revDue">Repasar ahora</button>`:""}${L.length?`<button class="btn ghost" id="revAll">Practicar ${fSubj?"esta asignatura":"todas"} (${L.length})</button>`:""}${S.cards.length>=2?`<button class="btn ghost" id="mockBtn">Simulacro de examen</button>`:""}</div></div>
+ ${S.mocks.length?`<details class="panel"><summary>Simulacros recientes (${S.mocks.length})</summary>${S.mocks.slice(0,6).map(m=>`<div class="mini-row"><div style="min-width:0;overflow-wrap:anywhere">${esc(m.s||"Todas las asignaturas")}<div class="sub">${new Date(m.d+"T12:00").toLocaleDateString("es-ES",{day:"numeric",month:"long"})} · ${m.ok} de ${m.n} · ${fmtMin(Math.max(1,Math.round(m.secs/60)))}</div></div><b class="gs" style="font-family:var(--f-mono)">${nf(m.ok/m.n*10)}</b></div>`).join("")}</details>`:""}
  <div class="toolbar"><select id="fs" aria-label="Filtrar por asignatura">${subjOptions(fSubj,"Todas las asignaturas")}</select></div>
  <div class="links">${L.map(c=>{const n=daysTo(c.due);return `<div class="link"><div class="q">${esc(c.q)}</div><div class="sub" style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(c.a)}</div>
  <div class="foot"><span class="tag">${esc(c.subject?c.subject+" · ":"")}nivel ${c.box+1} de 5 · ${n<=0?"toca hoy":"toca "+soonTxt(n)}</span><button class="iconbtn" data-edc="${c.id}">Editar</button></div></div>`}).join("")||`<div class="panel empty">${S.cards.length?"No hay fichas de esta asignatura.":"Aún no hay fichas. Una buena primera ficha: «¿Qué dice el art. 1 de la Constitución?»."}</div>`}</div>`;
@@ -1364,9 +1398,107 @@ function vFichas(){
  $("#fs").onchange=e=>{fSubj=e.target.value;render()};
  const rd=$("#revDue");if(rd)rd.onclick=()=>startReview(due,false);
  const ra=$("#revAll");if(ra)ra.onclick=()=>startReview(L,true);
+ const mk=$("#mockBtn");if(mk)mk.onclick=()=>mockForm(fSubj);
  main.querySelectorAll("[data-edc]").forEach(b=>b.onclick=()=>cardForm(S.cards.find(c=>c.id===b.dataset.edc)));
 }
 /* Repaso: free=true practica sin mover las fechas; las falladas vuelven una vez al final de la sesión */
+/* ---------- SIMULACRO DE EXAMEN: fichas al azar, con tiempo y nota sobre 10. No mueve las fechas de repaso ---------- */
+let X=null;
+function endMock(){if(X){clearInterval(X.tm);X=null}}
+const nf=n=>Number(n).toLocaleString("es-ES",{minimumFractionDigits:0,maximumFractionDigits:2});
+const gradeLabel=n=>n>=9?"Sobresaliente":n>=7?"Notable":n>=5?"Aprobado":"Suspenso";
+function mockForm(subj){const pool=name=>S.cards.filter(c=>!name||c.subject===name).length;
+ openForm("Simulacro de examen",
+ `<label class="full" for="f-ms">Asignatura<select id="f-ms" name="subject">${subjOptions(subj||"","Todas las asignaturas")}</select></label>
+  <label for="f-mn">Preguntas<select id="f-mn" name="n">${[5,10,20,0].map(n=>`<option value="${n}" ${n===10?"selected":""}>${n||"Todas"}</option>`).join("")}</select></label>
+  <label for="f-mt">Tiempo<select id="f-mt" name="mins">${[[0,"Sin límite"],[5,"5 minutos"],[10,"10 minutos"],[20,"20 minutos"],[30,"30 minutos"]].map(([k,v])=>`<option value="${k}" ${k===10?"selected":""}>${v}</option>`).join("")}</select></label>
+  <p class="full sub" style="margin:0">Salen fichas al azar. Respondes, miras la respuesta y marcas si acertaste. Al acabar verás tu nota y las que fallaste.</p>`,
+ d=>{const n=pool(d.subject);if(n<2){toast(d.subject?"Esa asignatura necesita al menos 2 fichas para un simulacro.":"Necesitas al menos 2 fichas para un simulacro.");return false}
+  const ids=S.cards.filter(c=>!d.subject||c.subject===d.subject).map(c=>c.id);
+  for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}
+  const take=+d.n?Math.min(+d.n,ids.length):ids.length;
+  R=null;X={queue:ids.slice(0,take),i:0,shown:false,ok:0,fails:[],subject:d.subject,limit:+d.mins*60,start:Date.now(),done:false,secs:0,timeUp:false,tm:null};
+  X.tm=setInterval(mockTick,500);view="fichas";try{history.replaceState(null,"","#fichas")}catch(e){}});
+ F.querySelector("[type=submit]").textContent="Empezar"}
+function mockLeft(){return X.limit?Math.max(0,X.limit-Math.floor((Date.now()-X.start)/1000)):Math.floor((Date.now()-X.start)/1000)}
+function mockTick(){if(!X||X.done)return;const el=$("#mclock");const left=mockLeft();if(el){el.textContent=fmt(left);el.classList.toggle("hot",!!X.limit&&left<=60)}
+ if(X.limit&&left<=0){X.timeUp=true;finishMock()}}
+function finishMock(){if(!X||X.done)return;clearInterval(X.tm);X.done=true;X.secs=Math.max(1,Math.floor((Date.now()-X.start)/1000));
+ const n=X.queue.length;S.mocks.unshift({d:today(),s:X.subject||"",n,ok:X.ok,secs:X.secs});S.mocks=S.mocks.slice(0,20);
+ const t=today();S.minutes[t]=Math.min(1440,(S.minutes[t]||0)+Math.max(1,Math.round(X.secs/60)));save();markStudied();render();window.scrollTo(0,0)}
+function mockAnswer(known){const id=X.queue[X.i];if(known)X.ok++;else X.fails.push(id);X.i++;X.shown=false;if(X.i>=X.queue.length)finishMock();else render()}
+function vMock(){
+ const n=X.queue.length;
+ if(X.done){const nota=X.ok/n*10,fails=X.queue.filter((id,i)=>X.fails.includes(id)||i>=X.i).map(id=>S.cards.find(c=>c.id===id)).filter(Boolean);
+  main.innerHTML=`<div class="review"><div class="card" style="text-align:center"><div class="eyebrow">Simulacro terminado${X.timeUp?" · se acabó el tiempo":""}</div><div class="cq" style="font-size:54px">${nf(nota)}</div>
+   <div><b>${gradeLabel(nota)}</b></div><div class="sub">${X.ok} de ${n} acertadas · ${fmtMin(Math.max(1,Math.round(X.secs/60)))}${X.subject?" · "+esc(X.subject):""}</div></div>
+  <div class="ctrl">${fails.length?`<button class="btn" id="mRetry">Repasar las ${fails.length} que faltan</button>`:""}<button class="btn ghost" id="mEnd">Volver a las fichas</button></div>
+  ${fails.length?`<div class="panel"><h2>Para repasar</h2>${fails.map(c=>`<div class="mfail"><b>${esc(c.q)}</b><div class="sub" style="white-space:pre-wrap;font-size:14px;margin-top:4px">${esc(c.a)}</div></div>`).join("")}</div>`:`<div class="sub" style="text-align:center">Pleno. Súbete la dificultad: más preguntas o menos tiempo.</div>`}</div>`;
+  $("#mEnd").onclick=()=>{endMock();render()};
+  const rt=$("#mRetry");if(rt)rt.onclick=()=>{endMock();startReview(fails,true)};return}
+ const c=S.cards.find(x=>x.id===X.queue[X.i]);
+ if(!c){X.i++;if(X.i>=n){finishMock();return}return vMock()}
+ main.innerHTML=`<div class="review"><div class="phead"><span class="eyebrow">Simulacro · pregunta ${X.i+1} de ${n}${c.subject?" · "+esc(c.subject):""}</span><span class="acts"><span class="mclock" id="mclock">${fmt(mockLeft())}</span><button class="iconbtn" id="mQuit">Salir</button></span></div>
+ <div class="bar" style="margin:0"><i style="width:${Math.round(X.i/n*100)}%"></i></div>
+ <div class="card"><div class="cq">${esc(c.q)}</div>${X.shown?`<div class="ca">${esc(c.a)}</div>`:""}</div>
+ <div class="ctrl">${X.shown?`<button class="btn miss" id="mNo">Fallada</button><button class="btn good" id="mYes">Acertada</button>`:`<button class="btn" id="mShow">Ver respuesta</button>`}</div>
+ <div class="sub" style="text-align:center">${X.shown?"Puntúate como lo haría quien corrige el examen.":"Responde por escrito o en voz alta antes de mirar."}</div></div>`;
+ $("#mQuit").onclick=()=>{endMock();render();toast("Simulacro cancelado. No se ha guardado.")};
+ if(X.shown){$("#mNo").onclick=()=>mockAnswer(false);$("#mYes").onclick=()=>mockAnswer(true);$("#mYes").focus()}
+ else{$("#mShow").onclick=()=>{X.shown=true;render()};$("#mShow").focus()}
+}
+document.addEventListener("keydown",e=>{if(!OPEN||view!=="fichas"||!X||X.done||dlg.open||!X.shown)return;if(e.key==="1"){e.preventDefault();mockAnswer(false)}else if(e.key==="2"){e.preventDefault();mockAnswer(true)}});
+
+/* ---------- CALIFICACIONES: notas por asignatura, media ponderada y lo que hace falta para el objetivo ---------- */
+function gradeCalc(name){const it=S.grades.filter(g=>g.subject===name),done=it.filter(g=>g.score!==null);
+ if(!it.some(g=>g.weight>0))return {it,done,weighted:false,mean:done.length?done.reduce((a,g)=>a+g.score,0)/done.length:null};
+ const totalW=it.reduce((a,g)=>a+g.weight,0),doneW=done.reduce((a,g)=>a+g.weight,0),pts=done.reduce((a,g)=>a+g.score*g.weight/100,0);
+ const rem=Math.max(0,100-doneW),target=S.gradeGoal[name]||5;
+ return {it,done,weighted:true,totalW,doneW,pts,rem,target,need:rem>0?(target-pts)/(rem/100):null,mean:doneW?pts/(doneW/100):null,final:rem===0?pts:null}}
+function gradeText(g){
+ if(!g.weighted)return g.mean===null?"Aún sin notas.":`Media de ${g.done.length} ${g.done.length===1?"nota":"notas"}: ${nf(g.mean)}. Añade el porcentaje de cada prueba para saber cuánto necesitas en lo que queda.`;
+ if(g.final!==null)return `Nota final: ${nf(g.final)}. ${gradeLabel(g.final)}.`;
+ if(!g.done.length)return `Aún sin notas. Para un ${nf(g.target)} necesitas esa media en el conjunto.`;
+ if(g.need<=0)return `Ya tienes el ${nf(g.target)} asegurado con lo que llevas.`;
+ if(g.need>10)return `Con el ${nf(g.rem)} % que queda ya no se llega al ${nf(g.target)}: haría falta un ${nf(g.need)}. Lo máximo posible es un ${nf(g.pts+g.rem/10)}.`;
+ return `Para llegar al ${nf(g.target)} necesitas un ${nf(Math.ceil(g.need*100)/100)} de media en el ${nf(g.rem)} % que queda.`}
+function gradeBar(g){const v=g.weighted?g.pts:(g.mean||0),t=g.weighted?g.target:5;
+ return `<div class="gbar" role="img" aria-label="${nf(v)} puntos de 10; objetivo ${nf(t)}"><i class="${g.weighted&&g.need!==null&&g.need>10?"low":""}" style="width:${Math.min(100,v*10)}%"></i><span class="gt" style="left:${t*10}%"></span><span class="gl" style="left:0;transform:none">0</span><span class="gl" style="left:${t*10}%">${nf(t)}</span><span class="gl" style="left:100%;transform:translateX(-100%)">10</span></div>`}
+function gradePanel(name,withGoal){const g=gradeCalc(name);
+ return `<div class="ghead2"><div><span class="gbig">${g.weighted?nf(g.pts):g.mean===null?"–":nf(g.mean)}</span> <span class="sub">${g.weighted?`puntos acumulados, con el ${nf(g.doneW)} % evaluado`:"de media"}</span></div>
+  ${withGoal&&g.weighted?`<label for="gg-${esc(name)}" style="flex-direction:row;align-items:center;gap:8px">Mi objetivo<select id="gg-${esc(name)}" data-goal="${esc(name)}">${[5,6,7,8,9,10].map(n=>`<option ${g.target===n?"selected":""}>${n}</option>`).join("")}</select></label>`:""}</div>
+  ${gradeBar(g)}<p style="margin:0 0 6px">${esc(gradeText(g))}</p>
+  ${g.weighted&&g.totalW<100?`<p class="sub" style="margin:0 0 6px">Has apuntado pruebas por el ${nf(g.totalW)} % de la nota. Falta definir el ${nf(100-g.totalW)} %.`+`</p>`:""}
+  ${g.it.map(x=>`<div class="grow"><div style="min-width:0;overflow-wrap:anywhere">${esc(x.title)}<div class="sub">${GT[x.type]}${x.date?" · "+new Date(x.date+"T12:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"}):""}</div></div><span class="gw">${x.weight?nf(x.weight)+" %":""}</span><span class="gs">${x.score===null?`<span class="sub" style="font-family:var(--f-body);font-weight:400">pend.</span>`:nf(x.score)}</span><button class="iconbtn" data-edg="${x.id}">Editar</button></div>`).join("")}`}
+function vNotas(){
+ const names=[...new Set([...S.subjects.map(x=>x.name),...S.grades.map(g=>g.subject)])];
+ const calc=names.map(n=>[n,gradeCalc(n)]),withMean=calc.filter(([,g])=>g.mean!==null),global=withMean.length?withMean.reduce((a,[,g])=>a+g.mean,0)/withMean.length:null,finals=calc.filter(([,g])=>g.weighted&&g.final!==null);
+ main.innerHTML=`<div class="head"><div><div class="eyebrow">Calificaciones</div><h1>Tus notas y lo que te falta</h1><p>Apunta cada prueba con su porcentaje y verás cuánto llevas y qué necesitas sacar en lo que queda. El cálculo es orientativo: comprueba la guía docente de cada asignatura.</p></div><button class="btn" id="addGrade">Nueva calificación</button></div>
+ ${S.grades.length?`<div class="stats" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>${global===null?"–":nf(global)}</b><span>media de lo evaluado hasta ahora</span></div><div class="stat"><b>${S.grades.filter(g=>g.score!==null).length}</b><span>${S.grades.filter(g=>g.score!==null).length===1?"nota apuntada":"notas apuntadas"}</span></div><div class="stat"><b>${finals.filter(([,g])=>g.final>=5).length} de ${finals.length}</b><span>asignaturas cerradas y aprobadas</span></div></div>`:""}
+ <div class="subjects" style="grid-template-columns:repeat(auto-fill,minmax(340px,1fr))">${names.map(n=>{const has=S.grades.some(g=>g.subject===n);return `<div class="subj"><div class="subj-h"><h2>${esc(n||"Sin asignatura")}</h2><button class="iconbtn" data-addg="${esc(n)}">Añadir</button></div>${has?gradePanel(n,true):`<div class="empty">Sin calificaciones. Apunta el examen final con su porcentaje aunque aún no tengas la nota.</div>`}</div>`}).join("")||`<div class="panel empty">Crea primero tus asignaturas en Temas, o apunta directamente tu primera nota.</div>`}</div>`;
+ $("#addGrade").onclick=()=>gradeForm();
+ main.querySelectorAll("[data-addg]").forEach(b=>b.onclick=()=>gradeForm(null,b.dataset.addg));
+ bindGrades();
+}
+function bindGrades(){main.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>gradeForm(S.grades.find(g=>g.id===b.dataset.edg)));
+ main.querySelectorAll("[data-goal]").forEach(b=>b.onchange=()=>{S.gradeGoal[b.dataset.goal]=+b.value;save();render()})}
+function gradeForm(g,pre){openForm(g?"Editar calificación":"Nueva calificación",
+ `<label class="full" for="f-gt">Qué es<input id="f-gt" name="title" required value="${esc(g?.title)}" placeholder="Examen final, parcial de noviembre, ensayo…"></label>
+  <label class="full" for="f-gsj">Asignatura<select id="f-gsj" name="subject">${subjOptions(g?g.subject:pre)}</select></label>
+  <label for="f-gty">Tipo<select id="f-gty" name="type">${Object.entries(GT).map(([k,v])=>`<option value="${k}" ${g?.type===k?"selected":""}>${v}</option>`).join("")}</select></label>
+  <label for="f-gw">Vale (% de la nota)<input id="f-gw" name="weight" type="number" min="0" max="100" step="1" inputmode="decimal" value="${esc(g?g.weight||"":"")}" placeholder="Ej.: 60"></label>
+  <label for="f-gs">Nota sobre 10<input id="f-gs" name="score" type="number" min="0" max="10" step="0.01" inputmode="decimal" value="${esc(g&&g.score!==null?g.score:"")}" placeholder="Vacía si aún no la tienes"></label>
+  <label for="f-gd">Fecha<input id="f-gd" name="date" type="date" value="${esc(g?.date)}"></label>`,
+ d=>{const w=+String(d.weight).replace(",",".")||0,sc=d.score===""?null:+String(d.score).replace(",",".");
+  if(w<0||w>100){toast("El porcentaje va de 0 a 100.");return false}
+  if(sc!==null&&(isNaN(sc)||sc<0||sc>10)){toast("La nota va de 0 a 10.");return false}
+  const others=S.grades.filter(x=>x!==g&&x.subject===d.subject).reduce((a,x)=>a+x.weight,0);
+  if(w&&others+w>100.001){toast(`Los porcentajes de esta asignatura sumarían ${nf(others+w)} %. No pueden pasar de 100.`);return false}
+  const v={title:d.title,subject:d.subject,type:d.type,weight:w,score:sc,date:d.date};
+  if(g)Object.assign(g,v);else S.grades.push({id:uid(),...v});
+  if(sc!==null&&sc>=5&&!(g&&g.score===sc))toast(sc>=9?"Sobresaliente. Enhorabuena.":sc>=7?"Notable. Buen trabajo.":"Aprobado. Uno menos.")},
+ g&&(()=>{S.grades=S.grades.filter(x=>x!==g)}))}
+
 function startReview(cards,free){if(!cards.length)return;R={queue:cards.map(c=>c.id),i:0,shown:false,ok:0,total:cards.length,free,again:new Set(),done:false};view="fichas";go("fichas")}
 function vRepaso(){
  if(R.done){main.innerHTML=`<div class="review"><div class="card" style="text-align:center"><div class="eyebrow">Repaso terminado</div><div class="cq">${R.ok} de ${R.total} a la primera</div>
@@ -1525,7 +1657,7 @@ function cvSkills(){openForm("Competencias",
  `<label class="full" for="f-sk">Separadas por comas<textarea id="f-sk" name="skills" style="min-height:110px" placeholder="Investigación jurídica, Oratoria, Trabajo en equipo…">${esc(S.cv.skills)}</textarea></label>`,
  d=>{S.cv.skills=d.skills})}
 /* Borrado por partes. Los hitos propios y sus notas no figuran: no se borran desde aquí */
-const WIPE=[["curso","Asignaturas, temas y apuntes",1],["fichas","Fichas de repaso",1],["enlaces","Enlaces",1],["agenda","Agenda y horario semanal",1],["cv","Currículum",0],["festivos","Festivos que añadiste",0],["racha","Racha y minutos de estudio",0]];
+const WIPE=[["curso","Asignaturas, temas y apuntes",1],["fichas","Fichas de repaso",1],["enlaces","Enlaces",1],["agenda","Agenda y horario semanal",1],["cv","Currículum",0],["festivos","Festivos que añadiste",0],["racha","Racha y minutos de estudio",0],["notas","Calificaciones y simulacros",0]];
 function wipeForm(){F.onsubmit=e=>e.preventDefault();
  F.innerHTML=`<h2>¿Qué quieres borrar?</h2><p class="sub" style="margin:0">Vienen marcadas las cosas de un curso. Lo que borres no se puede recuperar sin una copia.</p>
  <div class="wipe">${WIPE.map(([k,l,on])=>`<label for="w-${k}"><input id="w-${k}" type="checkbox" name="${k}" ${on?"checked":""}>${l}</label>`).join("")}</div>
@@ -1542,6 +1674,7 @@ function wipeForm(){F.onsubmit=e=>e.preventDefault();
   if(on("cv"))S.cv=normCv();
   if(on("festivos"))S.holidays=[];
   if(on("racha")){S.studyDays=[];S.minutes={}}
+  if(on("notas")){S.grades=[];S.gradeGoal={};S.mocks=[]}
   S.ejemplo=false;S.onboarded=true;save();dlg.close();toast("Borrado: "+sel.map(x=>x[1].toLowerCase()).join(", ")+".");go("hoy")};
  F.querySelectorAll("input").forEach(i=>i.onchange=()=>{const b=$("#wGo");delete b.dataset.sure;b.textContent="Borrar lo marcado"});
  dlg.showModal()}
@@ -1611,7 +1744,7 @@ function subjForm(s){openForm(s?"Editar asignatura":"Nueva asignatura",
  `<label class="full" for="f-name">Nombre<input id="f-name" name="name" required value="${esc(s?.name)}" placeholder="Derecho Civil I"></label>
   <label class="full" for="f-area">Área<select id="f-area" name="area">${AREAS.map(a=>`<option ${s?.area===a?"selected":""}>${a}</option>`).join("")}</select></label>`,
  d=>{if(S.subjects.some(x=>x!==s&&x.name===d.name)){toast("Ya tienes una asignatura con ese nombre.");return false}
-  if(s){[S.links,S.events,S.cards,S.routine,Object.values(S.hitoMeta)].forEach(l=>l.forEach(x=>{if(x.subject===s.name)x.subject=d.name}));if(fSubj===s.name)fSubj=d.name;Object.assign(s,d)}else S.subjects.push({id:uid(),topics:[],...d})},
+  if(s){[S.links,S.events,S.cards,S.routine,Object.values(S.hitoMeta)].forEach(l=>l.forEach(x=>{if(x.subject===s.name)x.subject=d.name}));S.grades.forEach(g=>{if(g.subject===s.name)g.subject=d.name});if(S.gradeGoal[s.name]){S.gradeGoal[d.name]=S.gradeGoal[s.name];if(d.name!==s.name)delete S.gradeGoal[s.name]}if(fSubj===s.name)fSubj=d.name;Object.assign(s,d)}else S.subjects.push({id:uid(),topics:[],...d})},
  s&&(()=>{S.subjects=S.subjects.filter(x=>x!==s);[S.links,S.events,S.cards,S.routine,Object.values(S.hitoMeta)].forEach(l=>l.forEach(x=>{if(x.subject===s.name)x.subject=""}));if(fSubj===s.name)fSubj=""}))}
 function topicForm(t,s){openForm("Editar tema",
  `<label class="full" for="f-t">Tema<input id="f-t" name="t" required value="${esc(t.t)}"></label>
@@ -1686,10 +1819,10 @@ $("#side").addEventListener("wheel",e=>{if(!menuOpen())return;const a=e.currentT
  if(a.scrollHeight<=a.clientHeight||(up&&a.scrollTop<=0)||(!up&&a.scrollTop+a.clientHeight>=a.scrollHeight-1))e.preventDefault()},{passive:false});
 $("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
-const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,ayuda:vAyuda,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
-function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R?"repaso":view;DAY=today();V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><span class="hbtns"><button class="btn ghost small" id="demoHelp">Cómo se usa</button><button class="btn small" id="demoOut">Salir del ejemplo</button></span></div>`);$("#demoOut").onclick=()=>exitDemo();$("#demoHelp").onclick=()=>openHelp("")}
- $("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-hito]").forEach(b=>b.onclick=()=>openHito(b.dataset.hito));main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
-function go(v,fromHistory){flushNote();setMenu(false);if(v!=="fichas")R=null;const changed=v!==view;view=v;
+const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,ayuda:vAyuda,notas:vNotas,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
+function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R||X?"repaso":view;DAY=today();V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><span class="hbtns"><button class="btn ghost small" id="demoHelp">Cómo se usa</button><button class="btn small" id="demoOut">Salir del ejemplo</button></span></div>`);$("#demoOut").onclick=()=>exitDemo();$("#demoHelp").onclick=()=>openHelp("")}
+ $("#bell").hidden=!!(R||X);if(R||X)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-hito]").forEach(b=>b.onclick=()=>openHito(b.dataset.hito));main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
+function go(v,fromHistory){flushNote();setMenu(false);if(v!=="fichas"){R=null;endMock()}const changed=v!==view;view=v;
  if(!fromHistory)try{history[changed?"pushState":"replaceState"](null,"","#"+v)}catch(e){}
  try{main.focus({preventScroll:true})}catch(e){}
  render();window.scrollTo(0,0)}
@@ -1697,9 +1830,9 @@ window.addEventListener("popstate",()=>{if(!OPEN)return;if(dlg.open)dlg.close();
 /* Si la web se quedó abierta de un día para otro, al volver se repinta con la fecha nueva */
 let DAY=today();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&OPEN&&today()!==DAY&&!dlg.open&&view!=="tema")render()});
-document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;go(b.dataset.v)});
+document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;endMock();go(b.dataset.v)});
 function openMore(){F.onsubmit=e=>e.preventDefault();
- F.innerHTML=`<h2>Más</h2><div class="mlist">${[["calendario","Calendario","El mes entero, con los festivos"],["hitos","Hitos","Lo que cambió el derecho y el mundo"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ayuda","Ayuda","Cómo se usa cada sección"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
+ F.innerHTML=`<h2>Más</h2><div class="mlist">${[["notas","Calificaciones","Tus notas y lo que necesitas sacar"],["calendario","Calendario","El mes entero, con los festivos"],["hitos","Hitos","Lo que cambió el derecho y el mundo"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ayuda","Ayuda","Cómo se usa cada sección"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
  <div class="form"><div class="actions"><button type="button" class="btn ghost small" id="fcan">Cerrar</button></div></div>`;
  F.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{dlg.close();R=null;go(b.dataset.mv)});
  $("#mOut").onclick=()=>{dlg.close();lock()};$("#fcan").onclick=()=>dlg.close();
@@ -1750,7 +1883,7 @@ function gateLogin(lk){gateShow(`
 function unlock(){OPEN=true;try{history.replaceState(null,"","#hoy")}catch(e){}if(S.theme&&S.theme!==THEME){THEME=S.theme;try{localStorage.setItem("cuaderno-tema",THEME)}catch(e){}applyTheme(THEME)}else if(!S.theme)S.theme=THEME;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
 async function lock(){if(!OPEN)return;exitDemo(true);flushNote();OPEN=false;clearTimeout(idle);
  if(CLOUD){clearTimeout(pushT);if(dirty)await push().catch(()=>{});await sb.auth.signOut({scope:"local"}).catch(()=>{})}else await chain;
- setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;CK=null;UID=null;S=emptyState();main.innerHTML="";document.title=TITLE;
+ setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;endMock();CK=null;UID=null;S=emptyState();main.innerHTML="";document.title=TITLE;
  if(CLOUD)return gateCloudLogin("");
  const lk=readLock();lk?gateLogin(lk):gateSetup()}
 
