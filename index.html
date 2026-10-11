@@ -348,6 +348,18 @@ button.status::after{content:"";position:absolute;inset:-13px}
 }
 /* Buscador, página de asignatura y plantillas */
 #searchBtn{right:76px}
+#helpBtn{right:128px;font-family:var(--f-display);font-size:21px;font-weight:600;line-height:1}
+/* Ayuda */
+.hsec summary{font-family:var(--f-display);font-size:19px}
+.hsec p{margin:10px 0 8px;max-width:68ch}
+.hsec .tips{margin-bottom:12px;max-width:68ch}
+.hsec .tips li{color:var(--ink);font-size:15px}
+.step{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.step:first-of-type{border-top:0}
+.step .status{margin:0;cursor:default;width:18px;height:18px}
+.step b{display:block}
+.step.ok b{color:var(--muted)}
+@media (max-width:560px){.step{grid-template-columns:auto 1fr}.step .btn{grid-column:2;justify-self:start}}
 .sres .panel{margin-bottom:16px}
 .sres h2 .sub{font-family:var(--f-body);font-weight:400;letter-spacing:0;text-transform:none}
 .tplbox{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
@@ -357,7 +369,9 @@ button.status::after{content:"";position:absolute;inset:-13px}
 .mini-row a{color:var(--accent);font-weight:600;text-decoration:none;word-break:break-word;overflow-wrap:anywhere}
 @media (max-width:820px){
   #searchBtn{right:60px}
-  .topbar{padding-right:112px}
+  #helpBtn{right:108px}
+  .topbar{padding-right:160px}
+  .topbar small{display:none}
 }
 /* Hitos: línea del tiempo de lo que cambió el derecho y el orden internacional */
 .k-tratado{--tc:var(--accent)} .k-conflicto{--tc:var(--crit)} .k-sentencia{--tc:var(--seal)} .k-poder{--tc:var(--gold)} .k-derechos{--tc:var(--ok)} .k-espana{--tc:var(--warn)}
@@ -583,6 +597,7 @@ dialog h2{margin-bottom:16px}
   <button class="mini" id="mini" hidden title="Ir al temporizador"></button>
   <button class="bell" id="bell" aria-label="Avisos" aria-expanded="false" aria-controls="notif"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><span class="badge" id="bellN" hidden></span></button>
   <button class="bell" id="searchBtn" aria-label="Buscar" title="Buscar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg></button>
+  <button class="bell" id="helpBtn" aria-label="Ayuda de esta pantalla" title="Ayuda de esta pantalla">?</button>
   <div class="notif" id="notif" role="dialog" aria-label="Avisos" hidden></div>
 </div>
 
@@ -774,10 +789,10 @@ let view=(location.hash||"").slice(1)||"hoy", q="", fSubj="", R=null;
 if(view==="copia")view="ajustes";
 const $=s=>document.querySelector(s), main=$("#main");
 /* Iconos de línea y menú: la misma lista sirve para el cajón de escritorio y las pestañas del teléfono */
-const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
+const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',ayuda:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 1.9"/><path d="M12 16.7h.01"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
 const ico=k=>`<svg class="ni" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
-const MORE=["calendario","hitos","enlaces","cv","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
-$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["hitos","Hitos"],["enlaces","Enlaces","c-enlaces"],["ajustes","Ajustes"]]
+const MORE=["calendario","hitos","enlaces","cv","ayuda","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
+$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["hitos","Hitos"],["enlaces","Enlaces","c-enlaces"],["ayuda","Ayuda"],["ajustes","Ajustes"]]
  .map(([v,l,c])=>`<button data-v="${v}" class="${MORE.includes(v)?"in-more":""}"><span class="nx">${ico(v)}<span>${l}</span></span>${c?`<span class="count" id="${c}"></span>`:""}</button>`).join("")
  +`<button id="moreBtn" class="only-more" aria-haspopup="dialog"><span class="nx">${ico("mas")}<span>Más</span></span></button>`;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1194,6 +1209,55 @@ function vAsig(){
  main.querySelectorAll("[data-edr]").forEach(b=>b.onclick=()=>routineForm(S.routine.find(r=>r.id===b.dataset.edr)));
  main.querySelectorAll("[data-edl]").forEach(b=>b.onclick=()=>linkForm(S.links.find(l=>l.id===b.dataset.edl)));
 }
+/* ---------- AYUDA: primeros pasos, una guía corta por sección, trucos, preguntas y método de estudio.
+   Cada sección: id, título, vista a la que lleva, para qué sirve y cómo se usa. Si cambia una pantalla, se actualiza aquí. ---------- */
+const HELP=[
+["hoy","Hoy","hoy","Tu portada: lo que toca hoy y cómo vas.",["Las tarjetas de arriba avisan de las fechas que se acercan. Tócalas para ir a la Agenda.","«Tu día» muestra tus clases y compromisos de hoy y tu mejor hueco para estudiar.","«Plan hasta el examen» calcula cuántos temas te quedan y a qué ritmo llegar.","El temporizador cuenta sesiones de 25 o 50 minutos. Al terminar suma los minutos a tu semana y el día cuenta para tu racha.","El botón «Currículum» abre tu CV."]],
+["temas","Temas y asignaturas","temas","El temario de cada asignatura y lo que ya dominas.",["Crea una asignatura con «Nueva asignatura» y añade sus temas.","Toca el círculo de un tema para cambiar su estado: pendiente, en curso o dominado.","Toca el nombre de un tema para abrir sus apuntes.","Toca el nombre de la asignatura para ver todo lo suyo en una página: temas, fichas, fechas, clases, enlaces e hitos.","El porcentaje de «temario dominado» de Hoy sale de aquí."]],
+["apuntes","Apuntes de un tema","temas","La página donde escribes cada tema.",["Da formato con la barra: título, subtítulo, listas, casillas, cita, texto legal, negrita y resaltado.","Se guarda solo mientras escribes. No hay botón de guardar.","En un tema vacío puedes empezar con una plantilla: comentario de sentencia, tema de teoría, caso práctico o lectura de RRII.","Selecciona un texto y pulsa «Hacer ficha»: ese texto será la respuesta y tú escribes la pregunta.","En una lista de casillas, toca el cuadrado para marcarla como hecha."]],
+["fichas","Fichas de repaso","fichas","Preguntas y respuestas para memorizar sin releer.",["Crea una ficha con «Nueva ficha» o desde tus apuntes con «Hacer ficha».","«Repasar ahora» te pregunta las que tocan hoy. Intenta responder antes de mirar la respuesta.","Si la sabías, la ficha sube de nivel y vuelve más tarde: al día siguiente, a los 3, 7, 14 y 30 días. Si no, vuelve mañana.","«Practicar todas» sirve para la víspera del examen y no cambia las fechas de repaso.","Terminar un repaso cuenta como día estudiado."]],
+["agenda","Agenda","eventos","Tu semana y tus fechas importantes.",["«Añadir al horario» es para lo que se repite cada semana: clases, trabajo y deporte. Se apunta una sola vez.","«Nueva fecha» es para exámenes, entregas y eventos. Tú eliges desde cuándo te avisa.","Asigna cada examen a su asignatura: así Hoy te calcula el plan.","En una entrega, pulsa «Entregado» cuando la termines.","Con borde, lo que tiene fecha. Sin borde, tu horario fijo. Toca cualquiera para cambiarlo."]],
+["calendario","Calendario","calendario","El mes entero, con los festivos.",["Los festivos de la Comunidad de Madrid ya vienen marcados en rojo.","Toca un día para ver su semana en la Agenda.","Añade los festivos de tu ciudad o los días no lectivos de tu universidad con «Añadir festivo».","En un día festivo no se muestran tus clases.","Los festivos son orientativos: confírmalos con el calendario oficial de cada año."]],
+["hitos","Hitos","hitos","Los acontecimientos que cambiaron el derecho y el orden internacional.",["Recorre la línea del tiempo, filtra por tipo o busca un año, un caso o un artículo.","En cada hito puedes escribir tu nota y elegir la asignatura con la que se relaciona.","«Hacer ficha» crea una ficha con la pregunta ya escrita.","Añade tus propios hitos con «Añadir hito».","Es material de apoyo: contrasta fechas y citas con tu manual antes de un examen."]],
+["enlaces","Enlaces","enlaces","Sentencias, leyes y artículos guardados con tu nota.",["Guarda un enlace con «Nuevo enlace» y escribe para qué te sirve.","Busca por título, nota o etiqueta, o filtra por asignatura.","En «Fuentes fiables» tienes el BOE, CENDOJ, el Tribunal Constitucional, EUR-Lex y otras para guardarlas con un toque."]],
+["cv","Currículum","cv","Tu CV en una página, siempre al día.",["Se abre con el botón «Currículum» de Hoy. En el teléfono, también desde «Más».","Edítalo sobre la propia hoja: cada bloque tiene su botón «Editar» o «Añadir».","«Imprimir o guardar PDF» saca solo la hoja, en A4. «Descargar para Word» baja una versión sencilla para retocar.","La lista «Antes de enviarlo» te dice qué le falta.","Los eventos pasados de tu agenda, como un Modelo ONU, aparecen como sugerencia de mérito."]],
+["buscar","Buscador","buscar","Encuentra cualquier cosa que hayas guardado.",["Se abre con la lupa de arriba.","Busca en asignaturas, temas, apuntes, fichas, enlaces, fechas, horario, hitos y en esta ayuda.","No distingue mayúsculas ni acentos.","Toca un resultado para ir a él."]],
+["avisos","Avisos","hoy","La campana de arriba.",["Reúne las fechas que se acercan y las fichas que tocan hoy.","El número rojo indica cuántos avisos no has visto.","Los avisos aparecen cuando abres Digesto. No llegan al teléfono con la web cerrada."]],
+["ajustes","Ajustes","ajustes","Tu apariencia, tus copias y tu acceso.",["Elige entre cuatro apariencias: oscuro, claro, rosa y gamer.","Cambia tu nombre y tu objetivo de minutos al día.","«Descargar archivo» guarda una copia de todo. Hazla de vez en cuando.","«Elegir qué borrar» sirve para empezar un curso nuevo. Tus hitos, tu nombre y tu acceso no se borran.","«Ver el ejemplo» enseña Digesto lleno con datos de muestra, sin guardar nada."]]
+];
+const HELP_FOR={hoy:"hoy",temas:"temas",asig:"temas",tema:"apuntes",fichas:"fichas",eventos:"agenda",calendario:"calendario",hitos:"hitos",hito:"hitos",enlaces:"enlaces",cv:"cv",buscar:"buscar",ajustes:"ajustes"};
+const HELP_TIPS=["En el ordenador, Ctrl + K o la tecla / abren el buscador.","En el repaso de fichas, la tecla 1 es «No la sabía» y la 2 es «La sabía».","En los apuntes, Ctrl + B pone negrita y Ctrl + I, cursiva.","La balanza de arriba lleva siempre a Hoy.","El botón «?» de arriba abre la ayuda de la pantalla en la que estás.","Lo que creas desde la página de una asignatura ya sale con esa asignatura puesta.","En el teléfono, las tarjetas de aviso de Hoy se pasan de lado con el dedo.","Si una fecha coincide con un hito, verás «Tal día como hoy» en la portada.","En el ordenador, el menú se abre con las tres rayas y se cierra solo al elegir."];
+const HELP_METODO=[["Recordar fija más que releer","Intentar responder de memoria es lo que consolida lo aprendido. Por eso las fichas te hacen contestar antes de mirar."],["Repasar espaciado","Es mejor ver algo cinco veces en un mes que cinco veces en una tarde. Digesto separa cada repaso un poco más que el anterior."],["Repartir el temario","Divide lo que queda entre los días que faltan. El «Plan hasta el examen» hace esa cuenta por ti y te dice el ritmo."],["Sesiones cortas con descanso","Veinticinco minutos de atención de verdad rinden más que dos horas a medias. Usa el temporizador y respeta el descanso."],["Apuntes con tus palabras","Copiar no es estudiar. Resume cada tema con tu propia estructura; las plantillas te dan el esqueleto."],["Constancia antes que intensidad","Un poco cada día gana a un atracón la víspera. La racha está para que no rompas la cadena."]];
+function helpFaq(){return [
+ ["¿Dónde se guardan mis datos?",CLOUD?"En tu cuenta. Los ves en cualquier dispositivo al entrar con tu correo y tu contraseña.":"Cifrados, solo en este navegador. No pasan solos a otro dispositivo y se pierden si borras los datos de navegación."],
+ ["He olvidado mi contraseña",CLOUD?"En la pantalla de acceso, pulsa «He olvidado mi contraseña» y te llegará un enlace al correo para elegir otra. Si el correo no llega, avisa a quien te dio acceso a Digesto.":"No se puede recuperar: sin ella el cuaderno no se descifra. Puedes borrarlo y crear otro, y recuperar tus datos si guardaste un archivo de copia."],
+ ["¿Cómo lo uso en el móvil?",CLOUD?"Abre la misma dirección en el navegador del teléfono y entra con tu cuenta. Desde el menú del navegador puedes añadirla a la pantalla de inicio.":"Descarga una copia en Ajustes, pásala al teléfono y recupérala allí. Cada dispositivo tiene su propio cuaderno."],
+ ["¿Cómo hago una copia de seguridad?","En Ajustes, «Descargar archivo». Guárdala en un sitio privado, porque la copia no va cifrada. Para recuperarla, usa «Recuperar copia» en el mismo sitio."],
+ ["He borrado algo sin querer","Si tienes una copia reciente, recupérala en Ajustes: sustituye todo por lo que había en la copia. Sin copia no se puede recuperar."],
+ ["El temporizador no suena","Con la pantalla bloqueada el teléfono pausa la web, y el aviso sonará al volver a abrirla. Comprueba también que no esté en silencio."],
+ ["¿Me avisa con la web cerrada?","No. Los avisos de la campana y las tarjetas aparecen al abrir Digesto."],
+ ["La sesión se ha cerrado sola","Pasa tras 20 minutos sin uso"+(CLOUD?" si no marcaste «Mantener la sesión abierta». En iPhone, además, el navegador puede cerrarla tras varios días sin entrar.":".")+" Tus datos no se pierden: vuelve a entrar."],
+ ["¿Puedo fiarme de los hitos y los festivos?","Son material de apoyo. Las fechas y citas de los hitos conviene contrastarlas con tu manual, y los festivos con el calendario oficial de cada año."],
+ ["¿Qué es «Ver un ejemplo»?","Enseña Digesto lleno con datos de muestra. Nada de lo que hagas ahí se guarda, y al salir vuelves a tu cuaderno tal como estaba."]]}
+let HP="pasos", HOPEN="";
+function openHelp(id){HP=id?"secciones":"pasos";HOPEN=id||"";go("ayuda")}
+function vAyuda(){
+ const steps=[["Crea tus asignaturas","En Temas, pulsa «Nueva asignatura».","temas",S.subjects.length>0],["Añade los temas del programa","Dentro de cada asignatura, con «Añadir tema».","temas",S.subjects.some(x=>x.topics.length>0)],["Apunta tu horario","En Agenda, «Añadir al horario»: clases, trabajo y deporte.","eventos",S.routine.length>0],["Apunta tu próximo examen","En Agenda, «Nueva fecha», con su asignatura.","eventos",upcoming().some(e=>e.type==="examen")],["Escribe tus primeras fichas","En Fichas, «Nueva ficha», o desde tus apuntes.","fichas",S.cards.length>0]];
+ const done=steps.filter(x=>x[3]).length;
+ const parts={pasos:"Primeros pasos",secciones:"Secciones",trucos:"Trucos",preguntas:"Preguntas",metodo:"Cómo estudiar"};
+ const body=HP==="secciones"?HELP.map(([id,t,v,intro,how])=>`<details class="panel hsec" id="h-${id}" ${HOPEN===id?"open":""}><summary>${t}</summary><p>${intro}</p><ul class="tips">${how.map(x=>`<li>${x}</li>`).join("")}</ul><button class="btn ghost small" data-go="${v}">Ir a ${t.split(" ")[0]==="Apuntes"?"Temas":t}</button></details>`).join("")
+  :HP==="trucos"?`<div class="panel"><h2>Atajos y detalles que no se ven a simple vista</h2><ul class="tips" style="margin-top:12px">${HELP_TIPS.map(x=>`<li style="color:var(--ink);font-size:15px">${x}</li>`).join("")}</ul></div>`
+  :HP==="preguntas"?helpFaq().map(([q,a])=>`<details class="panel hsec"><summary>${q}</summary><p>${a}</p></details>`).join("")
+  :HP==="metodo"?`<div class="panel"><h2>Seis ideas detrás de Digesto</h2>${HELP_METODO.map(([t,d])=>`<div class="step" style="grid-template-columns:1fr"><div><b>${t}</b><span class="sub" style="font-size:15px">${d}</span></div></div>`).join("")}</div>`
+  :`<div class="panel"><div class="phead"><h2>Déjalo listo el primer día</h2><span class="sub">${done} de ${steps.length} hechos</span></div>${steps.map(([t,d,v,ok],i)=>`<div class="step ${ok?"ok":""}"><i class="status ${ok?"dominado":""}"></i><div><b>${i+1}. ${t}</b><span class="sub">${d}</span></div><button class="btn ghost small" data-go="${v}">${ok?"Ver":"Ir"}</button></div>`).join("")}
+   <p class="sub" style="margin:12px 0 0">${done===steps.length?"Todo listo. Ahora, un poco cada día.":"Los pasos se marcan solos a medida que los haces."}${DEMO?"":` ¿Prefieres verlo antes con datos de muestra? <button class="linkbtn" id="helpDemo">Ver un ejemplo</button>`}</p></div>`;
+ main.innerHTML=`<div class="head"><div><div class="eyebrow">Ayuda</div><h1>Cómo se usa Digesto</h1><p>Cada apartado se lee en menos de un minuto. El botón «?» de arriba abre la ayuda de la pantalla en la que estés.</p></div></div>
+ <div class="hchips" style="margin-bottom:16px">${Object.entries(parts).map(([k,v])=>`<button class="chip" data-hp="${k}" aria-pressed="${HP===k}">${v}</button>`).join("")}</div>${body}`;
+ main.querySelectorAll("[data-hp]").forEach(b=>b.onclick=()=>{HP=b.dataset.hp;HOPEN="";render()});
+ const hd=$("#helpDemo");if(hd)hd.onclick=enterDemo;
+ if(HOPEN){const el=$("#h-"+HOPEN);if(el)setTimeout(()=>el.scrollIntoView({block:"center"}),0)}
+}
+$("#helpBtn").onclick=()=>view==="ayuda"?go("ayuda"):openHelp(HELP_FOR[view]||"");
 /* ---------- BUSCADOR: temas, apuntes, fichas, enlaces, fechas y horario; sin distinguir mayúsculas ni acentos ---------- */
 let SQ="", SACT=[];
 const fold=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
@@ -1208,7 +1272,8 @@ function searchAll(q){const f=fold(q.trim());if(f.length<2)return null;
   ["Enlaces",S.links.filter(l=>hit(l.title,l.note,l.tags,l.url)).map(l=>({t:l.title||l.url,s:[l.subject,snip(l.note||l.tags||l.url)].filter(Boolean).join(" · "),go:()=>linkForm(l)}))],
   ["Fechas",S.events.filter(e=>hit(e.title,e.note)).map(e=>({t:e.title,s:[TYPES[e.type],whenTxt(e),e.subject].filter(Boolean).join(" · "),go:()=>{wkOff=weekOf(e.date);go("eventos")}}))],
   ["Horario",S.routine.filter(r=>hit(r.title,r.note)).map(r=>({t:r.title,s:TYPES[r.type]+" · "+r.start+(r.end?"–"+r.end:""),go:()=>routineForm(r)}))],
-  ["Hitos",allHitos().filter(h=>hit(h.t,h.q,h.w,h.n)).map(h=>({t:h.t,s:h.y+" · "+snip(h.q),go:()=>openHito(h.id)}))]
+  ["Hitos",allHitos().filter(h=>hit(h.t,h.q,h.w,h.n)).map(h=>({t:h.t,s:h.y+" · "+snip(h.q),go:()=>openHito(h.id)}))],
+  ["Ayuda",[...HELP.filter(h=>hit(h[1],h[3],h[4].join(" "))).map(h=>({t:"Cómo se usa: "+h[1],s:h[3],go:()=>openHelp(h[0])})),...helpFaq().filter(x=>hit(x[0],x[1])).map(x=>({t:x[0],s:snip(x[1]),go:()=>{HP="preguntas";HOPEN="";go("ayuda")}}))]]
  ].filter(g=>g[1].length)}
 function paintSearch(){const box=$("#sres");if(!box)return;const g=searchAll(SQ);SACT=[];
  box.innerHTML=!g?`<div class="empty">Escribe al menos dos letras. Por ejemplo, un artículo, un autor o el nombre de una sentencia.</div>`
@@ -1571,13 +1636,13 @@ $("#side").addEventListener("wheel",e=>{if(!menuOpen())return;const a=e.currentT
  if(a.scrollHeight<=a.clientHeight||(up&&a.scrollTop<=0)||(!up&&a.scrollTop+a.clientHeight>=a.scrollHeight-1))e.preventDefault()},{passive:false});
 $("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
-const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
-function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R?"repaso":view;V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><button class="btn small" id="demoOut">Salir del ejemplo</button></div>`);$("#demoOut").onclick=()=>exitDemo()}
+const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,ayuda:vAyuda,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
+function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R?"repaso":view;V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><span class="hbtns"><button class="btn ghost small" id="demoHelp">Cómo se usa</button><button class="btn small" id="demoOut">Salir del ejemplo</button></span></div>`);$("#demoOut").onclick=()=>exitDemo();$("#demoHelp").onclick=()=>openHelp("")}
  $("#bell").hidden=!!R;if(R)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-hito]").forEach(b=>b.onclick=()=>openHito(b.dataset.hito));main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
 function go(v){flushNote();setMenu(false);if(v!=="fichas")R=null;view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render();window.scrollTo(0,0)}
 document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;go(b.dataset.v)});
 function openMore(){F.onsubmit=e=>e.preventDefault();
- F.innerHTML=`<h2>Más</h2><div class="mlist">${[["calendario","Calendario","El mes entero, con los festivos"],["hitos","Hitos","Lo que cambió el derecho y el mundo"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
+ F.innerHTML=`<h2>Más</h2><div class="mlist">${[["calendario","Calendario","El mes entero, con los festivos"],["hitos","Hitos","Lo que cambió el derecho y el mundo"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ayuda","Ayuda","Cómo se usa cada sección"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
  <div class="form"><div class="actions"><button type="button" class="btn ghost small" id="fcan">Cerrar</button></div></div>`;
  F.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{dlg.close();R=null;go(b.dataset.mv)});
  $("#mOut").onclick=()=>{dlg.close();lock()};$("#fcan").onclick=()=>dlg.close();
