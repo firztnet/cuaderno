@@ -434,35 +434,16 @@ button.status::after{content:"";position:absolute;inset:-13px}
 .mfail{padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
 .mfail:first-of-type{border-top:0}
 @media (max-width:560px){.grow{grid-template-columns:minmax(0,1fr) auto auto}.grow .iconbtn{grid-column:1/-1;justify-self:start;margin:-6px 0 0 -6px}}
-/* Panel de administración */
-.akpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
-.akpi .stat b{font-size:32px}
-.akpi .stat.alert b{color:var(--crit)}
-.wbars{display:flex;align-items:flex-end;gap:8px;height:130px;margin-top:16px}
-.wbars>div{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:10px;color:var(--muted);white-space:nowrap}
-.wbars i{display:block;width:100%;max-width:44px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--surface)));min-height:3px}
-.wbars b{font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
-.seg{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:16px 0 12px;background:var(--surface-2)}
-.seg i{display:block;height:100%}
-.lg{display:flex;gap:8px 16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-.lg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-right:6px;vertical-align:-1px}
-.lg b{color:var(--ink)}
-.accs{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
-.acc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
-.acc.off{border-style:dashed}
-.acc.off .av{filter:grayscale(1)}
-.acc-h{display:flex;gap:12px;align-items:center;min-width:0}
-.av{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-family:var(--f-display);font-size:20px;font-weight:600}
-.em{font-weight:600;overflow-wrap:anywhere;word-break:break-word}
-.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.bdg{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
-.bdg.adm{color:var(--seal)} .bdg.off{color:var(--crit)} .bdg.unc{color:var(--warn)} .bdg.me{color:var(--accent)} .bdg.on{color:var(--ok)}
-.ameta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;font-size:13px;color:var(--muted)}
-.ameta b{color:var(--ink);font-weight:600}
-.ause{display:flex;gap:6px;flex-wrap:wrap}
-.ause span{font-size:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-variant-numeric:tabular-nums}
-.aact{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
-@media (max-width:820px){.accs{grid-template-columns:1fr}.ameta{grid-template-columns:1fr}}
+/* Comunicados de la administración: arriba en cada pantalla y en el acceso */
+.annc-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.annc{--bc:var(--accent);display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--bc);border-left-width:4px;background:color-mix(in srgb,var(--bc) 10%,var(--surface));border-radius:var(--r);padding:12px 14px;text-align:left}
+.annc.mantenimiento{--bc:var(--warn)} .annc.urgente{--bc:var(--crit)}
+.annc>div{min-width:0;flex:1 1 220px}
+.annc-k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--bc)}
+.annc-t{font-weight:600}
+.annc-m{font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.annc-w{font-size:13px;font-weight:600;margin-top:2px}
+.gate-card .annc{font-size:14px}
 /* Enlaces y fichas */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .toolbar input{flex:1;min-width:180px}
@@ -885,7 +866,7 @@ function flush(){setSync("Guardando…");return push().then(()=>{warned=false;se
 async function openCloud(ses){UID=ses.user.id;EMAIL=ses.user.email||"";rev="";
  const st=await myState();
  if(!st.activa){await sb.auth.signOut({scope:"local"}).catch(()=>{});return gateCloudLogin(BLOCKED_MSG)}
- IS_ADMIN=st.admin;ADM=null;
+ loadComs();
  if(PENDING&&PENDING.uid===UID){S=PENDING.S;PENDING=null;rev="pendiente";await push()}else{PENDING=null;await pull(true)}
  setSync("Guardado en tu cuenta");unlock()}
 /* Mientras la web está abierta, cada minuto se comprueba si otro dispositivo ha guardado algo */
@@ -897,7 +878,7 @@ let view=(location.hash||"").slice(1)||"hoy", q="", fSubj="", R=null;
 if(view==="copia")view="ajustes";
 const $=s=>document.querySelector(s), main=$("#main");
 /* Iconos de línea y menú: la misma lista sirve para el cajón de escritorio y las pestañas del teléfono */
-const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',ayuda:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 1.9"/><path d="M12 16.7h.01"/>',admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/>',notas:'<path d="M7 3h10v18H7z"/><path d="m10 9 1.5 1.5L14.5 8M10 15h4.5"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',ojo:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/>',ojono:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path d="M4 4l16 16"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
+const IC={hoy:'<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/>',temas:'<path d="M12 6c-2-1.5-5-1.5-8 0v12c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0Z"/><path d="M12 6v12"/>',fichas:'<rect x="4" y="8" width="13" height="10" rx="2"/><path d="M8 5h10a2 2 0 0 1 2 2v8"/>',eventos:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="4.5" cy="7" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17" r="1.2"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',enlaces:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',ajustes:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',cv:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',ayuda:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.7 2.2c-.8.5-1.3 1-1.3 1.9"/><path d="M12 16.7h.01"/>',notas:'<path d="M7 3h10v18H7z"/><path d="m10 9 1.5 1.5L14.5 8M10 15h4.5"/>',hitos:'<path d="M3 20h18M5 20v-9M9.5 20v-9M14.5 20v-9M19 20v-9M3 11l9-6 9 6z"/>',ojo:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/>',ojono:'<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/><path d="M4 4l16 16"/>',mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',salir:'<path d="M10 5H6v14h4"/><path d="M14 8l4 4-4 4M18 12H9"/>'};
 const ico=k=>`<svg class="ni" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 /* Añade a cada campo de contraseña un botón para verla u ocultarla */
 function pwToggles(root){root.querySelectorAll('input[type="password"]').forEach(inp=>{
@@ -905,16 +886,15 @@ function pwToggles(root){root.querySelectorAll('input[type="password"]').forEach
  const b=document.createElement("button");b.type="button";b.className="pwbtn";b.innerHTML=ico("ojo");b.setAttribute("aria-label","Ver la contraseña");b.setAttribute("aria-pressed","false");
  b.onclick=()=>{const show=inp.type==="password";inp.type=show?"text":"password";b.innerHTML=ico(show?"ojono":"ojo");b.setAttribute("aria-label",show?"Ocultar la contraseña":"Ver la contraseña");b.setAttribute("aria-pressed",String(show));inp.focus()};
  w.append(b)})}
-const MORE=["notas","calendario","hitos","enlaces","cv","ayuda","ajustes","admin"]; // en el teléfono viven detrás de la pestaña «Más»
-$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["notas","Calificaciones"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["hitos","Hitos"],["enlaces","Enlaces","c-enlaces"],["ayuda","Ayuda"],["ajustes","Ajustes"],["admin","Administración"]]
+const MORE=["notas","calendario","hitos","enlaces","cv","ayuda","ajustes"]; // en el teléfono viven detrás de la pestaña «Más»
+$("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas","c-fichas"],["notas","Calificaciones"],["eventos","Agenda","c-eventos"],["calendario","Calendario"],["hitos","Hitos"],["enlaces","Enlaces","c-enlaces"],["ayuda","Ayuda"],["ajustes","Ajustes"]]
  .map(([v,l,c])=>`<button data-v="${v}" class="${MORE.includes(v)?"in-more":""}"><span class="nx">${ico(v)}<span>${l}</span></span>${c?`<span class="count" id="${c}"></span>`:""}</button>`).join("")
  +`<button id="moreBtn" class="only-more" aria-haspopup="dialog"><span class="nx">${ico("mas")}<span>Más</span></span></button>`;
-$('#nav [data-v="admin"]').hidden=true; // solo aparece para la cuenta administradora
 
 /* ---------- IDIOMA: la interfaz se pasa al inglés sobre la marcha, texto a texto.
    Lo que escribe ella y el contenido español (hitos, festivos, fuentes, máximas, ejemplo) no está en el diccionario y se queda igual.
    EN: textos exactos. EN_RX: textos con números o nombres dentro. ---------- */
-const EN=/*EN_DICT*/{
+const EN=/*EN_DICT*/{"Mantenimiento":"Maintenance","Aviso":"Notice","Urgente":"Urgent","Entendido":"Got it",
 "Hoy":"Today","Temas":"Topics","Fichas":"Flashcards","Calificaciones":"Grades","Agenda":"Planner","Calendario":"Calendar","Hitos":"Milestones","Enlaces":"Links","Ayuda":"Help","Ajustes":"Settings","Administración":"Admin","Más":"More",
 "Tu cuaderno se guarda cifrado en este navegador.":"Your notebook is stored encrypted in this browser.","Cerrar sesión":"Sign out","Acceso a Digesto":"Sign in to Digesto",
 "Ver la contraseña":"Show password","Ocultar la contraseña":"Hide password","Abrir menú":"Open menu","Cerrar menú":"Close menu","Ir a la página principal":"Go to the home page","Página principal":"Home page","Secciones":"Sections","Ir al temporizador":"Go to the timer","Avisos":"Notifications","Buscar":"Search","Ayuda de esta pantalla":"Help for this screen",
@@ -1595,98 +1575,30 @@ function vAyuda(){
  if(HOPEN){const el=$("#h-"+HOPEN);if(el)setTimeout(()=>el.scrollIntoView({block:"center"}),0)}
 }
 $("#helpBtn").onclick=()=>view==="ayuda"?go("ayuda"):openHelp(HELP_FOR[view]||"");
-/* ---------- ADMINISTRACIÓN: cuentas, accesos y registro. Las acciones las ejecuta Supabase,
-   que comprueba en cada una que quien llama es administrador (ver supabase-admin.sql). ---------- */
-let IS_ADMIN=false, ADM=null, AQ="", AF="todas", AS="recientes";
+/* ---------- CUENTAS: si la administración desactiva una cuenta, se cierra; y el registro puede ir solo con invitación (ver supabase-admin.sql) ---------- */
 const BLOCKED_MSG="Tu cuenta está desactivada. Si crees que es un error, contacta con quien te dio acceso a Digesto.";
 /* ¿Está abierto el registro? Lo puede preguntar cualquiera, sin cuenta. null si el panel aún no está preparado en Supabase */
 async function regOpen(){try{const {data,error}=await sb.rpc("digesto_registro_abierto");return error?null:data}catch(e){return null}}
 async function myState(){try{const {data,error}=await sb.rpc("digesto_mi_estado");if(error||!data)return {activa:true,admin:false};return {activa:data.activa!==false,admin:!!data.admin}}catch(e){return {activa:true,admin:false}}}
 function blockedOut(){if(!OPEN)return;sessionLost();PENDING=null;sb.auth.signOut({scope:"local"}).catch(()=>{});gateCloudLogin(BLOCKED_MSG)}
-async function admLoad(){ADM={...(ADM||{}),loading:true};if(view==="admin"&&OPEN)render();
- try{const [c,a]=await Promise.all([sb.rpc("digesto_admin_cuentas"),sb.rpc("digesto_admin_ajustes")]);
-  if(c.error)throw c.error;if(a.error)throw a.error;
-  ADM={rows:c.data||[],aj:a.data||{registro_abierto:true,invitados:[]},loading:false,err:"",at:new Date()}}
- catch(e){const m=((e&&e.message)||"").toLowerCase();
-  ADM={rows:null,aj:null,loading:false,err:m.includes("solo para administradores")?"Tu cuenta no tiene permisos de administración.":m.includes("could not find")||m.includes("does not exist")||m.includes("schema cache")?"Falta preparar el panel en Supabase: ejecuta el archivo supabase-admin.sql en el SQL Editor.":"No se pudo cargar el panel. Revisa la conexión y pulsa Actualizar."}}
- if(view==="admin"&&OPEN)render()}
-async function admDo(fn,args,ok){try{const {error}=await sb.rpc(fn,args);if(error)throw error;toast(ok);await admLoad()}catch(e){toast("No se pudo completar: "+((e&&e.message)||"error desconocido"))}}
-const relT=ts=>{if(!ts)return "nunca";const d=Math.floor((Date.now()-Date.parse(ts))/864e5);return d<=0?"hoy":d===1?"ayer":d<30?`hace ${d} días`:d<365?`hace ${Math.round(d/30)} ${Math.round(d/30)===1?"mes":"meses"}`:"hace más de un año"};
-const fmtB=b=>b<1024?b+" B":b<1048576?nf(Math.round(b/102.4)/10)+" KB":nf(Math.round(b/104857.6)/10)+" MB";
-const lastAct=r=>Math.max(r.ultimo_acceso?Date.parse(r.ultimo_acceso):0,r.guardado?Date.parse(r.guardado):0);
-const avHue=e=>[...String(e||"?")].reduce((a,ch)=>(a*31+ch.charCodeAt(0))%360,7);
-function admRows(){const f=fold(AQ.trim());
- const L=ADM.rows.filter(r=>(!f||fold(r.email).includes(f))&&(AF==="todas"||(AF==="activas"&&r.activa)||(AF==="off"&&!r.activa)||(AF==="admin"&&r.es_admin)||(AF==="unc"&&!r.confirmado)));
- return L.sort((a,b)=>AS==="acceso"?lastAct(b)-lastAct(a):AS==="uso"?(b.bytes||0)-(a.bytes||0):Date.parse(b.creado)-Date.parse(a.creado))}
-function accCard(r){const me=r.id===UID,id=esc(r.id),em=esc(r.email||"(sin correo)");
- return `<div class="acc ${r.activa?"":"off"}"><div class="acc-h"><span class="av" style="background:hsl(${avHue(r.email)} 50% 40%)" aria-hidden="true">${esc((r.email||"?")[0].toUpperCase())}</span>
-  <div style="min-width:0"><div class="em">${em}</div><div class="badges">${me?`<span class="bdg me">Tú</span>`:""}${r.es_admin?`<span class="bdg adm">Administración</span>`:""}<span class="bdg ${r.activa?"on":"off"}">${r.activa?"Activa":"Desactivada"}</span>${r.confirmado?"":`<span class="bdg unc">Correo sin confirmar</span>`}</div></div></div>
-  <div class="ameta"><span>Alta: <b>${new Date(r.creado).toLocaleDateString(LOC(),{day:"numeric",month:"short",year:"numeric"})}</b></span><span>Último acceso: <b>${relT(r.ultimo_acceso)}</b></span><span>Último guardado: <b>${relT(r.guardado)}</b></span><span>Espacio: <b>${fmtB(r.bytes||0)}</b></span></div>
-  <div class="ause"><span>${r.asignaturas} asignaturas</span><span>${r.temas} temas</span><span>${r.fichas} fichas</span><span>${r.fechas} fechas</span></div>
-  <div class="aact">${me?`<span class="sub">Tu cuenta no se puede desactivar ni eliminar desde aquí.</span>`:`<button class="btn ghost small" data-aon="${id}" data-val="${r.activa?0:1}" data-em="${em}">${r.activa?"Desactivar":"Activar"}</button><button class="btn ghost small" data-aadm="${id}" data-val="${r.es_admin?0:1}" data-em="${em}">${r.es_admin?"Quitar administración":"Hacer administración"}</button><button class="btn ghost small danger" data-adel="${id}" data-em="${em}">Eliminar</button>`}</div></div>`}
-function paintAccounts(){const box=$("#alist");if(!box)return;const L=admRows();
- box.innerHTML=L.length?`<div class="accs">${L.map(accCard).join("")}</div>`:`<div class="panel empty">Ninguna cuenta coincide con la búsqueda o el filtro.</div>`;
- box.querySelectorAll("[data-aon]").forEach(b=>b.onclick=()=>{const on=b.dataset.val==="1";
-  if(on)return admDo("digesto_admin_activar",{objetivo:b.dataset.aon,valor:true},"Cuenta activada. Ya puede entrar.");
-  confirmBox(`${b.dataset.em} no podrá entrar ni ver su cuaderno hasta que la vuelvas a activar. Sus datos se conservan.`,()=>admDo("digesto_admin_activar",{objetivo:b.dataset.aon,valor:false},"Cuenta desactivada."))});
- box.querySelectorAll("[data-aadm]").forEach(b=>b.onclick=()=>{const on=b.dataset.val==="1";
-  if(!on)return admDo("digesto_admin_hacer_admin",{objetivo:b.dataset.aadm,valor:false},"Permisos de administración retirados.");
-  confirmBox(`${b.dataset.em} podrá ver este panel y activar, desactivar o eliminar cualquier cuenta.`,()=>admDo("digesto_admin_hacer_admin",{objetivo:b.dataset.aadm,valor:true},"Ahora también administra Digesto."))});
- box.querySelectorAll("[data-adel]").forEach(b=>b.onclick=()=>confirmBox(`Se eliminará la cuenta ${b.dataset.em} y su cuaderno entero, para siempre. No se puede deshacer.`,()=>admDo("digesto_admin_eliminar",{objetivo:b.dataset.adel},"Cuenta eliminada.")))}
-function admCsv(){const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"',d=t=>t?new Date(t).toLocaleString(LOC()):"";
- const lines=[["Correo","Alta","Último acceso","Último guardado","Activa","Administración","Correo confirmado","Asignaturas","Temas","Fichas","Fechas","Bytes"].map(q).join(";"),
-  ...ADM.rows.map(r=>[r.email,d(r.creado),d(r.ultimo_acceso),d(r.guardado),r.activa?"sí":"no",r.es_admin?"sí":"no",r.confirmado?"sí":"no",r.asignaturas,r.temas,r.fichas,r.fechas,r.bytes].map(q).join(";"))];
- const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"}));a.download="digesto-cuentas-"+today()+".csv";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);toast("Lista descargada.")}
-function vAdmin(){
- if(!CLOUD||!IS_ADMIN){view="hoy";return vHoy()}
- if(!ADM)admLoad();
- const head=`<div class="head"><div><div class="eyebrow">Administración</div><h1>Panel de Digesto</h1><p>Solo tú ves esta sección. Muestra quién usa Digesto y cómo, nunca el contenido de los cuadernos.</p></div><div class="hbtns"><button class="btn ghost" id="aRef">Actualizar</button>${ADM&&ADM.rows?`<button class="btn" id="aCsv">Exportar lista</button>`:""}</div></div>`;
- const bindHead=()=>{$("#aRef").onclick=admLoad;const c=$("#aCsv");if(c)c.onclick=admCsv};
- if(!ADM||(ADM.loading&&!ADM.rows)){main.innerHTML=head+`<div class="panel empty">Cargando cuentas…</div>`;bindHead();return}
- if(ADM.err){main.innerHTML=head+`<div class="panel"><h2>No se pudo abrir el panel</h2><p class="sub" style="margin:8px 0 0">${esc(ADM.err)}</p></div>`;bindHead();return}
- const rows=ADM.rows,aj=ADM.aj,now=Date.now(),D=864e5;
- const act7=rows.filter(r=>now-lastAct(r)<7*D).length,off=rows.filter(r=>!r.activa).length,unc=rows.filter(r=>!r.confirmado).length,bytes=rows.reduce((a,r)=>a+(r.bytes||0),0);
- const m0=mondayOf(new Date());m0.setHours(0,0,0,0);
- const weeks=[...Array(8)].map((_,i)=>{const s0=m0.getTime()-(7-i)*7*D,e0=s0+7*D;return {l:new Date(s0).toLocaleDateString(LOC(),{day:"numeric",month:"short"}),n:rows.filter(r=>{const t=Date.parse(r.creado);return t>=s0&&t<e0}).length}});
- const wmax=Math.max(1,...weeks.map(w=>w.n));
- const buckets=[["Hoy","var(--ok)",r=>now-lastAct(r)<D],["Esta semana","var(--accent)",r=>{const d=now-lastAct(r);return d>=D&&d<7*D}],["Este mes","var(--gold)",r=>{const d=now-lastAct(r);return d>=7*D&&d<30*D}],["Más de un mes o nunca","var(--muted)",r=>now-lastAct(r)>=30*D]].map(([l,c,f])=>[l,c,rows.filter(f).length]);
- const chips=[["todas","Todas",rows.length],["activas","Activas",rows.length-off],["off","Desactivadas",off],["admin","Administración",rows.filter(r=>r.es_admin).length],["unc","Sin confirmar",unc]];
- main.innerHTML=head+`
- <div class="akpi">
-  <div class="stat"><b>${rows.length}</b><span>${rows.length===1?"cuenta":"cuentas"} en total</span></div>
-  <div class="stat"><b>${act7}</b><span>activas esta semana</span></div>
-  <div class="stat ${off?"alert":""}"><b>${off}</b><span>${off===1?"desactivada":"desactivadas"}</span></div>
-  <div class="stat"><b>${fmtB(bytes)}</b><span>espacio usado por los cuadernos</span></div>
-  <div class="stat ${aj.registro_abierto?"alert":""}"><b style="font-size:24px">${aj.registro_abierto?"Abierto":"Cerrado"}</b><span>registro de cuentas nuevas</span></div>
- </div>
- <div class="grid2"><div class="stack">
-  <div class="panel"><div class="phead"><h2>Altas por semana</h2><span class="sub">últimas 8 semanas</span></div>
-   <div class="wbars" role="img" aria-label="Cuentas nuevas por semana: ${weeks.map(w=>w.l+" "+w.n).join(", ")}">${weeks.map(w=>`<div><b>${w.n||""}</b><i style="height:${Math.round(w.n/wmax*100)}%"></i>${w.l}</div>`).join("")}</div></div>
-  <div class="panel"><h2>Última actividad</h2>
-   <div class="seg" role="img" aria-label="${buckets.map(b=>b[0]+": "+b[2]).join(", ")}">${buckets.map(([,c,n])=>n?`<i style="width:${n/Math.max(1,rows.length)*100}%;background:${c}"></i>`:"").join("")}</div>
-   <div class="lg">${buckets.map(([l,c,n])=>`<span style="--c:${c}">${l}: <b>${n}</b></span>`).join("")}</div></div>
- </div><div class="stack">
-  <div class="panel stack"><div class="phead"><h2>Registro</h2><span class="bdg ${aj.registro_abierto?"off":"on"}">${aj.registro_abierto?"Abierto":"Cerrado"}</span></div>
-   <p class="sub" style="margin:0">${aj.registro_abierto?"Cualquiera con el enlace puede crear una cuenta. Ciérralo cuando ya estén dentro las personas que quieres.":"Solo pueden crear cuenta los correos de la lista de invitados."}</p>
-   <div><button class="btn small ${aj.registro_abierto?"":"ghost"}" id="aReg">${aj.registro_abierto?"Cerrar el registro":"Abrir el registro"}</button></div>
-   <h3 class="eyebrow" style="margin:6px 0 0">Invitados (${aj.invitados.length})</h3>
-   <div class="addline"><input id="aInv" type="email" placeholder="correo@ejemplo.com" aria-label="Correo para invitar" autocomplete="off"><button class="btn small" id="aInvAdd">Invitar</button></div>
-   ${aj.invitados.map(e=>`<div class="mini-row"><span style="min-width:0;overflow-wrap:anywhere">${esc(e)}${rows.some(r=>(r.email||"").toLowerCase()===e)?` <span class="bdg on">Ya tiene cuenta</span>`:""}</span><button class="iconbtn" data-unv="${esc(e)}">Quitar</button></div>`).join("")||`<p class="sub" style="margin:0">Sin invitados. Con el registro cerrado, añade aquí el correo de quien quieras dejar entrar.</p>`}
-  </div>
- </div></div>
- <div class="phead" style="margin:28px 0 12px"><h2>Cuentas</h2><span class="sub">Actualizado a las ${ADM.at.toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"})}</span></div>
- <div class="toolbar"><input id="aq" type="search" placeholder="Buscar por correo…" aria-label="Buscar cuentas" autocomplete="off" value="${esc(AQ)}"><select id="as" aria-label="Ordenar cuentas">${[["recientes","Altas más recientes"],["acceso","Actividad más reciente"],["uso","Más espacio usado"]].map(([k,v])=>`<option value="${k}" ${AS===k?"selected":""}>${v}</option>`).join("")}</select></div>
- <div class="hchips" style="margin-bottom:16px">${chips.map(([k,l,n])=>`<button class="chip" data-af="${k}" aria-pressed="${AF===k}">${l} (${n})</button>`).join("")}</div>
- <div id="alist"></div>`;
- bindHead();paintAccounts();
- const q=$("#aq");q.oninput=()=>{AQ=q.value;paintAccounts()};
- $("#as").onchange=e=>{AS=e.target.value;paintAccounts()};
- main.querySelectorAll("[data-af]").forEach(b=>b.onclick=()=>{AF=b.dataset.af;render()});
- $("#aReg").onclick=()=>aj.registro_abierto?admDo("digesto_admin_registro",{valor:false},"Registro cerrado. Solo entran los invitados."):admDo("digesto_admin_registro",{valor:true},"Registro abierto.");
- const inv=$("#aInv"),add=()=>{const v=inv.value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))return toast("Escribe un correo válido.");admDo("digesto_admin_invitar",{correo:v,valor:true},"Invitado: "+v)};
- $("#aInvAdd").onclick=add;inv.onkeydown=e=>{if(e.key==="Enter")add()};
- main.querySelectorAll("[data-unv]").forEach(b=>b.onclick=()=>admDo("digesto_admin_invitar",{correo:b.dataset.unv,valor:false},"Invitación retirada."));
-}
+/* ---------- COMUNICADOS: avisos que publica la administración (admin.html) para todas las cuentas ---------- */
+let COMS=[];
+const comKey=c=>[c.id,c.titulo,c.mant_inicio||"",c.mant_fin||""].join("|");
+const comHidden=()=>{try{return JSON.parse(localStorage.getItem("digesto-com-ocultos")||"[]")}catch(e){return []}};
+const COMK={info:"Aviso",mantenimiento:"Mantenimiento",urgente:"Urgente"};
+function comWhen(c){if(!c.mant_inicio)return "";const a=new Date(c.mant_inicio),b=c.mant_fin?new Date(c.mant_fin):null,en=LANG==="en";
+ const day=x=>x.toLocaleDateString(LOC(),{weekday:"long",day:"numeric",month:"long"}),hr=x=>x.toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"});
+ if(!b)return en?`From ${day(a)} at ${hr(a)}.`:`Desde el ${day(a)} a las ${hr(a)}.`;
+ return a.toDateString()===b.toDateString()?(en?`On ${day(a)}, from ${hr(a)} to ${hr(b)}.`:`El ${day(a)}, de ${hr(a)} a ${hr(b)}.`):(en?`From ${day(a)} at ${hr(a)} to ${day(b)} at ${hr(b)}.`:`Del ${day(a)} a las ${hr(a)} al ${day(b)} a las ${hr(b)}.`)}
+const comHtml=(c,ok)=>`<div class="annc ${esc(c.tipo)}" role="${c.tipo==="urgente"?"alert":"status"}"><div><div class="annc-k">${COMK[c.tipo]||"Aviso"}</div><div class="annc-t" translate="no">${esc(c.titulo)}</div>${c.mensaje?`<div class="annc-m" translate="no">${esc(c.mensaje)}</div>`:""}${c.mant_inicio?`<div class="annc-w" translate="no">${esc(comWhen(c))}</div>`:""}</div>${ok?`<button type="button" class="btn ghost small" data-comok="${esc(comKey(c))}">Entendido</button>`:""}</div>`;
+async function loadComs(){if(!CLOUD||!sb)return;try{const {data,error}=await sb.rpc("digesto_comunicados_activos");if(error)return;COMS=data||[];paintComs();gateComs()}catch(e){}}
+function paintComs(){const old=$("#annc");if(old)old.remove();if(!OPEN)return;const h=comHidden(),L=COMS.filter(c=>!h.includes(comKey(c)));if(!L.length)return;
+ main.insertAdjacentHTML("afterbegin",`<div class="annc-bar no-print" id="annc">${L.map(c=>comHtml(c,true)).join("")}</div>`);
+ main.querySelectorAll("#annc [data-comok]").forEach(b=>b.onclick=()=>{const h2=comHidden();h2.push(b.dataset.comok);try{localStorage.setItem("digesto-com-ocultos",JSON.stringify(h2.slice(-50)))}catch(e){}paintComs()})}
+/* En la pantalla de acceso se ven siempre: así nadie se extraña si hay mantenimiento */
+function gateComs(){const card=gate.hidden?null:gate.querySelector(".gate-card");if(!card)return;const old=$("#gannc");if(old)old.remove();if(!COMS.length)return;
+ const hd=card.querySelector(".ghead")||card.firstElementChild;hd.insertAdjacentHTML("afterend",`<div class="annc-bar" id="gannc" style="margin:0">${COMS.map(c=>comHtml(c,false)).join("")}</div>`)}
+setInterval(()=>{if(CLOUD&&!document.hidden)loadComs()},5*60e3);
 
 /* ---------- BUSCADOR: temas, apuntes, fichas, enlaces, fechas y horario; sin distinguir mayúsculas ni acentos ---------- */
 let SQ="", SACT=[];
@@ -2172,8 +2084,8 @@ $("#side").addEventListener("wheel",e=>{if(!menuOpen())return;const a=e.currentT
  if(a.scrollHeight<=a.clientHeight||(up&&a.scrollTop<=0)||(!up&&a.scrollTop+a.clientHeight>=a.scrollHeight-1))e.preventDefault()},{passive:false});
 $("#home").onclick=()=>go("hoy");
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-open")){setMenu(false);$("#burger").focus()}});
-const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,ayuda:vAyuda,notas:vNotas,admin:vAdmin,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
-function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R||X?"repaso":view;DAY=today();V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><span class="hbtns"><button class="btn ghost small" id="demoHelp">Cómo se usa</button><button class="btn small" id="demoOut">Salir del ejemplo</button></span></div>`);$("#demoOut").onclick=()=>exitDemo();$("#demoHelp").onclick=()=>openHelp("")}
+const V={hoy:vHoy,temas:vTemas,fichas:vFichas,enlaces:vEnlaces,tema:vTema,asig:vAsig,buscar:vBuscar,hitos:vHitos,hito:vHito,ayuda:vAyuda,notas:vNotas,eventos:vEventos,calendario:vCalendario,cv:vCV,ajustes:vAjustes};
+function render(){if(!V[view])view="hoy";if(fSubj&&!S.subjects.some(s=>s.name===fSubj))fSubj="";document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v?b.dataset.v===view||((view==="tema"||view==="asig")&&b.dataset.v==="temas")||(view==="hito"&&b.dataset.v==="hitos"):MORE.includes(view)||view==="hito"));main.dataset.view=R||X?"repaso":view;DAY=today();V[view]();if(DEMO){main.insertAdjacentHTML("afterbegin",`<div class="demo no-print"><span><b>Estás viendo un ejemplo.</b> Nada de lo que hagas aquí se guarda ni toca tu cuaderno.</span><span class="hbtns"><button class="btn ghost small" id="demoHelp">Cómo se usa</button><button class="btn small" id="demoOut">Salir del ejemplo</button></span></div>`);$("#demoOut").onclick=()=>exitDemo();$("#demoHelp").onclick=()=>openHelp("")}paintComs();
  $("#bell").hidden=!!(R||X);if(R||X)closeNotif();main.querySelectorAll(".acard").forEach(tilt);main.querySelectorAll("[data-hito]").forEach(b=>b.onclick=()=>openHito(b.dataset.hito));main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));counts()}
 function go(v,fromHistory){flushNote();setMenu(false);if(v!=="fichas"){R=null;endMock()}const changed=v!==view;view=v;
  if(!fromHistory)try{history[changed?"pushState":"replaceState"](null,"","#"+v)}catch(e){}
@@ -2185,7 +2097,7 @@ let DAY=today();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&OPEN&&today()!==DAY&&!dlg.open&&view!=="tema")render()});
 document.querySelectorAll("#nav button[data-v]").forEach(b=>b.onclick=()=>{R=null;endMock();go(b.dataset.v)});
 function openMore(){F.onsubmit=e=>e.preventDefault();
- F.innerHTML=`<h2>Más</h2><div class="mlist">${[["notas","Calificaciones","Tus notas y lo que necesitas sacar"],["calendario","Calendario","El mes entero, con los festivos"],["hitos","Hitos","Lo que cambió el derecho y el mundo"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ayuda","Ayuda","Cómo se usa cada sección"],["ajustes","Ajustes","Apariencia, copias y acceso"],...(CLOUD&&IS_ADMIN?[["admin","Administración","Cuentas, accesos y registro"]]:[])].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
+ F.innerHTML=`<h2>Más</h2><div class="mlist">${[["notas","Calificaciones","Tus notas y lo que necesitas sacar"],["calendario","Calendario","El mes entero, con los festivos"],["hitos","Hitos","Lo que cambió el derecho y el mundo"],["enlaces","Enlaces","Sentencias, leyes y artículos guardados"],["cv","Currículum","Tu CV en una página"],["ayuda","Ayuda","Cómo se usa cada sección"],["ajustes","Ajustes","Apariencia, copias y acceso"]].map(([v,l,d])=>`<button type="button" class="mrow" data-mv="${v}">${ico(v)}<span><b>${l}</b><small>${d}</small></span></button>`).join("")}<button type="button" class="mrow danger" id="mOut">${ico("salir")}<span><b>Cerrar sesión</b></span></button></div>
  <div class="form"><div class="actions"><button type="button" class="btn ghost small" id="fcan">Cerrar</button></div></div>`;
  F.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{dlg.close();R=null;go(b.dataset.mv)});
  $("#mOut").onclick=()=>{dlg.close();lock()};$("#fcan").onclick=()=>dlg.close();
@@ -2233,8 +2145,8 @@ function gateLogin(lk){gateShow(`
   S=st;SALT=salt;CK=k;unlock()});
  $("#gwipe").onclick=()=>{const b=$("#gwipe");if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Pulsa otra vez para borrarlo todo";return}try{localStorage.removeItem(LOCK)}catch(e){}S=emptyState();gateSetup()};
 }
-function unlock(){OPEN=true;$('#nav [data-v="admin"]').hidden=!(CLOUD&&IS_ADMIN);try{history.replaceState(null,"","#hoy")}catch(e){}if(S.theme&&S.theme!==THEME){THEME=S.theme;try{localStorage.setItem("cuaderno-tema",THEME)}catch(e){}applyTheme(THEME)}else if(!S.theme)S.theme=THEME;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
-async function lock(){if(!OPEN)return;exitDemo(true);IS_ADMIN=false;ADM=null;flushNote();OPEN=false;clearTimeout(idle);
+function unlock(){OPEN=true;try{history.replaceState(null,"","#hoy")}catch(e){}if(S.theme&&S.theme!==THEME){THEME=S.theme;try{localStorage.setItem("cuaderno-tema",THEME)}catch(e){}applyTheme(THEME)}else if(!S.theme)S.theme=THEME;gate.hidden=true;gate.innerHTML="";app.hidden=false;view="hoy";render();poke()}
+async function lock(){if(!OPEN)return;exitDemo(true);flushNote();OPEN=false;clearTimeout(idle);
  if(CLOUD){clearTimeout(pushT);if(dirty)await push().catch(()=>{});await sb.auth.signOut({scope:"local"}).catch(()=>{})}else await chain;
  setMenu(false);closeNotif();if(dlg.open)dlg.close();P.len=25;resetP();R=null;endMock();CK=null;UID=null;S=emptyState();main.innerHTML="";document.title=TITLE;
  if(CLOUD)return gateCloudLogin("");
@@ -2256,7 +2168,7 @@ function gateCloudLogin(info){gateShow(`${info?`<p class="sub">${info}</p>`:""}
   const {data,error}=await sb.auth.signInWithPassword({email:d.email.trim(),password:d.pass});if(error)return authErr(error);
   await openCloud(data.session)});
  $("#gnew").onclick=gateCloudSignup;$("#gforgot").onclick=gateCloudForgot;
- regOpen().then(o=>{const n=$("#gInvite"),b=$("#gnew");if(o===false&&n&&b){n.hidden=false;b.textContent="Tengo una invitación"}})}
+ regOpen().then(o=>{const n=$("#gInvite"),b=$("#gnew");if(o===false&&n&&b){n.hidden=false;b.textContent="Tengo una invitación"}});gateComs()}
 function gateCloudSignup(){gateShow(`<h1>Crea tu cuenta</h1><p class="sub" id="gsuInfo">Con tu correo y una contraseña tendrás el mismo cuaderno en el móvil y en el portátil.</p>
  <label for="g-mail">Correo<input id="g-mail" name="email" type="email" autocomplete="username" required></label>
  <label for="g-pass">Contraseña (mínimo 8 caracteres)<input id="g-pass" name="pass" type="password" autocomplete="new-password" required minlength="8"></label>
@@ -2289,7 +2201,7 @@ function gateNewPass(){gateShow(`<h1>Elige tu nueva contraseña</h1>
 async function bootCloud(){
  const h=location.hash, rec=/type=recovery/.test(h), bad=/error=/.test(h);
  gateMsg("Abriendo Digesto","Un momento…");
- try{await loadSupa();mkClient();const {data}=await sb.auth.getSession();
+ try{await loadSupa();mkClient();loadComs();const {data}=await sb.auth.getSession();
   if(data.session&&rec)return gateNewPass();
   if(data.session)return await openCloud(data.session);
   gateCloudLogin(bad?"Ese enlace ha caducado o ya se usó. Pide otro.":"")}
