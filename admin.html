@@ -268,6 +268,43 @@ dialog::backdrop{background:rgba(10,15,20,.5)}
 .nrow b{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nrow span{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nrow small{font-size:11px;color:var(--muted)}
+/* Clientes, ruta, partes y horas */
+.mono{font-family:var(--f-mono);font-size:.92em}
+a.btn{text-decoration:none}
+.row2{display:flex;gap:8px;align-items:center;min-width:0}
+.row2>input,.row2>select{flex:1;min-width:0}
+fieldset.kinds{gap:8px}
+label.kchip{flex-direction:row;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:99px;font-size:13px;color:var(--ink);cursor:pointer;font-weight:500}
+label.kchip input{width:auto;margin:0;accent-color:var(--accent)}
+label.kchip:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.kv{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface-2);min-width:0}
+.sect{font-family:var(--f-display);font-weight:600;font-size:17px;margin-bottom:10px}
+.sect2{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.sig{border:1px dashed var(--muted);border-radius:8px;background:#fff;height:160px;touch-action:none;margin-bottom:8px;overflow:hidden}
+.sig canvas{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+.chkrow{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.chkrow input{width:18px;height:18px;flex:none;accent-color:var(--accent)}
+.chkrow span{flex:1;overflow-wrap:anywhere;color:var(--ink)}
+.pwwarn{color:var(--crit);font-size:12.5px;font-weight:600}
+.clis{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.cli{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
+.cli:hover{border-color:var(--accent)}
+.cli .ci{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.cli .ci b{font-size:15px;overflow-wrap:anywhere}
+.cli .ci span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:6px 12px;font-size:14px;margin:0}
+.dl dt{color:var(--muted)} .dl dd{margin:0;overflow-wrap:anywhere}
+.nrow.warn small{color:var(--crit);font-weight:600}
+.rcard{--cc:var(--accent);background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--cc);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.rcard.run{box-shadow:0 0 0 2px var(--ok)}
+.rc-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rc-h .h{font-family:var(--f-mono);font-size:13px;font-weight:600}
+.rcard .t{font-weight:600;font-size:16px;overflow-wrap:anywhere}
+.rcard .s{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+.rc-b{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.runb{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--surface))}
+.log tfoot td{font-weight:700;border-bottom:0}
+.it .t .bdg{vertical-align:1px;margin-left:4px}
 .tools{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 5px}
 .catrow{display:grid;grid-template-columns:minmax(0,1fr) 130px auto;gap:8px;align-items:center;margin-bottom:8px}
@@ -341,6 +378,7 @@ function mkClient(){sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{sto
 mkClient();
 
 const $=s=>document.querySelector(s), main=$("#main"), dlg=$("#dlg"), F=$("#F");
+const openDlg=()=>{if(!dlg.open)dlg.showModal()};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nf=n=>Number(n).toLocaleString("es-ES",{maximumFractionDigits:1});
 const fold=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
@@ -547,7 +585,7 @@ function comForm(c){c=c||{tipo:"info",activo:true};
   if(v.desde&&v.hasta&&Date.parse(v.hasta)<=Date.parse(v.desde))return e.textContent="La fecha «hasta» debe ser posterior a «desde».";
   if(v.hasta&&Date.parse(v.hasta)<=Date.now())return e.textContent="La fecha «hasta» ya ha pasado: nadie lo vería.";
   dlg.close();await saveCom(v,c.id?"Comunicado guardado.":"Comunicado publicado. Los estudiantes lo verán al abrir Digesto.")};
- dlg.showModal();$("#cTit").focus()}
+ openDlg();$("#cTit").focus()}
 
 /* ---------- REGISTRO ---------- */
 function vRegistro(){
@@ -624,19 +662,38 @@ const fest=s=>festYear(+s.slice(0,4))[s]||"";
 
 const AGCOL=[["#2f6fb0","Azul"],["#2f7a4f","Verde"],["#b3312f","Rojo"],["#b8730f","Ámbar"],["#6b4fa0","Morado"],["#1f7a7a","Turquesa"],["#8a2b3a","Granate"],["#5b6670","Gris"]];
 const AGCATS=[{id:"trabajo",n:"Trabajo",c:"#2f6fb0"},{id:"reuniones",n:"Reuniones",c:"#6b4fa0"},{id:"digesto",n:"Digesto",c:"#8a2b3a"},{id:"personal",n:"Personal",c:"#2f7a4f"}];
-const REPN={"":"No se repite",dia:"Cada día",lab:"De lunes a viernes",sem:"Cada semana",mes:"Cada mes",ano:"Cada año"};
+const REPN={"":"No se repite",dia:"Cada día",lab:"De lunes a viernes",sem:"Cada semana",mes:"Cada mes",tri:"Cada 3 meses",sem6:"Cada 6 meses",ano:"Cada año"};
+/* Tipos de cita para el trabajo con clientes */
+const KIND={"":"Evento",visita:"Visita de soporte",reunion:"Reunión con cliente",llamada:"Llamada"};
+const KSHORT={visita:"Visita",reunion:"Reunión",llamada:"Llamada"};
+const ESTN={"":"Sin estado",resuelto:"Resuelto",pendiente:"Pendiente",otra:"Necesita otra visita"};
+const DEFTPL=[
+ {n:"Revisión de router",items:["Comprobar luces y estado de la conexión","Reiniciar y revisar la configuración","Actualizar el firmware si hace falta","Revisar la red wifi (nombre, cifrado y cobertura)","Probar la velocidad y anotarla"]},
+ {n:"Puesta en marcha de equipo",items:["Comprobar el material recibido","Conectar y encender","Actualizar el sistema operativo","Instalar los programas necesarios","Configurar la cuenta del usuario","Configurar impresora y red","Explicar el uso básico al usuario"]},
+ {n:"Copia de seguridad",items:["Comprobar que la última copia terminó bien","Revisar el espacio libre del destino","Probar a recuperar un archivo","Revisar la programación de las copias","Anotar la fecha de la comprobación"]}];
+const normVis=v=>{v=v&&typeof v==="object"?v:{};const T=x=>typeof x==="string"?x:"",isT=x=>/^\d\d:\d\d$/.test(x||"");
+ return {inc:T(v.inc),prob:T(v.prob),diag:T(v.diag),sol:T(v.sol),mat:T(v.mat),lleg:isT(v.lleg)?v.lleg:"",sal:isT(v.sal)?v.sal:"",km:Math.max(0,+v.km||0),est:v.est in ESTN?v.est:"",
+  chk:(Array.isArray(v.chk)?v.chk:[]).filter(c=>c&&typeof c.t==="string").map(c=>({t:c.t,ok:!!c.ok})),firma:/^data:image\/png;base64,/.test(v.firma||"")?v.firma:"",firmante:T(v.firmante),fu:!!v.fu}};
+const normMet=m=>{m=m&&typeof m==="object"?m:{};const T=x=>typeof x==="string"?x:"";return {asis:T(m.asis),puntos:T(m.puntos),acuerdos:T(m.acuerdos),pasos:T(m.pasos),hechos:!!m.hechos}};
 const REMN=[[-1,"Sin aviso"],[0,"A la hora"],[5,"5 minutos antes"],[10,"10 minutos antes"],[15,"15 minutos antes"],[30,"30 minutos antes"],[60,"1 hora antes"],[1440,"1 día antes"]];
 const PRIN={1:"Alta",2:"Media",3:"Baja"};
 let AG=null, AGM="", AGsync="", agT=null, agDirty=false;
-let AGV={tab:"cal",mode:mob()?"dia":"semana",d:todayS(),tf:"pend",q:"",sc:null};
+let AGV={tab:"cal",mode:mob()?"dia":"semana",d:todayS(),tf:"pend",q:"",sc:null,cli:"",cq:"",rd:"",hm:"",fcli:""};
 let AGH=new Set();try{AGH=new Set(JSON.parse(localStorage.getItem("digesto-agenda-ocultas")||"[]"))}catch(e){}
 
 function agNorm(x){x=x&&typeof x==="object"?x:{};const A=v=>Array.isArray(v)?v:[],T=v=>typeof v==="string"?v:"",isD=v=>/^\d{4}-\d\d-\d\d$/.test(v||""),isT=v=>/^\d\d:\d\d$/.test(v||"");
  const cats=A(x.cats).filter(c=>c&&c.id).map(c=>({id:T(c.id),n:T(c.n)||"Categoría",c:/^#[0-9a-f]{6}$/i.test(c.c)?c.c:AGCOL[0][0]}));
  return {v:1,cats:cats.length?cats:AGCATS.map(c=>({...c})),
-  events:A(x.events).filter(e=>e&&isD(e.d)).map(e=>({id:T(e.id)||uid(),t:T(e.t),d:e.d,all:!!e.all,s:isT(e.s)?e.s:"09:00",e:isT(e.e)?e.e:"",cat:T(e.cat),loc:T(e.loc),notes:T(e.notes),rep:e.rep in REPN?e.rep:"",until:isD(e.until)?e.until:"",ex:A(e.ex).filter(isD),rem:Number.isFinite(e.rem)?e.rem:-1})),
-  tasks:A(x.tasks).filter(t=>t).map(t=>({id:T(t.id)||uid(),t:T(t.t),due:isD(t.due)?t.due:"",pri:[1,2,3].includes(t.pri)?t.pri:2,cat:T(t.cat),notes:T(t.notes),done:!!t.done,doneAt:T(t.doneAt),created:T(t.created)||new Date().toISOString()})),
-  notes:A(x.notes).filter(n=>n).map(n=>({id:T(n.id)||uid(),t:T(n.t),b:T(n.b),pin:!!n.pin,upd:T(n.upd)||new Date().toISOString()}))}}
+  events:A(x.events).filter(e=>e&&isD(e.d)).map(e=>({id:T(e.id)||uid(),t:T(e.t),d:e.d,all:!!e.all,s:isT(e.s)?e.s:"09:00",e:isT(e.e)?e.e:"",cat:T(e.cat),loc:T(e.loc),notes:T(e.notes),rep:e.rep in REPN?e.rep:"",until:isD(e.until)?e.until:"",ex:A(e.ex).filter(isD),rem:Number.isFinite(e.rem)?e.rem:-1,
+   kind:e.kind in KIND?e.kind:"",cli:T(e.cli),vis:normVis(e.vis),met:normMet(e.met)})),
+  tasks:A(x.tasks).filter(t=>t).map(t=>({id:T(t.id)||uid(),t:T(t.t),due:isD(t.due)?t.due:"",pri:[1,2,3].includes(t.pri)?t.pri:2,cat:T(t.cat),cli:T(t.cli),notes:T(t.notes),done:!!t.done,doneAt:T(t.doneAt),created:T(t.created)||new Date().toISOString()})),
+  notes:A(x.notes).filter(n=>n).map(n=>({id:T(n.id)||uid(),t:T(n.t),b:T(n.b),pin:!!n.pin,upd:T(n.upd)||new Date().toISOString()})),
+  clients:A(x.clients).filter(c=>c).map(c=>({id:T(c.id)||uid(),n:T(c.n)||"Cliente",emp:T(c.emp),con:T(c.con),tel:T(c.tel),mail:T(c.mail),dir:T(c.dir),notas:T(c.notas),created:T(c.created)||new Date().toISOString(),
+   eq:A(c.eq).filter(q=>q).map(q=>({id:T(q.id)||uid(),mod:T(q.mod),serie:T(q.serie),ubi:T(q.ubi),inst:isD(q.inst)?q.inst:"",gar:isD(q.gar)?q.gar:"",notas:T(q.notas)}))})),
+  tpls:(Array.isArray(x.tpls)?x.tpls:DEFTPL).filter(t=>t&&t.n).map(t=>({id:T(t.id)||uid(),n:T(t.n),items:A(t.items).filter(i=>typeof i==="string"&&i.trim())})),
+  seq:Object.fromEntries(Object.entries(x.seq&&typeof x.seq==="object"?x.seq:{}).filter(([k,v])=>/^\d{4}$/.test(k)&&Number.isFinite(v))),
+  cfg:{rate:Math.max(0,+(x.cfg&&x.cfg.rate)||0),kmRate:Math.max(0,+(x.cfg&&x.cfg.kmRate)||0)},
+  run:x.run&&typeof x.run==="object"&&T(x.run.ev)&&isD(x.run.d)&&T(x.run.start)?{ev:x.run.ev,d:x.run.d,start:x.run.start}:null}}
 
 /* Guardado: en tu cuenta si la tabla existe; si aún no has ejecutado supabase-agenda.sql, en este navegador */
 const agLocalKey=()=>"digesto-agenda-"+(ME?ME.id:"");
@@ -662,13 +719,23 @@ const undoTo=s=>()=>{AG=agNorm(JSON.parse(s));agChanged();render();toast("Deshec
 
 /* Repeticiones y lo que cae en cada día */
 function occurs(e,s){if(s<e.d||(e.until&&s>e.until)||e.ex.includes(s))return false;if(!e.rep)return s===e.d;const a=pd(e.d),b=pd(s);
- switch(e.rep){case "dia":return true;case "lab":{const w=b.getDay();return w>0&&w<6}case "sem":return a.getDay()===b.getDay();case "mes":return a.getDate()===b.getDate();case "ano":return a.getDate()===b.getDate()&&a.getMonth()===b.getMonth()}return false}
+ switch(e.rep){case "dia":return true;case "lab":{const w=b.getDay();return w>0&&w<6}case "sem":return a.getDay()===b.getDay();case "mes":return a.getDate()===b.getDate();
+  case "tri":case "sem6":{const k=e.rep==="tri"?3:6,md=(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth();return md%k===0&&a.getDate()===b.getDate()}
+  case "ano":return a.getDate()===b.getDate()&&a.getMonth()===b.getMonth()}return false}
 const catOf=id=>AG.cats.find(c=>c.id===id)||AG.cats[0]||{id:"",c:AGCOL[0][0],n:"Sin categoría"};
 const visCat=id=>!AGH.has(catOf(id).id);
 const endM=e=>e.e&&mins(e.e)>mins(e.s)?mins(e.e):Math.min(mins(e.s)+60,1440);
 const evOnAll=s=>AG.events.filter(e=>occurs(e,s)).sort((a,b)=>(b.all-a.all)||a.s.localeCompare(b.s));
-const evOn=s=>evOnAll(s).filter(e=>visCat(e.cat));
-const tasksOn=s=>AG.tasks.filter(t=>t.due===s&&visCat(t.cat));
+const evOn=s=>evOnAll(s).filter(e=>visCat(e.cat)&&(!AGV.fcli||e.cli===AGV.fcli));
+const tasksOn=s=>AG.tasks.filter(t=>t.due===s&&visCat(t.cat)&&(!AGV.fcli||t.cli===AGV.fcli));
+const cliOf=id=>id&&AG.clients.find(c=>c.id===id)||null;
+const cliSorted=()=>[...AG.clients].sort((a,b)=>a.n.localeCompare(b.n,"es"));
+const cliOpts=sel=>`<option value="">Sin cliente</option>`+cliSorted().map(c=>`<option value="${c.id}" ${c.id===sel?"selected":""}>${esc(c.n)}${c.emp&&c.emp!==c.n?" · "+esc(c.emp):""}</option>`).join("");
+const estBdg=e=>e.kind==="visita"&&e.vis.est?`<span class="bdg ${e.vis.est==="resuelto"?"on":e.vis.est==="pendiente"?"unc":"off"}">${ESTN[e.vis.est]}</span>`:"";
+const mapsUrl=q=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
+const telHref=t=>"tel:"+String(t).replace(/[^\d+]/g,"");
+const isUrl=s=>/^https?:\/\//i.test(s||"");
+const addrOf=e=>!isUrl(e.loc)&&e.loc?e.loc:(cliOf(e.cli)||{}).dir||"";
 /* Eventos que se solapan: se reparten en columnas dentro del día */
 function lay(L){const items=L.map(e=>({e,a:mins(e.s),b:endM(e)})).sort((x,y)=>x.a-y.a||y.b-x.b);const groups=[];let cur=[],end=-1;
  items.forEach(it=>{if(cur.length&&it.a>=end){groups.push(cur);cur=[];end=-1}cur.push(it);end=Math.max(end,it.b)});if(cur.length)groups.push(cur);
@@ -678,7 +745,8 @@ function lay(L){const items=L.map(e=>({e,a:mins(e.s),b:endM(e)})).sort((x,y)=>x.
 const evTime=e=>e.all?"Todo el día":e.s+(e.e?"–"+e.e:"");
 const evPill=(e,s)=>`<button class="pill" data-ev="${e.id}" data-on="${s}" style="--cc:${catOf(e.cat).c}" title="${esc(e.t)}">${e.all?"":e.s+" "}${esc(e.t)||"(sin título)"}</button>`;
 const tkPill=t=>`<button class="pill task ${t.done?"done":""}" data-tk="${t.id}" style="--cc:${catOf(t.cat).c}" title="${esc(t.t)}">${t.done?"☑":"☐"} ${esc(t.t)}</button>`;
-const itemEv=(e,s)=>`<button class="it" data-ev="${e.id}" data-on="${s}" style="--cc:${catOf(e.cat).c}"><span class="h">${e.all?"Todo el día":e.s+(e.e?"<br>"+e.e:"")}</span><span><span class="t">${esc(e.t)||"(sin título)"}</span>${e.loc||e.rep||e.rem>=0?`<span class="s">${[e.loc&&esc(e.loc),e.rep&&REPN[e.rep],e.rem>=0&&"Con aviso"].filter(Boolean).join(" · ")}</span>`:""}</span></button>`;
+const itemEv=(e,s,withDate)=>{const c=cliOf(e.cli),sub=[e.kind&&KSHORT[e.kind],c&&esc(c.n),e.kind==="visita"&&e.vis.inc,e.loc&&esc(e.loc),e.rep&&REPN[e.rep],e.rem>=0&&"Con aviso"].filter(Boolean);
+ return `<button class="it" data-ev="${e.id}" data-on="${s}" style="--cc:${catOf(e.cat).c}"><span class="h">${withDate?pd(s).toLocaleDateString("es-ES",{day:"numeric",month:"short",year:"2-digit"})+"<br>":""}${e.all?"Todo el día":e.s+(e.e&&!withDate?"<br>"+e.e:"")}</span><span><span class="t">${esc(e.t)||"(sin título)"} ${estBdg(e)}</span>${sub.length?`<span class="s">${sub.join(" · ")}</span>`:""}</span></button>`};
 const itemTk=t=>`<button class="it" data-tk="${t.id}" style="--cc:${catOf(t.cat).c}"><span class="h">${t.done?"☑ Hecha":"☐ Tarea"}</span><span><span class="t" ${t.done?'style="text-decoration:line-through;color:var(--muted)"':""}>${esc(t.t)}</span><span class="s">Prioridad ${PRIN[t.pri].toLowerCase()} · ${esc(catOf(t.cat).n)}</span></span></button>`;
 function dayBlock(s,showEmpty){const E=evOn(s),K=tasksOn(s),f=fest(s);if(!showEmpty&&!E.length&&!K.length&&!f)return "";
  return `<div class="al-day"><h3 class="${s===todayS()?"today":""}">${s===todayS()?"Hoy · ":""}${dLong(s)}${f?` <span class="f">· ${esc(f)}</span>`:""}</h3>${E.map(e=>itemEv(e,s)).join("")}${K.map(itemTk).join("")}${!E.length&&!K.length?`<div class="sub" style="padding:2px 0 4px">Libre.</div>`:""}</div>`}
@@ -699,11 +767,12 @@ function vGrid(days){const T=todayS(),now=new Date(),nm=now.getHours()*60+now.ge
  return `<div class="tg" style="--n:${days.length}"><div class="tg-h"><div></div>${days.map(s=>`<div class="${s===T?"today":""}">${pd(s).toLocaleDateString("es-ES",{weekday:"short"})}<b>${pd(s).getDate()}</b>${fest(s)?`<span class="fest" title="${esc(fest(s))}">${esc(fest(s))}</span>`:""}</div>`).join("")}</div>
  <div class="tg-all"><div>todo el día</div>${days.map(s=>`<div>${evOn(s).filter(e=>e.all).map(e=>evPill(e,s)).join("")}${tasksOn(s).map(tkPill).join("")}</div>`).join("")}</div>
  <div class="tg-b" id="tgb"><div class="tg-g"><div class="tg-hours">${[...Array(24)].map((_,i)=>`<div>${i?pad(i)+":00":""}</div>`).join("")}</div>
- ${days.map(s=>`<div class="tg-col ${s===T?"today":""}" data-col="${s}">${lay(evOn(s).filter(e=>!e.all)).map(it=>`<button class="ev" data-ev="${it.e.id}" data-on="${s}" style="--cc:${catOf(it.e.cat).c};top:calc(${it.a/60} * var(--hh));height:calc(${(it.b-it.a)/60} * var(--hh) - 2px);min-height:20px;left:calc(${it.c/it.n*100}% + 2px);width:calc(${100/it.n}% - 4px)" title="${esc(it.e.t)} · ${evTime(it.e)}"><b>${esc(it.e.t)||"(sin título)"}</b><span>${evTime(it.e)}</span>${it.e.loc?`<span> · ${esc(it.e.loc)}</span>`:""}</button>`).join("")}${s===T?`<div class="now" style="top:calc(${nm/60} * var(--hh))"></div>`:""}</div>`).join("")}</div></div></div>`}
+ ${days.map(s=>`<div class="tg-col ${s===T?"today":""}" data-col="${s}">${lay(evOn(s).filter(e=>!e.all)).map(it=>`<button class="ev" data-ev="${it.e.id}" data-on="${s}" style="--cc:${catOf(it.e.cat).c};top:calc(${it.a/60} * var(--hh));height:calc(${(it.b-it.a)/60} * var(--hh) - 2px);min-height:20px;left:calc(${it.c/it.n*100}% + 2px);width:calc(${100/it.n}% - 4px)" title="${esc(it.e.t)} · ${evTime(it.e)}"><b>${esc(it.e.t)||"(sin título)"}</b><span>${evTime(it.e)}</span>${cliOf(it.e.cli)?`<span> · ${esc(cliOf(it.e.cli).n)}</span>`:it.e.loc?`<span> · ${esc(it.e.loc)}</span>`:""}</button>`).join("")}${s===T?`<div class="now" style="top:calc(${nm/60} * var(--hh))"></div>`:""}</div>`).join("")}</div></div></div>`}
 function vList(){let h="";for(let i=0;i<60;i++)h+=dayBlock(addD(AGV.d,i),i===0);return h||`<div class="panel empty">Nada en los próximos 60 días.</div>`}
 function vCal(){const m=AGV.mode;
  const bar=`<div class="ag-bar"><span class="ttl">${calTitle()}</span><button class="navb" data-mv="0">Hoy</button><button class="navb" data-mv="-1" aria-label="Anterior">‹</button><button class="navb" data-mv="1" aria-label="Siguiente">›</button>
-  <div class="segc" role="group" aria-label="Vista">${[["dia","Día"],["semana","Semana"],["mes","Mes"],["lista","Lista"]].map(([k,l])=>`<button data-mode="${k}" aria-pressed="${m===k}">${l}</button>`).join("")}</div></div>`;
+  <div class="segc" role="group" aria-label="Vista">${[["dia","Día"],["semana","Semana"],["mes","Mes"],["lista","Lista"]].map(([k,l])=>`<button data-mode="${k}" aria-pressed="${m===k}">${l}</button>`).join("")}</div>
+  ${AG.clients.length?`<select id="fCli" aria-label="Filtrar por cliente" style="width:auto;max-width:220px">${cliOpts(AGV.fcli).replace(">Sin cliente<",">Todos los clientes<")}</select>`:""}</div>`;
  if(m==="mes")return bar+vMonth();
  if(m==="lista")return bar+vList();
  if(m==="semana"){const a=monday(AGV.d),days=[...Array(7)].map((_,i)=>addD(a,i));return bar+(mob()?days.map(s=>dayBlock(s,true)).join(""):vGrid(days))}
@@ -713,7 +782,7 @@ function agMove(n){const m=AGV.mode;AGV.sc=null;
 
 /* Tareas */
 function tkFilters(){const T=todayS(),in7=addD(T,7);return {pend:["Pendientes",t=>!t.done],hoy:["Para hoy",t=>!t.done&&t.due===T],late:["Atrasadas",t=>!t.done&&t.due&&t.due<T],next:["Próximos 7 días",t=>!t.done&&t.due>T&&t.due<=in7],nodate:["Sin fecha",t=>!t.done&&!t.due],done:["Hechas",t=>t.done]}}
-const tkRow=t=>{const late=!t.done&&t.due&&t.due<todayS();return `<div class="tk ${t.done?"done":""}"><input type="checkbox" data-tdone="${t.id}" ${t.done?"checked":""} aria-label="Marcar «${esc(t.t)}» como hecha"><div style="min-width:0"><div class="t" data-tk="${t.id}" role="button" tabindex="0">${esc(t.t)}</div><div class="s"><span><span class="cdot" style="--cc:${catOf(t.cat).c}"></span>${esc(catOf(t.cat).n)}</span>${t.due?`<span class="${late?"late":""}">${late?"Venció ":""}${dShort(t.due)}</span>`:""}${t.notes?"<span>Con notas</span>":""}</div></div><span class="pri p${t.pri}">${PRIN[t.pri]}</span></div>`};
+const tkRow=t=>{const late=!t.done&&t.due&&t.due<todayS();return `<div class="tk ${t.done?"done":""}"><input type="checkbox" data-tdone="${t.id}" ${t.done?"checked":""} aria-label="Marcar «${esc(t.t)}» como hecha"><div style="min-width:0"><div class="t" data-tk="${t.id}" role="button" tabindex="0">${esc(t.t)}</div><div class="s"><span><span class="cdot" style="--cc:${catOf(t.cat).c}"></span>${esc(catOf(t.cat).n)}</span>${cliOf(t.cli)?`<span>${esc(cliOf(t.cli).n)}</span>`:""}${t.due?`<span class="${late?"late":""}">${late?"Venció ":""}${dShort(t.due)}</span>`:""}${t.notes?"<span>Con notas</span>":""}</div></div><span class="pri p${t.pri}">${PRIN[t.pri]}</span></div>`};
 function vTasks(){const FL=tkFilters(),vis=AG.tasks.filter(t=>visCat(t.cat)),f=FL[AGV.tf]||FL.pend;
  const L=vis.filter(f[1]).sort(AGV.tf==="done"?(a,b)=>b.doneAt.localeCompare(a.doneAt):(a,b)=>(a.due||"9999").localeCompare(b.due||"9999")||a.pri-b.pri||a.created.localeCompare(b.created));
  return `<div class="qadd"><input id="tQ" placeholder="Escribe una tarea y pulsa Intro" maxlength="200" aria-label="Nueva tarea rápida" autocomplete="off"><button class="btn" id="tQA">Añadir</button></div>
@@ -735,10 +804,11 @@ function noteCard(){const L=[...AG.notes].sort((a,b)=>(b.pin-a.pin)||b.upd.local
 
 /* Búsqueda en toda la agenda */
 function vSearch(){const f=fold(AGV.q.trim());
- const E=AG.events.filter(e=>fold([e.t,e.loc,e.notes].join(" ")).includes(f)).sort((a,b)=>b.d.localeCompare(a.d));
+ const E=AG.events.filter(e=>fold([e.t,e.loc,e.notes,(cliOf(e.cli)||{}).n,e.vis.inc,e.vis.prob,e.vis.diag,e.vis.sol,e.vis.mat,e.met.asis,e.met.puntos,e.met.acuerdos,e.met.pasos].join(" ")).includes(f)).sort((a,b)=>b.d.localeCompare(a.d));
  const K=AG.tasks.filter(t=>fold(t.t+" "+t.notes).includes(f)),N=AG.notes.filter(n=>fold(n.t+" "+n.b).includes(f));
- if(!E.length&&!K.length&&!N.length)return `<div class="panel empty">Nada coincide con «${esc(AGV.q.trim())}».</div>`;
- return `${E.length?`<div class="al-day"><h3>Eventos (${E.length})</h3>${E.map(e=>`<button class="it" data-ev="${e.id}" data-on="${e.d}" style="--cc:${catOf(e.cat).c}"><span class="h">${pd(e.d).toLocaleDateString("es-ES",{day:"numeric",month:"short",year:"2-digit"})}</span><span><span class="t">${esc(e.t)}</span><span class="s">${[evTime(e),e.rep&&REPN[e.rep],e.loc&&esc(e.loc)].filter(Boolean).join(" · ")}</span></span></button>`).join("")}</div>`:""}
+ const C=AG.clients.filter(c=>fold([c.n,c.emp,c.con,c.tel,c.mail,c.dir,c.notas,...c.eq.map(q=>q.mod+" "+q.serie)].join(" ")).includes(f));
+ if(!E.length&&!K.length&&!N.length&&!C.length)return `<div class="panel empty">Nada coincide con «${esc(AGV.q.trim())}».</div>`;
+ return `${C.length?`<div class="al-day"><h3>Clientes (${C.length})</h3><div class="clis">${C.map(cliCard).join("")}</div></div>`:""}${E.length?`<div class="al-day"><h3>Eventos (${E.length})</h3>${E.map(e=>itemEv(e,e.d,true)).join("")}</div>`:""}
  ${K.length?`<div class="al-day"><h3>Tareas (${K.length})</h3>${K.map(itemTk).join("")}</div>`:""}
  ${N.length?`<div class="al-day"><h3>Notas (${N.length})</h3>${N.map(n=>`<button class="it" data-note="${n.id}" style="--cc:var(--gold)"><span class="h">Nota</span><span><span class="t">${esc(n.t)||"Sin título"}</span><span class="s">${esc(n.b.slice(0,140))}</span></span></button>`).join("")}</div>`:""}`}
 
@@ -756,6 +826,7 @@ function agSide(){const d=pd(AGV.d),first=ymd(new Date(d.getFullYear(),d.getMont
   <button class="linkbtn" id="agIcs">Exportar al calendario del móvil (.ics)</button>
   <button class="linkbtn" id="agBak">Descargar copia de seguridad</button>
   <button class="linkbtn" id="agRes">Restaurar una copia</button>
+  <button class="linkbtn" id="tplEd">Plantillas de comprobación</button>
   <button class="linkbtn" id="agNot">${window.Notification&&Notification.permission==="granted"?"Avisos del navegador activados":"Activar avisos del navegador"}</button>
   <p class="sub" style="margin:4px 0 0">Los avisos suenan mientras tengas el panel abierto. Para avisos con el panel cerrado, exporta el .ics a tu calendario.</p>
   ${mob()?"":`<p class="sub" style="margin:4px 0 0">Atajos: <span class="kbd">N</span> evento · <span class="kbd">T</span> hoy · <span class="kbd">←</span> <span class="kbd">→</span> mover · <span class="kbd">D</span> <span class="kbd">S</span> <span class="kbd">M</span> <span class="kbd">L</span> vistas</p>`}</div>`}
@@ -764,17 +835,19 @@ function vAgenda(){
  if(!AG){main.innerHTML=`<div class="head"><div><div class="eyebrow">Agenda</div><h1>Tu agenda</h1></div></div><div class="panel empty">${AGM==="error"?"No se pudo cargar tu agenda. Revisa la conexión y vuelve a intentarlo.":"Cargando…"}</div>`;if(!AG&&ME&&!DATA.loading)agLoad().then(()=>{if(VIEW==="agenda"&&AG)render()});return}
  const T=todayS(),E=evOnAll(T).length,K=AG.tasks.filter(t=>!t.done&&t.due===T).length,L=AG.tasks.filter(t=>!t.done&&t.due&&t.due<T).length;
  main.innerHTML=`<div class="head"><div><div class="eyebrow">Agenda</div><h1>${dLong(T)}</h1><p>${[E?`${E} ${E===1?"evento":"eventos"} hoy`:"Sin eventos hoy",K?`${K} ${K===1?"tarea":"tareas"} para hoy`:"",L?`${L} ${L===1?"tarea atrasada":"tareas atrasadas"}`:""].filter(Boolean).join(" · ")}. <span id="agSync" class="agsync">${esc(AGsync)}</span></p></div>
-  <div class="hbtns"><button class="btn ghost" id="agNt">Nueva nota</button><button class="btn ghost" id="agTk">Nueva tarea</button><button class="btn" id="agEv">Nuevo evento</button></div></div>
+  <div class="hbtns"><button class="btn ghost" id="agNt">Nueva nota</button><button class="btn ghost" id="agTk">Nueva tarea</button><button class="btn ghost" id="agEv">Nuevo evento</button><button class="btn" id="agVi">Nueva visita</button></div></div>
+ ${runBanner()}
  ${AGM==="local"?`<div class="notice">Tu agenda se está guardando <b>solo en este navegador</b>. Ejecuta <b>supabase-agenda.sql</b> en Supabase para guardarla en tu cuenta y tenerla en todos tus dispositivos; lo que ya hayas apuntado se subirá solo.</div>`:""}
- <div class="ag-top"><div class="chips" role="tablist">${[["cal","Calendario"],["tareas",`Tareas (${AG.tasks.filter(t=>!t.done).length})`],["notas",`Notas (${AG.notes.length})`]].map(([k,l])=>`<button class="chip" data-tab="${k}" aria-pressed="${AGV.tab===k&&!AGV.q.trim()}">${l}</button>`).join("")}</div>
+ <div class="ag-top"><div class="chips" role="tablist">${[["cal","Calendario"],["ruta","Mi ruta"],["clientes",`Clientes (${AG.clients.length})`],["tareas",`Tareas (${AG.tasks.filter(t=>!t.done).length})`],["notas",`Notas (${AG.notes.length})`],["horas","Horas"]].map(([k,l])=>`<button class="chip" data-tab="${k}" aria-pressed="${AGV.tab===k&&!AGV.q.trim()}">${l}</button>`).join("")}</div>
   <input id="agQ" type="search" placeholder="Buscar en la agenda…" aria-label="Buscar en la agenda" autocomplete="off" value="${esc(AGV.q)}"></div>
  <div class="ag"><div class="ag-main" id="agBody"></div><aside class="ag-side" id="agSide"></aside></div>`;
- $("#agEv").onclick=()=>evForm();$("#agTk").onclick=()=>tkForm();$("#agNt").onclick=()=>noteForm();
- main.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{AGV.tab=b.dataset.tab;AGV.q="";render()});
+ $("#agEv").onclick=()=>evForm();$("#agTk").onclick=()=>tkForm();$("#agNt").onclick=()=>noteForm();$("#agVi").onclick=()=>newKind("visita");
+ const rs=$("#runStop");if(rs)rs.onclick=stopRun;
+ main.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{AGV.tab=b.dataset.tab;AGV.q="";if(b.dataset.tab==="clientes")AGV.cli="";render()});
  const q=$("#agQ");q.oninput=()=>{AGV.q=q.value;main.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-pressed",String(AGV.tab===b.dataset.tab&&!AGV.q.trim())));paintAg()};
  paintAg()}
 function paintAg(){const body=$("#agBody"),side=$("#agSide");if(!body)return;
- body.innerHTML=AGV.q.trim()?vSearch():AGV.tab==="tareas"?vTasks():AGV.tab==="notas"?vNotes():vCal();
+ body.innerHTML=AGV.q.trim()?vSearch():AGV.tab==="tareas"?vTasks():AGV.tab==="notas"?vNotes():AGV.tab==="clientes"?vClients():AGV.tab==="ruta"?vRuta():AGV.tab==="horas"?vHoras():vCal();
  side.innerHTML=agSide();
  const root=$(".ag");
  root.querySelectorAll("[data-ev]").forEach(b=>b.onclick=e=>{e.stopPropagation();evForm(AG.events.find(x=>x.id===b.dataset.ev),b.dataset.on)});
@@ -798,69 +871,151 @@ function paintAg(){const body=$("#agBody"),side=$("#agSide");if(!body)return;
  $("#ncNew").onclick=()=>noteForm(null,ncq.value);
  const nca=$("#ncAll");if(nca)nca.onclick=()=>{AGV.tab="notas";AGV.q="";render()};
  $("#catEd").onclick=catForm;$("#agIcs").onclick=agIcs;$("#agBak").onclick=()=>{download("digesto-agenda-"+todayS()+".json",JSON.stringify(AG,null,1),"application/json");toast("Copia descargada.")};
- $("#agRes").onclick=agRestore;
+ $("#agRes").onclick=agRestore;$("#tplEd").onclick=tplForm;
+ bindPro(root);
  $("#agNot").onclick=async()=>{if(!window.Notification)return toast("Este navegador no permite avisos.");const p=await Notification.requestPermission();toast(p==="granted"?"Avisos activados: te avisaré mientras el panel esté abierto.":"El navegador ha bloqueado los avisos. Puedes permitirlos en los ajustes del sitio.");paintAg()};
  const tgb=$("#tgb");if(tgb){const hh=tgb.querySelector(".tg-col").getBoundingClientRect().height/24,now=new Date();
   tgb.scrollTop=AGV.sc!=null?AGV.sc:hh*(main.querySelector(".tg-col.today")?Math.max(0,now.getHours()-2):7.5);tgb.onscroll=()=>{AGV.sc=tgb.scrollTop}}}
 
 /* Formularios */
-function evForm(ev,on){const isNew=!ev||!ev.id;const base={t:"",d:AGV.d,all:false,s:"09:00",e:"10:00",cat:(AG.cats[0]||{}).id||"",loc:"",notes:"",rep:"",until:"",ex:[],rem:-1,...(ev||{})};
+const catFor=k=>{const want=k==="reunion"?"reuniones":k?"trabajo":"";return (AG.cats.find(c=>c.id===want)||AG.cats[0]||{}).id||""};
+function newKind(kind,extra){evForm({kind,cat:catFor(kind),d:AGV.tab==="ruta"?AGV.rd||todayS():AGV.d,cli:AGV.tab==="clientes"&&AGV.cli?AGV.cli:AGV.fcli||"",...(extra||{})})}
+const evTitle=(k,isNew)=>(isNew?(k==="llamada"?"Nueva ":k?"Nueva ":"Nuevo "):"Editar ")+KIND[k].toLowerCase();
+function evForm(ev,on){const isNew=!ev||!ev.id;
+ const base={t:"",d:AGV.d,all:false,s:"09:00",e:"10:00",cat:(AG.cats[0]||{}).id||"",loc:"",notes:"",rep:"",until:"",ex:[],rem:-1,kind:"",cli:AGV.fcli||"",...(ev||{})};
+ const vis=normVis(base.vis),met=normMet(base.met);let chk=vis.chk.map(c=>({...c}));
  const series=!isNew&&!!base.rep;on=on||base.d;
  F.onsubmit=e=>e.preventDefault();
- F.innerHTML=`<h2 style="margin-bottom:14px">${isNew?"Nuevo evento":"Editar evento"}</h2><div class="form">
- <label class="full" for="eT">Título<input id="eT" maxlength="160" value="${esc(base.t)}" placeholder="Reunión, llamada, entrega…"></label>
+ F.innerHTML=`<h2 style="margin-bottom:14px" id="eH">${evTitle(base.kind,isNew)}</h2><div class="form">
+ <fieldset class="full kinds"><legend>Tipo</legend>${Object.entries(KIND).map(([k,l])=>`<label class="kchip"><input type="radio" name="kind" value="${k}" ${base.kind===k?"checked":""}>${l}</label>`).join("")}</fieldset>
+ <label class="full" for="eT">Título<input id="eT" maxlength="160" value="${esc(base.t)}" placeholder="Qué es: revisión, instalación, reunión de seguimiento…"></label>
+ <label for="eCl">Cliente<span class="row2"><select id="eCl">${cliOpts(base.cli)}</select><button type="button" class="btn ghost small" id="eNewCli">Nuevo</button></span></label>
+ <label for="eC">Categoría<select id="eC">${AG.cats.map(c=>`<option value="${c.id}" ${c.id===base.cat?"selected":""}>${esc(c.n)}</option>`).join("")}</select></label>
  <label for="eD">Fecha<input id="eD" type="date" value="${series?on:base.d}"></label>
  <label class="check" for="eAll" style="align-self:end;padding-bottom:10px"><input id="eAll" type="checkbox" ${base.all?"checked":""}>Todo el día</label>
  <label class="tm" for="eS">Empieza<input id="eS" type="time" value="${base.s}"></label>
  <label class="tm" for="eE">Termina<input id="eE" type="time" value="${base.e}"></label>
- <label for="eC">Categoría<select id="eC">${AG.cats.map(c=>`<option value="${c.id}" ${c.id===base.cat?"selected":""}>${esc(c.n)}</option>`).join("")}</select></label>
- <label for="eR">Aviso<select id="eR">${REMN.map(([v,l])=>`<option value="${v}" ${v===base.rem?"selected":""}>${l}</option>`).join("")}</select></label>
- <label class="full" for="eL">Lugar o enlace<input id="eL" maxlength="300" value="${esc(base.loc)}" placeholder="Despacho, dirección o enlace de videollamada"></label>
  <label for="eRep">Repetición<select id="eRep">${Object.entries(REPN).map(([k,v])=>`<option value="${k}" ${k===base.rep?"selected":""}>${v}</option>`).join("")}</select></label>
  <label class="rp" for="eU">Hasta (vacío: sin fin)<input id="eU" type="date" value="${base.until}"></label>
- <label class="full" for="eN">Notas<textarea id="eN" maxlength="5000" placeholder="Orden del día, personas, documentos…">${esc(base.notes)}</textarea></label>
- ${series?`<fieldset class="full"><legend>Este evento se repite. Aplicar a</legend><label class="check"><input type="radio" name="sc" value="one" checked>Solo el ${esc(dLong(on).toLowerCase())}</label><label class="check"><input type="radio" name="sc" value="all">Toda la serie</label></fieldset>`:""}
- ${!isNew&&/^https?:\/\//.test(base.loc)?`<p class="full" style="margin:0"><a href="${esc(base.loc)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">Abrir el enlace</a></p>`:""}
+ <label for="eR">Aviso<select id="eR">${REMN.map(([v,l])=>`<option value="${v}" ${v===base.rem?"selected":""}>${l}</option>`).join("")}</select></label>
+ <label class="full" for="eL">Lugar, dirección o enlace<input id="eL" maxlength="300" value="${esc(base.loc)}" placeholder="Si lo dejas vacío, se usa la dirección del cliente"></label>
+ <div class="full hbtns" id="eLinks"></div>
+ <div class="full kv" data-k="visita"><div class="sect">Parte de visita${vis.inc?` · <span class="mono">${esc(vis.inc)}</span>`:` <span class="sub">· el número de incidencia se pone al guardar</span>`}</div><div class="form" style="margin:0">
+  <label class="full" for="vP">Problema que reporta el cliente<textarea id="vP" maxlength="5000">${esc(vis.prob)}</textarea></label>
+  <label class="full" for="vD">Diagnóstico<textarea id="vD" maxlength="5000">${esc(vis.diag)}</textarea></label>
+  <label class="full" for="vS">Solución aplicada<textarea id="vS" maxlength="5000">${esc(vis.sol)}</textarea></label>
+  <label class="full" for="vM">Material o piezas<textarea id="vM" maxlength="3000" style="min-height:60px" placeholder="Una por línea, con cantidad si hace falta">${esc(vis.mat)}</textarea></label>
+  <label for="vL">Llegada<span class="row2"><input id="vL" type="time" value="${vis.lleg}"><button type="button" class="btn ghost small" data-now="vL">Ahora</button></span></label>
+  <label for="vX">Salida<span class="row2"><input id="vX" type="time" value="${vis.sal}"><button type="button" class="btn ghost small" data-now="vX">Ahora</button></span></label>
+  <label for="vK">Kilómetros<input id="vK" type="number" min="0" step="0.1" inputmode="decimal" value="${vis.km||""}"></label>
+  <label for="vE">Estado<select id="vE">${Object.entries(ESTN).map(([k,l])=>`<option value="${k}" ${vis.est===k?"selected":""}>${l}</option>`).join("")}</select></label>
+  <div class="full"><div class="sect2">Lista de comprobación</div><div id="vChk"></div>
+   <div class="row2" style="margin-top:6px;flex-wrap:wrap"><select id="vTpl" style="flex:1 1 180px"><option value="">Añadir una plantilla…</option>${AG.tpls.map(t=>`<option value="${t.id}">${esc(t.n)}</option>`).join("")}</select><input id="vItem" placeholder="O escribe un punto" style="flex:1 1 160px"><button type="button" class="btn ghost small" id="vItemAdd">Añadir</button></div></div>
+  <div class="full"><div class="sect2">Firma del cliente</div><div class="sig"><canvas id="vSig" aria-label="Recuadro para firmar con el dedo o el ratón"></canvas></div>
+   <div class="row2"><input id="vFn" maxlength="120" placeholder="Nombre de quien firma" value="${esc(vis.firmante)}"><button type="button" class="btn ghost small" id="vSigClr">Borrar firma</button></div></div>
+ </div></div>
+ <div class="full kv" data-k="reunion"><div class="sect">Acta de la reunión</div><div class="form" style="margin:0">
+  <label class="full" for="mA">Asistentes<input id="mA" maxlength="500" value="${esc(met.asis)}" placeholder="Nombres, separados por comas"></label>
+  <label class="full" for="mP">Puntos tratados<textarea id="mP" maxlength="8000">${esc(met.puntos)}</textarea></label>
+  <label class="full" for="mC">Acuerdos<textarea id="mC" maxlength="8000">${esc(met.acuerdos)}</textarea></label>
+  <label class="full" for="mN">Próximos pasos (uno por línea)<textarea id="mN" maxlength="5000">${esc(met.pasos)}</textarea></label>
+  <div class="full"><button type="button" class="btn ghost small" id="mTasks">Guardar y convertir los próximos pasos en tareas</button>${met.hechos?` <span class="sub">Ya creaste tareas desde esta acta.</span>`:""}</div>
+ </div></div>
+ <label class="full" for="eN">Notas<textarea id="eN" maxlength="5000" placeholder="Observaciones, orden del día, documentos…">${esc(base.notes)}</textarea><span class="pwwarn" id="eW" hidden>No guardes contraseñas aquí: usa un gestor de contraseñas.</span></label>
+ ${series?`<fieldset class="full"><legend>Esta cita se repite. Aplicar a</legend><label class="check"><input type="radio" name="sc" value="one" checked>Solo el ${esc(dLong(on).toLowerCase())}</label><label class="check"><input type="radio" name="sc" value="all">Toda la serie</label></fieldset>`:""}
  <div class="err full" id="eErr" role="alert"></div>
- <div class="actions">${isNew?"":`<button type="button" class="btn ghost danger" id="eDel" style="margin-right:auto">Borrar</button><button type="button" class="btn ghost" id="eDup">Duplicar</button>`}<button type="button" class="btn ghost" id="eCan">Cancelar</button><button type="button" class="btn" id="eOk">${isNew?"Crear":"Guardar"}</button></div></div>`;
- const sync=()=>{F.querySelectorAll(".tm").forEach(l=>l.hidden=$("#eAll").checked);F.querySelector(".rp").hidden=!$("#eRep").value};
- $("#eAll").onchange=sync;$("#eRep").onchange=sync;sync();
+ <div class="actions">${isNew?"":`<button type="button" class="btn ghost danger" id="eDel" style="margin-right:auto">Borrar</button><button type="button" class="btn ghost" id="eDup">Duplicar</button>`}<button type="button" class="btn ghost" id="ePrint"></button><button type="button" class="btn ghost" id="eCan">Cancelar</button><button type="button" class="btn" id="eOk">${isNew?"Crear":"Guardar"}</button></div></div>`;
+ const kind=()=>F.querySelector("[name=kind]:checked").value;
+ /* Firma con el dedo o el ratón */
+ const cv=$("#vSig");let ctx=null,drawing=false,sigHas=!!vis.firma,sigDirty=false;
+ const sigSetup=()=>{const r=cv.getBoundingClientRect();if(!r.width)return;const dpr=Math.max(1,window.devicePixelRatio||1);cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
+  ctx=cv.getContext("2d");ctx.scale(dpr,dpr);ctx.fillStyle="#fff";ctx.fillRect(0,0,r.width,r.height);ctx.lineWidth=2.2;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#16202c";
+  if(vis.firma&&!sigDirty){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height);im.src=vis.firma}};
+ const pos=e=>{const r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]};
+ cv.onpointerdown=e=>{if(!ctx)sigSetup();if(!ctx)return;drawing=true;try{cv.setPointerCapture(e.pointerId)}catch(x){}const [x,y]=pos(e);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+.1,y+.1);ctx.stroke();sigHas=true;sigDirty=true};
+ cv.onpointermove=e=>{if(!drawing)return;const [x,y]=pos(e);ctx.lineTo(x,y);ctx.stroke()};
+ cv.onpointerup=cv.onpointercancel=()=>{drawing=false};
+ $("#vSigClr").onclick=()=>{if(!ctx)sigSetup();if(ctx){const r=cv.getBoundingClientRect();ctx.fillStyle="#fff";ctx.fillRect(0,0,r.width,r.height)}sigHas=false;sigDirty=true};
+ const getSig=()=>{if(!sigDirty)return vis.firma;if(!sigHas)return "";const r=cv.getBoundingClientRect(),t=document.createElement("canvas");t.width=Math.round(r.width)||600;t.height=Math.round(r.height)||160;t.getContext("2d").drawImage(cv,0,0,t.width,t.height);return t.toDataURL("image/png")};
+ /* Lista de comprobación */
+ const paintChk=()=>{const box=$("#vChk");box.innerHTML=chk.map((c,i)=>`<div class="chkrow"><input type="checkbox" data-ci="${i}" ${c.ok?"checked":""} aria-label="${esc(c.t)}"><span>${esc(c.t)}</span><button type="button" class="iconbtn" data-cx="${i}" aria-label="Quitar este punto">✕</button></div>`).join("")||`<p class="sub" style="margin:0">Sin puntos todavía.</p>`;
+  box.querySelectorAll("[data-ci]").forEach(b=>b.onchange=()=>{chk[+b.dataset.ci].ok=b.checked});box.querySelectorAll("[data-cx]").forEach(b=>b.onclick=()=>{chk.splice(+b.dataset.cx,1);paintChk()})};
+ paintChk();
+ $("#vTpl").onchange=e=>{const t=AG.tpls.find(x=>x.id===e.target.value);if(t)t.items.forEach(i=>{if(!chk.some(c=>c.t===i))chk.push({t:i,ok:false})});e.target.value="";paintChk()};
+ const addItem=()=>{const v=$("#vItem").value.trim();if(!v)return;chk.push({t:v,ok:false});$("#vItem").value="";paintChk();$("#vItem").focus()};
+ $("#vItemAdd").onclick=addItem;$("#vItem").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addItem()}};
+ F.querySelectorAll("[data-now]").forEach(b=>b.onclick=()=>{const n=new Date();$("#"+b.dataset.now).value=hm(n.getHours()*60+n.getMinutes())});
+ /* Enlaces rápidos: cómo llegar, abrir enlace, llamar */
+ const links=()=>{const loc=$("#eL").value.trim(),c=cliOf($("#eCl").value),addr=!isUrl(loc)&&loc?loc:c&&c.dir||"";
+  $("#eLinks").innerHTML=[addr&&`<a class="btn ghost small" href="${esc(mapsUrl(addr))}" target="_blank" rel="noopener">Cómo llegar</a>`,isUrl(loc)&&`<a class="btn ghost small" href="${esc(loc)}" target="_blank" rel="noopener">Abrir el enlace</a>`,c&&c.tel&&`<a class="btn ghost small" href="${esc(telHref(c.tel))}">Llamar a ${esc(c.con||c.n)}</a>`].filter(Boolean).join("");$("#eLinks").hidden=!$("#eLinks").innerHTML};
+ const sync=()=>{const k=kind();F.querySelectorAll(".tm").forEach(l=>l.hidden=$("#eAll").checked);F.querySelector(".rp").hidden=!$("#eRep").value;
+  F.querySelectorAll(".kv").forEach(x=>x.hidden=x.dataset.k!==k);$("#eH").textContent=evTitle(k,isNew);
+  const p=$("#ePrint");p.hidden=k!=="visita"&&k!=="reunion";p.textContent=k==="reunion"?"Guardar e imprimir el acta":"Guardar e imprimir el parte";
+  if(k==="visita"&&!ctx)requestAnimationFrame(sigSetup);links()};
+ F.querySelectorAll("[name=kind]").forEach(r=>r.onchange=()=>{const k=kind();if(isNew&&$("#eC").value===catFor(""))$("#eC").value=catFor(k);sync()});
+ $("#eAll").onchange=sync;$("#eRep").onchange=sync;$("#eL").oninput=links;
+ $("#eCl").onchange=()=>{const c=cliOf($("#eCl").value);if(c&&!$("#eT").value.trim()&&kind())$("#eT").value=`${KSHORT[kind()]} · ${c.n}`;links()};
  $("#eS").onchange=()=>{const s=$("#eS").value,e=$("#eE").value;if(s&&(!e||mins(e)<=mins(s)))$("#eE").value=hm(Math.min(mins(s)+60,23*60+59))};
- const err=m=>{$("#eErr").textContent=m};
+ pwWarn($("#eN"),$("#eW"));
+ const err=m=>{$("#eErr").textContent=m;$("#eErr").scrollIntoView({block:"nearest"})};
  const scope=()=>series?F.querySelector("[name=sc]:checked").value:"all";
+ const read=()=>{const k=kind();return {kind:k,cli:$("#eCl").value,t:$("#eT").value.trim(),d:$("#eD").value,all:$("#eAll").checked,s:$("#eS").value||"09:00",e:$("#eE").value,cat:$("#eC").value,loc:$("#eL").value.trim(),notes:$("#eN").value,rep:$("#eRep").value,until:$("#eRep").value?$("#eU").value:"",rem:+$("#eR").value,
+  vis:k==="visita"?{...vis,prob:$("#vP").value,diag:$("#vD").value,sol:$("#vS").value,mat:$("#vM").value,lleg:$("#vL").value,sal:$("#vX").value,km:Math.max(0,+$("#vK").value||0),est:$("#vE").value,chk:chk.map(c=>({...c})),firma:getSig(),firmante:$("#vFn").value.trim()}:vis,
+  met:k==="reunion"?{...met,asis:$("#mA").value.trim(),puntos:$("#mP").value,acuerdos:$("#mC").value,pasos:$("#mN").value}:met}};
+ $("#eNewCli").onclick=()=>{const draft=read();cliForm(null,c=>evForm({...(ev||{}),...draft,cli:c?c.id:draft.cli},on))};
+ const save=quiet=>{const v=read();
+  if(!v.t){const c=cliOf(v.cli);if(v.kind&&c)v.t=`${KSHORT[v.kind]} · ${c.n}`;else{err("Escribe un título.");return null}}
+  if(!v.d){err("Elige una fecha.");return null}
+  if(!v.all&&v.e&&mins(v.e)<=mins(v.s)){err("La hora de fin debe ser posterior a la de inicio.");return null}
+  if(v.rep&&v.until&&v.until<v.d){err("La fecha «hasta» es anterior al primer día.");return null}
+  if(v.kind==="visita"&&v.vis.lleg&&v.vis.sal&&mins(v.vis.sal)<=mins(v.vis.lleg)){err("La salida debe ser posterior a la llegada.");return null}
+  let saved;
+  if(isNew){saved={id:uid(),ex:[],...v};AG.events.push(saved)}
+  else{const o=AG.events.find(x=>x.id===ev.id);if(!o){dlg.close();return null}
+   if(series&&scope()==="one"){o.ex.push(on);saved={id:uid(),ex:[],...v,rep:"",until:""};AG.events.push(saved)}
+   else{Object.assign(o,v,{d:series&&v.d===on?o.d:v.d});saved=o}}
+  const msg=[];
+  if(saved.kind==="visita"){
+   if(!saved.vis.inc&&!saved.rep){const y=saved.d.slice(0,4);AG.seq[y]=(AG.seq[y]||0)+1;saved.vis={...saved.vis,inc:`INC-${y}-${String(AG.seq[y]).padStart(3,"0")}`};msg.push("Incidencia "+saved.vis.inc+".")}
+   if((saved.vis.est==="pendiente"||saved.vis.est==="otra")&&!saved.vis.fu){const T=todayS(),base0=saved.d>T?saved.d:T;
+    AG.tasks.push({id:uid(),t:`Seguimiento${saved.vis.inc?" "+saved.vis.inc:""}: ${saved.t}`,due:addD(base0,saved.vis.est==="otra"?7:2),pri:1,cat:saved.cat,cli:saved.cli,notes:saved.vis.diag||saved.vis.prob||"",done:false,doneAt:"",created:new Date().toISOString()});
+    saved.vis={...saved.vis,fu:true};msg.push("He creado la tarea de seguimiento.")}}
+  dlg.close();agChanged();if(isNew&&v.d!==AGV.d&&AGV.tab==="cal"){AGV.d=v.d;AGV.sc=null}render();
+  if(!quiet)toast([isNew?(saved.kind?KSHORT[saved.kind]+" creada.":"Evento creado."):"Guardado.",...msg].join(" "));
+  return saved};
  $("#eCan").onclick=()=>dlg.close();
- $("#eOk").onclick=()=>{const v={t:$("#eT").value.trim(),d:$("#eD").value,all:$("#eAll").checked,s:$("#eS").value||"09:00",e:$("#eE").value,cat:$("#eC").value,loc:$("#eL").value.trim(),notes:$("#eN").value,rep:$("#eRep").value,until:$("#eRep").value?$("#eU").value:"",rem:+$("#eR").value};
-  if(!v.t)return err("Escribe un título.");if(!v.d)return err("Elige una fecha.");
-  if(!v.all&&v.e&&mins(v.e)<=mins(v.s))return err("La hora de fin debe ser posterior a la de inicio.");
-  if(v.rep&&v.until&&v.until<v.d)return err("La fecha «hasta» es anterior al primer día.");
-  if(isNew)AG.events.push({id:uid(),ex:[],...v});
-  else{const o=AG.events.find(x=>x.id===ev.id);if(!o)return dlg.close();
-   if(series&&scope()==="one"){o.ex.push(on);AG.events.push({id:uid(),ex:[],...v,rep:"",until:""})}
-   else Object.assign(o,v,{d:series&&v.d===on?o.d:v.d})}
-  dlg.close();agChanged();if(isNew&&v.d!==AGV.d&&AGV.tab==="cal"){AGV.d=v.d;AGV.sc=null}render();toast(isNew?"Evento creado.":"Evento guardado.")};
+ $("#eOk").onclick=()=>save();
+ $("#ePrint").onclick=()=>{const s=save(true);if(s){toast("Guardado. Abriendo la impresión…");printEv(s,s.d)}};
+ $("#mTasks").onclick=()=>{const lines=$("#mN").value.split("\n").map(x=>x.replace(/^[-•*\d.)\s]+/,"").trim()).filter(Boolean);
+  if(!lines.length)return err("Escribe al menos un próximo paso, uno por línea.");
+  const s=save(true);if(!s)return;
+  lines.forEach(l=>AG.tasks.push({id:uid(),t:l,due:"",pri:2,cat:s.cat,cli:s.cli,notes:`De la reunión «${s.t}» del ${pd(s.d).toLocaleDateString("es-ES")}`,done:false,doneAt:"",created:new Date().toISOString()}));
+  s.met={...s.met,hechos:true};agChanged();render();toast(`${lines.length} ${lines.length===1?"tarea creada":"tareas creadas"} a partir del acta.`)};
  if(!isNew){
-  $("#eDel").onclick=()=>{const s=snap(),o=AG.events.find(x=>x.id===ev.id);if(series&&scope()==="one")o.ex.push(on);else AG.events=AG.events.filter(x=>x.id!==ev.id);dlg.close();agChanged();render();toast(series&&scope()==="one"?"Borrado solo ese día.":"Evento borrado.",undoTo(s))};
-  $("#eDup").onclick=()=>{const c={...AG.events.find(x=>x.id===ev.id),id:uid(),ex:[]};if(series&&scope()==="one"){c.d=on;c.rep="";c.until=""}AG.events.push(c);agChanged();render();toast("Evento duplicado. Ahora puedes cambiar la copia.");evForm(c,c.d)}}
- dlg.showModal();if(isNew)$("#eT").focus()}
-function tkForm(t){const isNew=!t;const b={t:"",due:"",pri:2,cat:(AG.cats[0]||{}).id||"",notes:"",done:false,...(t||{})};
+  $("#eDel").onclick=()=>{const s=snap(),o=AG.events.find(x=>x.id===ev.id);if(series&&scope()==="one")o.ex.push(on);else{AG.events=AG.events.filter(x=>x.id!==ev.id);if(AG.run&&AG.run.ev===ev.id)AG.run=null}dlg.close();agChanged();render();toast(series&&scope()==="one"?"Borrado solo ese día.":"Borrado.",undoTo(s))};
+  $("#eDup").onclick=()=>{const o=AG.events.find(x=>x.id===ev.id),c={...JSON.parse(JSON.stringify(o)),id:uid(),ex:[],vis:normVis({prob:o.vis.prob}),met:normMet({asis:o.met.asis})};if(series&&scope()==="one"){c.d=on;c.rep="";c.until=""}AG.events.push(c);agChanged();render();toast("Duplicado. Ahora puedes cambiar la copia.");evForm(c,c.d)}}
+ openDlg();dlg.scrollTop=0;sync();if(isNew&&!base.t)$("#eT").focus()}
+function pwWarn(el,warn){const chk=()=>{warn.hidden=!/contrase|password|passw|\bclave\b|\bpwd\b|\bpin\b/i.test(el.value)};el.addEventListener("input",chk);chk()}
+function tkForm(t,pre){const isNew=!t;const b={t:"",due:"",pri:2,cat:(AG.cats[0]||{}).id||"",cli:"",notes:"",done:false,...(pre||{}),...(t||{})};
  F.onsubmit=e=>e.preventDefault();
  F.innerHTML=`<h2 style="margin-bottom:14px">${isNew?"Nueva tarea":"Editar tarea"}</h2><div class="form">
  <label class="full" for="kT">Tarea<input id="kT" maxlength="200" value="${esc(b.t)}" placeholder="Qué hay que hacer"></label>
  <label for="kD">Fecha límite (opcional)<input id="kD" type="date" value="${b.due}"></label>
  <label for="kP">Prioridad<select id="kP">${[1,2,3].map(p=>`<option value="${p}" ${p===b.pri?"selected":""}>${PRIN[p]}</option>`).join("")}</select></label>
  <label for="kC">Categoría<select id="kC">${AG.cats.map(c=>`<option value="${c.id}" ${c.id===b.cat?"selected":""}>${esc(c.n)}</option>`).join("")}</select></label>
+ <label for="kCl">Cliente<select id="kCl">${cliOpts(b.cli)}</select></label>
  <label class="check" for="kDone" style="align-self:end;padding-bottom:10px"><input id="kDone" type="checkbox" ${b.done?"checked":""}>Hecha</label>
  <label class="full" for="kN">Notas<textarea id="kN" maxlength="5000">${esc(b.notes)}</textarea></label>
  <div class="err full" id="kErr" role="alert"></div>
  <div class="actions">${isNew?"":`<button type="button" class="btn ghost danger" id="kDel" style="margin-right:auto">Borrar</button>`}<button type="button" class="btn ghost" id="kCan">Cancelar</button><button type="button" class="btn" id="kOk">${isNew?"Crear":"Guardar"}</button></div></div>`;
  $("#kCan").onclick=()=>dlg.close();
- $("#kOk").onclick=()=>{const v={t:$("#kT").value.trim(),due:$("#kD").value,pri:+$("#kP").value,cat:$("#kC").value,notes:$("#kN").value,done:$("#kDone").checked};
+ $("#kOk").onclick=()=>{const v={t:$("#kT").value.trim(),due:$("#kD").value,pri:+$("#kP").value,cat:$("#kC").value,cli:$("#kCl").value,notes:$("#kN").value,done:$("#kDone").checked};
   if(!v.t)return $("#kErr").textContent="Escribe la tarea.";
   if(isNew)AG.tasks.push({id:uid(),...v,doneAt:v.done?new Date().toISOString():"",created:new Date().toISOString()});
   else{const o=AG.tasks.find(x=>x.id===t.id);if(o){if(v.done!==o.done)o.doneAt=v.done?new Date().toISOString():"";Object.assign(o,v)}}
   dlg.close();agChanged();render();toast(isNew?"Tarea creada.":"Tarea guardada.")};
  if(!isNew)$("#kDel").onclick=()=>{const s=snap();AG.tasks=AG.tasks.filter(x=>x.id!==t.id);dlg.close();agChanged();render();toast("Tarea borrada.",undoTo(s))};
- dlg.showModal();if(isNew)$("#kT").focus()}
+ openDlg();if(isNew)$("#kT").focus()}
 function noteForm(n,pre){const isNew=!n;const b={t:"",b:pre||"",pin:false,...(n||{})};
  F.onsubmit=e=>e.preventDefault();
  F.innerHTML=`<h2 style="margin-bottom:14px">${isNew?"Nueva nota":"Editar nota"}</h2><div class="form">
@@ -875,7 +1030,7 @@ function noteForm(n,pre){const isNew=!n;const b={t:"",b:pre||"",pin:false,...(n|
   if(isNew)AG.notes.push({id:uid(),...v});else Object.assign(AG.notes.find(x=>x.id===n.id)||{},v);
   dlg.close();agChanged();if(isNew)AGV.tab="notas";render();toast("Nota guardada.")};
  if(!isNew)$("#oDel").onclick=()=>{const s=snap();AG.notes=AG.notes.filter(x=>x.id!==n.id);dlg.close();agChanged();render();toast("Nota borrada.",undoTo(s))};
- dlg.showModal();(isNew?$("#oT"):$("#oB")).focus()}
+ openDlg();(isNew?$("#oT"):$("#oB")).focus()}
 function catForm(){let L=AG.cats.map(c=>({...c}));
  const paint=()=>{F.innerHTML=`<h2 style="margin-bottom:6px">Categorías</h2><p class="sub" style="margin:0 0 14px">Si borras una, lo que tenga pasa a la primera de la lista.</p>
   ${L.map((c,i)=>`<div class="catrow"><input data-cn="${i}" value="${esc(c.n)}" maxlength="40" aria-label="Nombre de la categoría"><select data-cc="${i}" aria-label="Color" style="border-left:8px solid ${c.c}">${AGCOL.map(([h,n])=>`<option value="${h}" ${h===c.c?"selected":""}>${n}</option>`).join("")}</select><button type="button" class="iconbtn" data-cdel="${i}" ${L.length<2?"disabled":""}>Borrar</button></div>`).join("")}
@@ -888,27 +1043,207 @@ function catForm(){let L=AG.cats.map(c=>({...c}));
   $("#cCan").onclick=()=>dlg.close();
   $("#cOk").onclick=()=>{L=L.map(c=>({...c,n:c.n.trim()||"Sin nombre"}));const ids=new Set(L.map(c=>c.id));
    [...AG.events,...AG.tasks].forEach(x=>{if(!ids.has(x.cat))x.cat=L[0].id});AG.cats=L;dlg.close();agChanged();render();toast("Categorías guardadas.")}};
- F.onsubmit=e=>e.preventDefault();paint();dlg.showModal()}
+ F.onsubmit=e=>e.preventDefault();paint();openDlg()}
 function agIcs(){const z=s=>String(s).replace(/[\\;,]/g,m=>"\\"+m).replace(/\r?\n/g,"\\n");const dt=(d,t)=>d.replace(/-/g,"")+(t?"T"+t.replace(":","")+"00":"");
- const RR={dia:"FREQ=DAILY",lab:"FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",sem:"FREQ=WEEKLY",mes:"FREQ=MONTHLY",ano:"FREQ=YEARLY"},stamp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
+ const RR={dia:"FREQ=DAILY",lab:"FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",sem:"FREQ=WEEKLY",mes:"FREQ=MONTHLY",tri:"FREQ=MONTHLY;INTERVAL=3",sem6:"FREQ=MONTHLY;INTERVAL=6",ano:"FREQ=YEARLY"},stamp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Digesto//Agenda//ES","CALSCALE:GREGORIAN","X-WR-CALNAME:Agenda Digesto"];
  AG.events.forEach(e=>{L.push("BEGIN:VEVENT","UID:"+e.id+"@digesto","DTSTAMP:"+stamp,"SUMMARY:"+z(e.t),"CATEGORIES:"+z(catOf(e.cat).n));
   if(e.all)L.push("DTSTART;VALUE=DATE:"+dt(e.d),"DTEND;VALUE=DATE:"+dt(addD(e.d,1)));else L.push("DTSTART:"+dt(e.d,e.s),"DTEND:"+dt(e.d,hm(Math.min(endM(e),23*60+59))));
   if(e.rep)L.push("RRULE:"+RR[e.rep]+(e.until?";UNTIL="+dt(e.until)+(e.all?"":"T235959"):""));
   e.ex.forEach(x=>L.push(e.all?"EXDATE;VALUE=DATE:"+dt(x):"EXDATE:"+dt(x,e.s)));
-  if(e.loc)L.push("LOCATION:"+z(e.loc));if(e.notes)L.push("DESCRIPTION:"+z(e.notes));
+  const c=cliOf(e.cli),where=addrOf(e)||e.loc;if(where)L.push("LOCATION:"+z(where));
+  const desc=[e.kind&&KIND[e.kind],c&&("Cliente: "+c.n+(c.tel?" · "+c.tel:"")),e.kind==="visita"&&e.vis.inc,e.notes].filter(Boolean).join("\n");if(desc)L.push("DESCRIPTION:"+z(desc));
   if(e.rem>=0)L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+z(e.t),"TRIGGER:-PT"+e.rem+"M","END:VALARM");
   L.push("END:VEVENT")});
  L.push("END:VCALENDAR");download("digesto-agenda.ics",L.join("\r\n"),"text/calendar");toast(AG.events.length?"Calendario descargado. Ábrelo en el móvil para añadirlo a tu calendario.":"Aún no hay eventos que exportar.")}
 function agRestore(){const inp=document.createElement("input");inp.type="file";inp.accept=".json,application/json";
  inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let x;try{x=JSON.parse(await f.text())}catch(e){return toast("Ese archivo no es una copia de la agenda.")}
   if(!x||!Array.isArray(x.events))return toast("Ese archivo no es una copia de la agenda.");
-  const n=agNorm(x);confirmBox(`Se sustituirá tu agenda por la copia (${n.events.length} eventos, ${n.tasks.length} tareas, ${n.notes.length} notas). Podrás deshacerlo justo después.`,"Restaurar",()=>{const s=snap();AG=n;agChanged();render();toast("Copia restaurada.",undoTo(s))})};
+  const n=agNorm(x);confirmBox(`Se sustituirá tu agenda por la copia (${n.events.length} citas, ${n.clients.length} clientes, ${n.tasks.length} tareas, ${n.notes.length} notas). Podrás deshacerlo justo después.`,"Restaurar",()=>{const s=snap();AG=n;agChanged();render();toast("Copia restaurada.",undoTo(s))})};
  inp.click()}
+
+/* ---------- CLIENTES ---------- */
+const cliNext=c=>{const T=todayS();for(let i=0;i<120;i++){const s=addD(T,i),x=evOnAll(s).find(e=>e.cli===c.id);if(x)return {e:x,s}}return null};
+const cliOpen=c=>AG.events.filter(e=>e.cli===c.id&&e.kind==="visita"&&(e.vis.est==="pendiente"||e.vis.est==="otra")).length;
+function cliCard(c){const n=cliNext(c),o=cliOpen(c);
+ return `<button class="cli" data-cli="${c.id}"><span class="av" style="background:hsl(${avHue(c.n)} 45% 42%)" aria-hidden="true">${esc((c.n||"?")[0].toUpperCase())}</span><span class="ci"><b>${esc(c.n)}</b>${c.emp||c.con?`<span>${esc([c.emp!==c.n&&c.emp,c.con].filter(Boolean).join(" · "))}</span>`:""}<span>${n?`Próxima cita: ${dShort(n.s)}${n.e.all?"":" a las "+n.e.s}`:"Sin citas próximas"}</span></span>${o?`<span class="bdg unc">${o} ${o===1?"abierta":"abiertas"}</span>`:""}</button>`}
+function cliList(){const f=fold(AGV.cq.trim()),L=cliSorted().filter(c=>!f||fold([c.n,c.emp,c.con,c.tel,c.mail,c.dir].join(" ")).includes(f));
+ return L.length?`<div class="clis">${L.map(cliCard).join("")}</div>`:`<div class="panel empty">${AG.clients.length?"Ningún cliente coincide con la búsqueda.":"Aún no tienes clientes. Crea el primero para tener a mano su teléfono, su dirección y el historial de visitas."}</div>`}
+function vClients(){const c=AGV.cli&&cliOf(AGV.cli);if(c)return vClient(c);
+ return `<div class="toolbar"><input id="cliQ" type="search" placeholder="Buscar por nombre, empresa, teléfono o dirección…" aria-label="Buscar clientes" autocomplete="off" value="${esc(AGV.cq)}"><button class="btn" id="cliNew">Nuevo cliente</button></div><div id="cliList">${cliList()}</div>`}
+function vClient(c){const T=todayS(),E=AG.events.filter(e=>e.cli===c.id);
+ const up=[];for(let i=0;i<120&&up.length<8;i++){const s=addD(T,i);evOnAll(s).filter(e=>e.cli===c.id).forEach(e=>up.push([e,s]))}
+ const hist=E.filter(e=>!e.rep&&e.d<T).sort((a,b)=>b.d.localeCompare(a.d)||b.s.localeCompare(a.s)),per=E.filter(e=>e.rep),K=AG.tasks.filter(t=>t.cli===c.id&&!t.done);
+ const m0=T.slice(0,7)+"-01",y0=T.slice(0,4)+"-01-01",hm0=hoursRows(m0,T).filter(r=>r.e.cli===c.id),hy=hoursRows(y0,T).filter(r=>r.e.cli===c.id),sumH=R=>nf(R.reduce((a,r)=>a+r.min,0)/60);
+ const gar=q=>!q.gar?"Sin garantía anotada":q.gar<T?"Garantía vencida el "+pd(q.gar).toLocaleDateString("es-ES"):"Garantía hasta el "+pd(q.gar).toLocaleDateString("es-ES");
+ return `<button class="linkbtn" id="cliBack" style="margin-bottom:12px">← Todos los clientes</button>
+ <div class="panel"><div class="acc-h"><span class="av" style="background:hsl(${avHue(c.n)} 45% 42%);width:52px;height:52px;font-size:24px" aria-hidden="true">${esc((c.n||"?")[0].toUpperCase())}</span><div style="min-width:0"><h2 style="font-size:24px;overflow-wrap:anywhere">${esc(c.n)}</h2>${c.emp||c.con?`<div class="sub">${esc([c.emp!==c.n&&c.emp,c.con].filter(Boolean).join(" · "))}</div>`:""}</div></div>
+  <div class="hbtns" style="margin-top:14px">${c.tel?`<a class="btn ghost small" href="${esc(telHref(c.tel))}">Llamar</a>`:""}${c.mail?`<a class="btn ghost small" href="mailto:${esc(c.mail)}">Correo</a>`:""}${c.dir?`<a class="btn ghost small" href="${esc(mapsUrl(c.dir))}" target="_blank" rel="noopener">Cómo llegar</a>`:""}<button class="btn ghost small" id="cliEd">Editar</button></div>
+  <div class="hbtns" style="margin-top:8px"><button class="btn small" data-newk="visita">Nueva visita</button><button class="btn ghost small" data-newk="reunion">Nueva reunión</button><button class="btn ghost small" data-newk="llamada">Nueva llamada</button><button class="btn ghost small" id="cliTk">Nueva tarea</button></div></div>
+ <div class="grid2" style="margin-top:16px"><div class="stack">
+  <div class="panel"><h2 style="margin-bottom:10px">Datos</h2><dl class="dl">${[["Contacto",c.con],["Teléfono",c.tel],["Correo",c.mail],["Dirección",c.dir]].filter(x=>x[1]).map(([l,v])=>`<dt>${l}</dt><dd>${esc(v)}</dd>`).join("")||`<dd class="sub">Sin datos de contacto.</dd>`}</dl>${c.notas?`<div class="sect2" style="margin-top:12px">Notas fijas</div><p style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">${esc(c.notas)}</p>`:""}</div>
+  <div class="panel"><h2 style="margin-bottom:10px">Próximas citas</h2>${up.map(([e,s])=>itemEv(e,s,true)).join("")||`<div class="empty">Ninguna. <button class="linkbtn" data-newk="visita">Programar una visita</button></div>`}</div>
+  <div class="panel"><h2 style="margin-bottom:10px">Historial (${hist.length})</h2>${hist.map(e=>itemEv(e,e.d,true)).join("")||`<div class="empty">Aún no hay visitas ni reuniones pasadas.</div>`}</div>
+ </div><div class="stack">
+  <div class="panel"><h2>Horas dedicadas</h2><div class="kpis" style="margin:12px 0 0"><div class="kpi"><b>${sumH(hm0)}</b><span>horas este mes</span></div><div class="kpi"><b>${sumH(hy)}</b><span>horas este año</span></div><div class="kpi"><b>${hy.filter(r=>r.e.kind==="visita").length}</b><span>visitas este año</span></div></div></div>
+  <div class="panel" style="padding-bottom:8px"><h2 style="margin-bottom:4px">Tareas pendientes (${K.length})</h2>${K.map(tkRow).join("")||`<div class="empty">Nada pendiente.</div>`}</div>
+  ${per.length?`<div class="panel"><h2 style="margin-bottom:10px">Citas periódicas</h2>${per.map(e=>itemEv(e,e.d,true)).join("")}</div>`:""}
+  <div class="panel"><div class="phead"><h2>Equipos</h2><button class="iconbtn" id="eqNew">Añadir</button></div>${c.eq.map(q=>`<button class="nrow ${q.gar&&q.gar<T?"warn":""}" data-eq="${q.id}"><b>${esc(q.mod||"Equipo")}</b><span>${esc([q.serie&&"S/N "+q.serie,q.ubi].filter(Boolean).join(" · "))}</span><small>${gar(q)}</small></button>`).join("")||`<div class="empty">Sin equipos anotados.</div>`}</div>
+ </div></div>`}
+function cliForm(c,after){const isNew=!c;const b={n:"",emp:"",con:"",tel:"",mail:"",dir:"",notas:"",...(c||{})};
+ F.onsubmit=e=>e.preventDefault();
+ F.innerHTML=`<h2 style="margin-bottom:14px">${isNew?"Nuevo cliente":"Editar cliente"}</h2><div class="form">
+ <label class="full" for="cN">Nombre del cliente<input id="cN" maxlength="120" value="${esc(b.n)}" placeholder="Persona o empresa"></label>
+ <label for="cE">Empresa<input id="cE" maxlength="120" value="${esc(b.emp)}"></label>
+ <label for="cP">Persona de contacto<input id="cP" maxlength="120" value="${esc(b.con)}"></label>
+ <label for="cT">Teléfono<input id="cT" type="tel" inputmode="tel" maxlength="40" value="${esc(b.tel)}"></label>
+ <label for="cM">Correo<input id="cM" type="email" maxlength="160" value="${esc(b.mail)}"></label>
+ <label class="full" for="cD">Dirección<input id="cD" maxlength="300" value="${esc(b.dir)}" placeholder="Calle, número, ciudad"></label>
+ <label class="full" for="cO">Notas fijas<textarea id="cO" maxlength="5000" placeholder="Horario, cómo se entra, a quién preguntar, aparcamiento…">${esc(b.notas)}</textarea><span class="pwwarn" id="cW" hidden>No guardes contraseñas aquí: usa un gestor de contraseñas.</span></label>
+ <div class="err full" id="cErr" role="alert"></div>
+ <div class="actions">${isNew?"":`<button type="button" class="btn ghost danger" id="cDel" style="margin-right:auto">Borrar</button>`}<button type="button" class="btn ghost" id="cCan">Cancelar</button><button type="button" class="btn" id="cOk">${isNew?"Crear cliente":"Guardar"}</button></div></div>`;
+ pwWarn($("#cO"),$("#cW"));
+ $("#cCan").onclick=()=>after?after(null):dlg.close();
+ $("#cOk").onclick=()=>{const v={n:$("#cN").value.trim(),emp:$("#cE").value.trim(),con:$("#cP").value.trim(),tel:$("#cT").value.trim(),mail:$("#cM").value.trim(),dir:$("#cD").value.trim(),notas:$("#cO").value};
+  if(!v.n)return $("#cErr").textContent="Escribe el nombre del cliente.";
+  if(v.mail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.mail))return $("#cErr").textContent="El correo no parece válido.";
+  let r;if(isNew){r={id:uid(),...v,created:new Date().toISOString(),eq:[]};AG.clients.push(r)}else{r=AG.clients.find(x=>x.id===c.id);Object.assign(r,v)}
+  agChanged();if(after){toast(isNew?"Cliente creado.":"Cliente guardado.");return after(r)}
+  dlg.close();if(isNew){AGV.tab="clientes";AGV.q="";AGV.cli=r.id}render();toast(isNew?"Cliente creado.":"Cliente guardado.")};
+ if(!isNew)$("#cDel").onclick=()=>{const s=snap();AG.clients=AG.clients.filter(x=>x.id!==c.id);[...AG.events,...AG.tasks].forEach(x=>{if(x.cli===c.id)x.cli=""});if(AGV.fcli===c.id)AGV.fcli="";AGV.cli="";dlg.close();agChanged();render();toast("Cliente borrado. Sus citas y tareas se conservan.",undoTo(s))};
+ openDlg();dlg.scrollTop=0;$("#cN").focus()}
+function eqForm(c,q){const isNew=!q;const b={mod:"",serie:"",ubi:"",inst:"",gar:"",notas:"",...(q||{})};
+ F.onsubmit=e=>e.preventDefault();
+ F.innerHTML=`<h2 style="margin-bottom:6px">${isNew?"Nuevo equipo":"Editar equipo"}</h2><p class="sub" style="margin:0 0 14px">${esc(c.n)}</p><div class="form">
+ <label class="full" for="qM">Equipo (tipo y modelo)<input id="qM" maxlength="160" value="${esc(b.mod)}" placeholder="Router TP-Link Archer AX55, portátil HP ProBook…"></label>
+ <label for="qS">Número de serie<input id="qS" maxlength="80" value="${esc(b.serie)}"></label>
+ <label for="qU">Ubicación<input id="qU" maxlength="120" value="${esc(b.ubi)}" placeholder="Recepción, despacho 2…"></label>
+ <label for="qI">Fecha de instalación<input id="qI" type="date" value="${b.inst}"></label>
+ <label for="qG">Garantía hasta<input id="qG" type="date" value="${b.gar}"></label>
+ <label class="full" for="qN">Notas<textarea id="qN" maxlength="3000">${esc(b.notas)}</textarea><span class="pwwarn" id="qW" hidden>No guardes contraseñas aquí: usa un gestor de contraseñas.</span></label>
+ <div class="err full" id="qErr" role="alert"></div>
+ <div class="actions">${isNew?"":`<button type="button" class="btn ghost danger" id="qDel" style="margin-right:auto">Borrar</button>`}<button type="button" class="btn ghost" id="qCan">Cancelar</button><button type="button" class="btn" id="qOk">Guardar</button></div></div>`;
+ pwWarn($("#qN"),$("#qW"));
+ $("#qCan").onclick=()=>dlg.close();
+ $("#qOk").onclick=()=>{const v={mod:$("#qM").value.trim(),serie:$("#qS").value.trim(),ubi:$("#qU").value.trim(),inst:$("#qI").value,gar:$("#qG").value,notas:$("#qN").value};
+  if(!v.mod&&!v.serie)return $("#qErr").textContent="Escribe al menos el equipo o el número de serie.";
+  const cc=AG.clients.find(x=>x.id===c.id);if(isNew)cc.eq.push({id:uid(),...v});else Object.assign(cc.eq.find(x=>x.id===q.id)||{},v);
+  dlg.close();agChanged();render();toast("Equipo guardado.")};
+ if(!isNew)$("#qDel").onclick=()=>{const s=snap(),cc=AG.clients.find(x=>x.id===c.id);cc.eq=cc.eq.filter(x=>x.id!==q.id);dlg.close();agChanged();render();toast("Equipo borrado.",undoTo(s))};
+ openDlg();dlg.scrollTop=0;$("#qM").focus()}
+
+/* ---------- MI RUTA: las citas del día con llamar, cómo llegar y cronómetro ---------- */
+const elapsed=()=>{if(!AG||!AG.run)return "";const m=Math.max(0,Math.floor((Date.now()-Date.parse(AG.run.start))/6e4));return (m>=60?Math.floor(m/60)+" h ":"")+m%60+" min"};
+function runBanner(){if(!AG.run)return "";const e=AG.events.find(x=>x.id===AG.run.ev);if(!e){AG.run=null;return ""}
+ return `<div class="notice runb"><span>${e.kind==="visita"?"Visita":"Reunión"} en curso: <b>${esc(e.t)}</b> · <span class="runT">${elapsed()}</span></span><button class="btn small" id="runStop">Terminar</button></div>`}
+const routeUrl=a=>"https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(a[a.length-1])+(a.length>1?"&waypoints="+encodeURIComponent(a.slice(0,-1).join("|")):"");
+function rCard(e,d){const c=cliOf(e.cli),addr=addrOf(e),T=todayS(),run=AG.run&&AG.run.ev===e.id,canRun=(e.kind==="visita"||e.kind==="reunion")&&d===T;
+ return `<div class="rcard ${run?"run":""}" style="--cc:${catOf(e.cat).c}"><div class="rc-h"><span class="h">${evTime(e)}</span>${e.kind?`<span class="bdg mut">${KSHORT[e.kind]}</span>`:""}${estBdg(e)}${e.kind==="visita"&&e.vis.inc?`<span class="sub mono">${esc(e.vis.inc)}</span>`:""}</div>
+ <div class="t">${esc(e.t)}</div>${c?`<div class="s">${esc(c.n)}${c.con?" · "+esc(c.con):""}</div>`:""}${addr?`<div class="s">${esc(addr)}</div>`:""}${c&&c.notas?`<div class="s" style="white-space:pre-wrap">${esc(c.notas.slice(0,160))}</div>`:""}
+ <div class="rc-b">${c&&c.tel?`<a class="btn ghost small" href="${esc(telHref(c.tel))}">Llamar</a>`:""}${addr?`<a class="btn ghost small" href="${esc(mapsUrl(addr))}" target="_blank" rel="noopener">Cómo llegar</a>`:""}${isUrl(e.loc)?`<a class="btn ghost small" href="${esc(e.loc)}" target="_blank" rel="noopener">Abrir el enlace</a>`:""}
+ ${canRun?(run?`<button class="btn small" data-stop="1">Terminar · <span class="runT">${elapsed()}</span></button>`:AG.run?"":`<button class="btn small" data-start="${e.id}" data-on="${d}">${e.kind==="visita"?"Empezar visita":"Empezar reunión"}</button>`):""}
+ <button class="btn ghost small" data-ev="${e.id}" data-on="${d}">${e.kind==="visita"?"Parte":e.kind==="reunion"?"Acta":"Abrir"}</button></div></div>`}
+function vRuta(){const T=todayS(),d=AGV.rd||T,L=evOnAll(d),addrs=[...new Set(L.map(addrOf).filter(Boolean))];
+ return `<div class="ag-bar"><span class="ttl">${d===T?"Mi ruta de hoy":"Ruta del "+dLong(d).toLowerCase()}</span><button class="navb" data-rd="0">Hoy</button><button class="navb" data-rd="-1" aria-label="Día anterior">‹</button><button class="navb" data-rd="1" aria-label="Día siguiente">›</button></div>
+ ${addrs.length>1?`<p style="margin:0 0 12px"><a class="btn ghost small" href="${esc(routeUrl(addrs))}" target="_blank" rel="noopener">Ver la ruta completa en Google Maps (${addrs.length} paradas)</a></p>`:""}
+ ${L.length?L.map(e=>rCard(e,d)).join(""):`<div class="panel empty">${d===T?"Hoy no tienes citas.":"No hay citas ese día."} <button class="linkbtn" data-newk="visita">Añadir una visita</button></div>`}`}
+function startRun(id,d){let e=AG.events.find(x=>x.id===id);if(!e||AG.run)return;
+ if(e.rep){e.ex.push(d);const c={...JSON.parse(JSON.stringify(e)),id:uid(),d,rep:"",until:"",ex:[],vis:normVis({}),met:normMet({})};AG.events.push(c);e=c}
+ const n=new Date();if(e.kind==="visita")e.vis={...e.vis,lleg:hm(n.getHours()*60+n.getMinutes())};
+ AG.run={ev:e.id,d,start:n.toISOString()};agChanged();render();toast(e.kind==="visita"?"Visita empezada. Llegada anotada a las "+e.vis.lleg+".":"Reunión empezada.")}
+function stopRun(){const r=AG.run;if(!r)return;const e=AG.events.find(x=>x.id===r.ev);AG.run=null;const n=new Date(),t=hm(n.getHours()*60+n.getMinutes()),st=new Date(r.start),s0=hm(st.getHours()*60+st.getMinutes());
+ if(e){if(e.kind==="visita")e.vis={...e.vis,sal:!e.vis.lleg||mins(t)>mins(e.vis.lleg)?t:""};else if(!e.all&&r.d===todayS()&&mins(t)>mins(s0)){e.s=s0;e.e=t}}
+ agChanged();render();if(e){toast(e.kind==="visita"?"Visita terminada. Rellena el parte.":"Reunión terminada. Rellena el acta.");evForm(e,e.d)}}
+
+/* ---------- HORAS: tiempo por cliente y mes, con kilómetros e importe ---------- */
+const durMin=e=>e.kind==="visita"&&!e.rep&&e.vis.lleg&&e.vis.sal&&mins(e.vis.sal)>mins(e.vis.lleg)?mins(e.vis.sal)-mins(e.vis.lleg):e.all?0:endM(e)-mins(e.s);
+function hoursRows(from,to){const R=[];for(let s=from;s<=to;s=addD(s,1))evOnAll(s).forEach(e=>{if(!e.cli&&!e.kind)return;R.push({e,s,min:durMin(e),km:e.kind==="visita"&&!e.rep?e.vis.km:0})});return R}
+const money=x=>x.toLocaleString("es-ES",{style:"currency",currency:"EUR"});
+function hoursData(){const m=AGV.hm||todayS().slice(0,7),from=m+"-01",to=ymd(new Date(+m.slice(0,4),+m.slice(5,7),0,12)),R=hoursRows(from,to),G={};
+ R.forEach(r=>{const k=r.e.cli||"";const g=G[k]||(G[k]={k,n:(cliOf(k)||{}).n||"Sin cliente",visita:0,reunion:0,llamada:0,"":0,min:0,km:0});g[r.e.kind]++;g.min+=r.min;g.km+=r.km});
+ const rows=Object.values(G).sort((a,b)=>b.min-a.min),tot=rows.reduce((a,g)=>({visita:a.visita+g.visita,reunion:a.reunion+g.reunion,llamada:a.llamada+g.llamada,min:a.min+g.min,km:a.km+g.km}),{visita:0,reunion:0,llamada:0,min:0,km:0});
+ const imp=g=>g.min/60*AG.cfg.rate+g.km*AG.cfg.kmRate;return {m,from,R,rows,tot,imp}}
+function vHoras(){const {from,R,rows,tot,imp}=hoursData(),rate=AG.cfg.rate>0||AG.cfg.kmRate>0,h=m=>nf(m/60);
+ return `<div class="ag-bar"><span class="ttl">${cap(pd(from).toLocaleDateString("es-ES",{month:"long",year:"numeric"}))}</span><button class="navb" data-hm="0">Este mes</button><button class="navb" data-hm="-1" aria-label="Mes anterior">‹</button><button class="navb" data-hm="1" aria-label="Mes siguiente">›</button>${R.length?`<button class="btn ghost small" id="hCsv2">Exportar a Excel (CSV)</button>`:""}</div>
+ <div class="kpis"><div class="kpi"><b>${h(tot.min)}</b><span>horas</span></div><div class="kpi"><b>${tot.visita}</b><span>visitas</span></div><div class="kpi"><b>${tot.reunion}</b><span>reuniones</span></div><div class="kpi"><b>${nf(tot.km)}</b><span>kilómetros</span></div>${rate?`<div class="kpi good"><b style="font-size:26px">${money(imp(tot))}</b><span>a facturar</span></div>`:""}</div>
+ ${R.length?`<div class="panel tablewrap"><h2 style="margin-bottom:8px">Por cliente</h2><table class="log"><thead><tr><th>Cliente</th><th>Visitas</th><th>Reuniones</th><th>Llamadas</th><th>Horas</th><th>Km</th>${rate?"<th>Importe</th>":""}</tr></thead><tbody>${rows.map(g=>`<tr><td>${g.k?`<button class="linkbtn" data-cli="${g.k}">${esc(g.n)}</button>`:esc(g.n)}</td><td>${g.visita}</td><td>${g.reunion}</td><td>${g.llamada}</td><td>${h(g.min)}</td><td>${nf(g.km)}</td>${rate?`<td>${money(imp(g))}</td>`:""}</tr>`).join("")}</tbody>
+  <tfoot><tr><td>Total</td><td>${tot.visita}</td><td>${tot.reunion}</td><td>${tot.llamada}</td><td>${h(tot.min)}</td><td>${nf(tot.km)}</td>${rate?`<td>${money(imp(tot))}</td>`:""}</tr></tfoot></table></div>
+ <div class="panel tablewrap" style="margin-top:16px"><h2 style="margin-bottom:8px">Detalle</h2><table class="log"><thead><tr><th>Fecha</th><th>Cliente</th><th>Tipo</th><th>Cita</th><th>Incidencia</th><th>Horas</th><th>Km</th><th>Estado</th></tr></thead><tbody>${R.map(r=>`<tr><td class="c">${pd(r.s).toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit"})}</td><td>${esc((cliOf(r.e.cli)||{}).n||"—")}</td><td>${KSHORT[r.e.kind]||"Evento"}</td><td><button class="linkbtn" data-ev="${r.e.id}" data-on="${r.s}">${esc(r.e.t)}</button></td><td class="c">${esc(r.e.kind==="visita"?r.e.vis.inc:"")}</td><td>${h(r.min)}</td><td>${r.km?nf(r.km):""}</td><td>${r.e.kind==="visita"&&r.e.vis.est?ESTN[r.e.vis.est]:""}</td></tr>`).join("")}</tbody></table></div>`
+ :`<div class="panel empty">Este mes no hay visitas, reuniones ni citas con clientes.</div>`}
+ <div class="panel" style="margin-top:16px"><h2>Tarifas (opcional)</h2><p class="sub" style="margin:6px 0 12px">Si las rellenas, se calcula el importe a facturar. La duración de las visitas sale de la llegada y la salida del parte; si no las anotas, de la hora de la cita.</p>
+  <div class="row2" style="max-width:420px"><label for="cfR" style="flex:1">€ por hora<input id="cfR" type="number" min="0" step="0.5" inputmode="decimal" value="${AG.cfg.rate||""}"></label><label for="cfK" style="flex:1">€ por km<input id="cfK" type="number" min="0" step="0.01" inputmode="decimal" value="${AG.cfg.kmRate||""}"></label></div></div>`}
+function hoursCsv(){const {m,R,imp}=hoursData(),q=v=>'"'+String(v??"").replace(/"/g,'""')+'"',n2=x=>String(Math.round(x*100)/100).replace(".",",");
+ const lines=[["Fecha","Cliente","Empresa","Tipo","Cita","Incidencia","Llegada","Salida","Horas","Km","Estado",AG.cfg.rate||AG.cfg.kmRate?"Importe (€)":""].map(q).join(";"),
+  ...R.map(r=>{const c=cliOf(r.e.cli)||{};return [pd(r.s).toLocaleDateString("es-ES"),c.n||"",c.emp||"",KIND[r.e.kind],r.e.t,r.e.kind==="visita"?r.e.vis.inc:"",r.e.kind==="visita"?r.e.vis.lleg:"",r.e.kind==="visita"?r.e.vis.sal:"",n2(r.min/60),r.km?n2(r.km):"",r.e.kind==="visita"?ESTN[r.e.vis.est]:"",AG.cfg.rate||AG.cfg.kmRate?n2(imp(r)):""].map(q).join(";")})];
+ download("digesto-horas-"+m+".csv","﻿"+lines.join("\r\n"),"text/csv");toast("Horas descargadas.")}
+
+/* ---------- IMPRIMIR: parte de trabajo o acta, listo para guardar en PDF ---------- */
+function printDoc(title,body){const f=document.createElement("iframe");f.setAttribute("aria-hidden","true");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";document.body.append(f);
+ const d=f.contentDocument;d.open();d.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+ body{font-family:Helvetica,Arial,sans-serif;color:#16202c;margin:0;font-size:13px;line-height:1.45}
+ header{display:flex;gap:14px;align-items:center;border-bottom:2px solid #1f4e79;padding-bottom:12px;margin-bottom:14px}
+ header img{border-radius:10px}.k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#55626f}
+ h1{font-family:Georgia,serif;font-weight:400;font-size:23px;margin:2px 0 0}
+ .inc{margin-left:auto;font-family:Menlo,monospace;font-size:14px;border:1.5px solid #1f4e79;color:#1f4e79;padding:4px 10px;border-radius:6px;white-space:nowrap}
+ h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#1f4e79;margin:18px 0 6px}
+ table{width:100%;border-collapse:collapse}th{width:26%;text-align:left;color:#55626f;font-weight:600;padding:6px 8px;vertical-align:top;border-bottom:1px solid #e3e7ec}
+ td{padding:6px 8px;border-bottom:1px solid #e3e7ec;vertical-align:top}ul{list-style:none;padding:0;margin:0}li{padding:3px 0}
+ .firmas{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:30px;break-inside:avoid}.fl{font-size:12px;color:#55626f;margin-bottom:6px}
+ .firmas img{width:100%;height:110px;object-fit:contain;object-position:left bottom;border-bottom:1px solid #16202c;display:block}.fb{height:110px;border-bottom:1px solid #16202c}.fn{font-size:12px;margin-top:4px}
+ footer{margin-top:28px;font-size:10px;color:#8a96a3;text-align:center}@page{margin:14mm}</style></head><body>${body}</body></html>`);d.close();
+ const go=()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast("No se pudo abrir la impresión en este navegador.")}setTimeout(()=>f.remove(),60000)};
+ const imgs=[...d.images];Promise.all(imgs.map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r}))).then(()=>setTimeout(go,150))}
+function printEv(e,on){const c=cliOf(e.cli),v=e.vis,m=e.met,isV=e.kind==="visita",logo=new URL("icono-digesto.svg",location.href).href,br=x=>esc(x).replace(/\n/g,"<br>");
+ const row=(l,x)=>x?`<tr><th>${l}</th><td>${br(x)}</td></tr>`:"",day=on||e.d;
+ const dm=isV&&v.lleg&&v.sal&&mins(v.sal)>mins(v.lleg)?mins(v.sal)-mins(v.lleg):0;
+ const body=`<header><img src="${logo}" width="46" height="46" alt=""><div><div class="k">${isV?"Parte de trabajo":"Acta de reunión"}</div><h1>${esc(e.t)}</h1></div>${isV&&v.inc?`<div class="inc">${esc(v.inc)}</div>`:""}</header>
+ <table>${row("Fecha",cap(pd(day).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"})))}${isV?row("Llegada",v.lleg)+row("Salida",v.sal)+row("Duración",dm?(dm>=60?Math.floor(dm/60)+" h ":"")+dm%60+" min":"")+row("Kilómetros",v.km?nf(v.km)+" km":""):row("Hora",evTime(e))}${row("Lugar",addrOf(e)||e.loc)}${row(isV?"Técnico":"Organiza",ME?ME.email:"")}</table>
+ ${c?`<h2>Cliente</h2><table>${row("Nombre",c.n)}${row("Empresa",c.emp!==c.n?c.emp:"")}${row("Contacto",c.con)}${row("Teléfono",c.tel)}${row("Correo",c.mail)}${row("Dirección",c.dir)}</table>`:""}
+ ${isV?`<h2>Trabajo realizado</h2><table>${row("Problema",v.prob)}${row("Diagnóstico",v.diag)}${row("Solución",v.sol)}${row("Material",v.mat)}${row("Estado",v.est?ESTN[v.est]:"")}</table>
+  ${v.chk.length?`<h2>Lista de comprobación</h2><ul>${v.chk.map(x=>`<li>${x.ok?"☑":"☐"} ${esc(x.t)}</li>`).join("")}</ul>`:""}
+  ${e.notes?`<h2>Observaciones</h2><p>${br(e.notes)}</p>`:""}
+  <div class="firmas"><div><div class="fl">Firma del cliente</div>${v.firma?`<img src="${v.firma}" alt="Firma del cliente">`:`<div class="fb"></div>`}<div class="fn">${esc(v.firmante)}</div></div><div><div class="fl">Firma del técnico</div><div class="fb"></div></div></div>`
+ :`<h2>Acta</h2><table>${row("Asistentes",m.asis)}${row("Puntos tratados",m.puntos)}${row("Acuerdos",m.acuerdos)}${row("Próximos pasos",m.pasos)}</table>${e.notes?`<h2>Observaciones</h2><p>${br(e.notes)}</p>`:""}`}
+ <footer>Documento generado con Digesto el ${new Date().toLocaleString("es-ES")}</footer>`;
+ printDoc((isV?"Parte "+(v.inc||""):"Acta")+" - "+(c?c.n:e.t),body)}
+
+/* ---------- PLANTILLAS de listas de comprobación ---------- */
+function tplForm(){let L=AG.tpls.map(t=>({...t,items:[...t.items]}));
+ const paint=()=>{F.innerHTML=`<h2 style="margin-bottom:6px">Plantillas de comprobación</h2><p class="sub" style="margin:0 0 14px">Listas que añades al parte de una visita con un toque. Un punto por línea.</p>
+  ${L.map((t,i)=>`<div class="panel" style="padding:12px;margin-bottom:10px"><div class="row2"><input data-tn="${i}" value="${esc(t.n)}" maxlength="80" aria-label="Nombre de la plantilla"><button type="button" class="iconbtn" data-tdel="${i}">Borrar</button></div><textarea data-ti="${i}" style="margin-top:8px;min-height:110px" aria-label="Puntos de la plantilla">${esc(t.items.join("\n"))}</textarea></div>`).join("")}
+  <button type="button" class="linkbtn" id="tAdd">Añadir plantilla</button>
+  <div class="form"><div class="actions"><button type="button" class="btn ghost" id="tCan">Cancelar</button><button type="button" class="btn" id="tOk">Guardar</button></div></div>`;
+  F.querySelectorAll("[data-tn]").forEach(i=>i.oninput=()=>L[+i.dataset.tn].n=i.value);
+  F.querySelectorAll("[data-ti]").forEach(i=>i.oninput=()=>L[+i.dataset.ti].items=i.value.split("\n"));
+  F.querySelectorAll("[data-tdel]").forEach(b=>b.onclick=()=>{L.splice(+b.dataset.tdel,1);paint()});
+  $("#tAdd").onclick=()=>{L.push({id:uid(),n:"Nueva plantilla",items:[]});paint();const ins=F.querySelectorAll("[data-tn]");ins[ins.length-1].select()};
+  $("#tCan").onclick=()=>dlg.close();
+  $("#tOk").onclick=()=>{AG.tpls=L.map(t=>({...t,n:t.n.trim()||"Plantilla",items:t.items.map(x=>x.trim()).filter(Boolean)}));dlg.close();agChanged();toast("Plantillas guardadas.")}};
+ F.onsubmit=e=>e.preventDefault();paint();openDlg();dlg.scrollTop=0}
+
+/* Eventos de las vistas nuevas */
+function bindPro(root){
+ const bindCli=()=>root.querySelectorAll("[data-cli]").forEach(b=>b.onclick=()=>{AGV.tab="clientes";AGV.q="";AGV.cli=b.dataset.cli;render();window.scrollTo(0,0)});bindCli();
+ const cq=$("#cliQ");if(cq)cq.oninput=()=>{AGV.cq=cq.value;$("#cliList").innerHTML=cliList();bindCli()};
+ const cn=$("#cliNew");if(cn)cn.onclick=()=>cliForm();
+ const cb=$("#cliBack");if(cb)cb.onclick=()=>{AGV.cli="";paintAg();window.scrollTo(0,0)};
+ const c=AGV.cli&&cliOf(AGV.cli);
+ const ce=$("#cliEd");if(ce&&c)ce.onclick=()=>cliForm(c);
+ const ct=$("#cliTk");if(ct&&c)ct.onclick=()=>tkForm(null,{cli:c.id,cat:catFor("visita")});
+ const en=$("#eqNew");if(en&&c)en.onclick=()=>eqForm(c);
+ root.querySelectorAll("[data-eq]").forEach(b=>b.onclick=()=>eqForm(c,c.eq.find(q=>q.id===b.dataset.eq)));
+ root.querySelectorAll("[data-newk]").forEach(b=>b.onclick=()=>newKind(b.dataset.newk));
+ root.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startRun(b.dataset.start,b.dataset.on));
+ root.querySelectorAll("[data-stop]").forEach(b=>b.onclick=stopRun);
+ root.querySelectorAll("[data-rd]").forEach(b=>b.onclick=()=>{const n=+b.dataset.rd;AGV.rd=n?addD(AGV.rd||todayS(),n):"";paintAg()});
+ root.querySelectorAll("[data-hm]").forEach(b=>b.onclick=()=>{const n=+b.dataset.hm;AGV.hm=n?addM((AGV.hm||todayS().slice(0,7))+"-01",n).slice(0,7):"";paintAg()});
+ const hc=$("#hCsv2");if(hc)hc.onclick=hoursCsv;
+ [["cfR","rate"],["cfK","kmRate"]].forEach(([id,k])=>{const i=$("#"+id);if(i)i.onchange=()=>{AG.cfg[k]=Math.max(0,+i.value||0);agChanged();paintAg()}});
+ const fc=$("#fCli");if(fc)fc.onchange=()=>{AGV.fcli=fc.value;paintAg()}}
 
 /* Avisos: se comprueban cada 30 segundos mientras el panel está abierto */
 const fired=new Set();
-function agTick(){if(!AG||!ME)return;const now=new Date(),T=ymd(now),nm=now.getHours()*60+now.getMinutes();
+function agTick(){if(!AG||!ME)return;document.querySelectorAll(".runT").forEach(x=>x.textContent=elapsed());const now=new Date(),T=ymd(now),nm=now.getHours()*60+now.getMinutes();
  [T,addD(T,1)].forEach((s,k)=>evOnAll(s).forEach(e=>{if(e.rem<0)return;const start=(e.all?9*60:mins(e.s))+k*1440,key=e.id+s;
   if(nm>=start-e.rem&&nm<=start&&!fired.has(key)){fired.add(key);const msg=`${e.t} · ${k?"mañana":"hoy"}${e.all?"":" a las "+e.s}${e.loc?" · "+e.loc:""}`;
    toast("Recordatorio: "+msg);if(window.Notification&&Notification.permission==="granted")try{new Notification("Agenda · Digesto",{body:msg,tag:key})}catch(x){}}}))}
@@ -925,7 +1260,7 @@ matchMedia("(max-width:820px)").addEventListener("change",()=>{if(VIEW==="agenda
 /* ---------- CONFIRMACIONES ---------- */
 function confirmBox(msg,okLabel,yes){F.onsubmit=e=>e.preventDefault();
  F.innerHTML=`<h2 style="margin-bottom:10px">¿Seguro?</h2><p style="margin:0 0 6px">${esc(msg)}</p><div class="form"><div class="actions"><button type="button" class="btn ghost" id="kNo">Cancelar</button><button type="button" class="btn" id="kYes">${esc(okLabel)}</button></div></div>`;
- $("#kNo").onclick=()=>dlg.close();$("#kYes").onclick=()=>{dlg.close();yes()};dlg.showModal()}
+ $("#kNo").onclick=()=>dlg.close();$("#kYes").onclick=()=>{dlg.close();yes()};openDlg()}
 
 /* ---------- ARRANQUE ---------- */
 VIEW=(location.hash||"").slice(1)||"agenda";
