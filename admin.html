@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-/* Layout: barra lateral fija con las secciones del panel (pestañas arriba en el teléfono) y área de trabajo; mismo lenguaje visual que Digesto, en tono de consola */
+/* Layout: barra lateral fija con las secciones del panel (pestañas arriba en el teléfono) y área de trabajo; lenguaje visual propio de Agenda Firztnet */
 :root{
   --bg:#eef1f4; --surface:#ffffff; --surface-2:#f5f7f9; --line:#d9dfe6;
   --ink:#16202c; --muted:#55626f; --accent:#1f4e79; --accent-soft:#e1eaf3;
@@ -464,7 +464,7 @@ $("#loginForm").onsubmit=async e=>{e.preventDefault();const b=$("#lGo");if(b.dat
 async function enter(ses){
  const {data,error}=await sb.rpc("digesto_mi_estado");
  if(error){await sb.auth.signOut({scope:"local"});return showLogin("Falta preparar el panel en Supabase: ejecuta supabase-admin.sql.")}
- if(!data||!data.admin){await sb.auth.signOut({scope:"local"});return showLogin("Esta cuenta no tiene permisos de administración. Los estudiantes entran por la web de Digesto.")}
+ if(!data||!data.admin){await sb.auth.signOut({scope:"local"});return showLogin("Esta cuenta no tiene permisos de administración. Los estudiantes entran por su propia web.")}
  ME={id:ses.user.id,email:ses.user.email||""};$("#whoEmail").textContent=ME.email;
  $("#login").hidden=true;$("#app").hidden=false;go(VIEW);loadAll()}
 async function signOut(){setMenu(false);if(agDirty){clearTimeout(agT);await agPush()}await sb.auth.signOut({scope:"local"}).catch(()=>{});ME=null;DATA={};AG=null;AGM="";showLogin("Sesión cerrada.")}
@@ -504,7 +504,7 @@ const errBox=m=>`<div class="panel"><h2>No disponible</h2><p class="sub" style="
 /* ---------- RESUMEN ---------- */
 function vResumen(){
  const rows=DATA.cuentas;
- if(!rows){main.innerHTML=head("Panel","Resumen de Digesto","")+(DATA.cuentasErr?errBox(DATA.cuentasErr):`<div class="panel empty">Cargando…</div>`);return}
+ if(!rows){main.innerHTML=head("Panel","Resumen de cuentas","")+(DATA.cuentasErr?errBox(DATA.cuentasErr):`<div class="panel empty">Cargando…</div>`);return}
  const now=Date.now(),act7=rows.filter(r=>now-lastAct(r)<7*D).length,off=rows.filter(r=>!r.activa).length,unc=rows.filter(r=>!r.confirmado).length,idle=rows.filter(r=>now-lastAct(r)>=30*D).length,bytes=rows.reduce((a,r)=>a+(r.bytes||0),0);
  const sum=k=>rows.reduce((a,r)=>a+(r[k]||0),0);
  const m0=new Date();m0.setHours(0,0,0,0);m0.setDate(m0.getDate()-(m0.getDay()+6)%7);
@@ -513,7 +513,7 @@ function vResumen(){
  const visibles=(DATA.coms||[]).filter(c=>comState(c)==="Visible ahora");
  const newest=[...rows].sort((a,b)=>Date.parse(b.creado)-Date.parse(a.creado)).slice(0,5);
  const top=[...rows].filter(r=>lastAct(r)).sort((a,b)=>lastAct(b)-lastAct(a)).slice(0,5);
- main.innerHTML=head("Panel","Resumen de Digesto",`Situación de todas las cuentas${DATA.at?`, actualizada a las ${DATA.at.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}`:""}.`,`<button class="btn" data-go="comunicados">Nuevo comunicado</button>`)+`
+ main.innerHTML=head("Panel","Resumen de cuentas",`Situación de todas las cuentas${DATA.at?`, actualizada a las ${DATA.at.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}`:""}.`,`<button class="btn" data-go="comunicados">Nuevo comunicado</button>`)+`
  <div class="kpis">
   <div class="kpi"><b>${rows.length}</b><span>${rows.length===1?"cuenta":"cuentas"} en total</span></div>
   <div class="kpi good"><b>${act7}</b><span>activas esta semana</span></div>
@@ -528,7 +528,7 @@ function vResumen(){
   <div class="panel"><h2>Última actividad de las cuentas</h2>
    <div class="seg" role="img" aria-label="${buckets.map(b=>b[0]+": "+b[2]).join(", ")}">${buckets.map(([,c,n])=>n?`<i style="width:${n/Math.max(1,rows.length)*100}%;background:${c}"></i>`:"").join("")}</div>
    <div class="lg">${buckets.map(([l,c,n])=>`<span style="--c:${c}">${l}: <b>${n}</b></span>`).join("")}</div></div>
-  <div class="panel"><h2>Uso de Digesto</h2>
+  <div class="panel"><h2>Uso de la web de estudiantes</h2>
    <div class="kpis" style="margin:14px 0 0">${[["asignaturas",sum("asignaturas")],["temas",sum("temas")],["fichas",sum("fichas")],["fechas en agendas",sum("fechas")]].map(([l,n])=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join("")}</div></div>
  </div><div class="stack">
   ${AG&&AGM!=="error"?(()=>{const T=todayS(),E=evOnAll(T),K=AG.tasks.filter(t=>!t.done&&t.due&&t.due<=T);
@@ -545,10 +545,10 @@ function vResumen(){
 let AQ="", AF="todas", AS="recientes";
 function vCuentas(){
  const rows=DATA.cuentas;
- if(!rows){main.innerHTML=head("Cuentas","Cuentas de Digesto","")+(DATA.cuentasErr?errBox(DATA.cuentasErr):`<div class="panel empty">Cargando…</div>`);return}
+ if(!rows){main.innerHTML=head("Cuentas","Cuentas de estudiantes","")+(DATA.cuentasErr?errBox(DATA.cuentasErr):`<div class="panel empty">Cargando…</div>`);return}
  const off=rows.filter(r=>!r.activa).length,unc=rows.filter(r=>!r.confirmado).length;
  const chips=[["todas","Todas",rows.length],["activas","Activas",rows.length-off],["off","Desactivadas",off],["admin","Administración",rows.filter(r=>r.es_admin).length],["unc","Sin confirmar",unc],["inactivas","Sin actividad en 30 días",rows.filter(r=>Date.now()-lastAct(r)>=30*D).length]];
- main.innerHTML=head("Cuentas","Cuentas de Digesto","Activa, desactiva o elimina cuentas y da permisos de administración. Nunca se muestra el contenido de los cuadernos.",`<button class="btn" id="aCsv">Exportar lista</button>`)+`
+ main.innerHTML=head("Cuentas","Cuentas de estudiantes","Activa, desactiva o elimina cuentas y da permisos de administración. Nunca se muestra el contenido de los cuadernos.",`<button class="btn" id="aCsv">Exportar lista</button>`)+`
  <div class="toolbar"><input id="aq" type="search" placeholder="Buscar por correo…" aria-label="Buscar cuentas" autocomplete="off" value="${esc(AQ)}"><select id="as" aria-label="Ordenar cuentas">${[["recientes","Altas más recientes"],["acceso","Actividad más reciente"],["uso","Más espacio usado"],["correo","Correo (A-Z)"]].map(([k,v])=>`<option value="${k}" ${AS===k?"selected":""}>${v}</option>`).join("")}</select></div>
  <div class="chips">${chips.map(([k,l,n])=>`<button class="chip" data-af="${k}" aria-pressed="${AF===k}">${l} (${n})</button>`).join("")}</div>
  <div id="alist"></div>`;
@@ -573,12 +573,12 @@ function paintAccounts(){const box=$("#alist");if(!box)return;const L=accRows();
   confirmBox(`${b.dataset.em} no podrá entrar ni ver su cuaderno hasta que la vuelvas a activar. Sus datos se conservan.`,"Desactivar",()=>act("digesto_admin_activar",{objetivo:b.dataset.aon,valor:false},"Cuenta desactivada."))});
  box.querySelectorAll("[data-aadm]").forEach(b=>b.onclick=()=>{const on=b.dataset.val==="1";
   if(!on)return act("digesto_admin_hacer_admin",{objetivo:b.dataset.aadm,valor:false},"Permisos de administración retirados.");
-  confirmBox(`${b.dataset.em} podrá entrar en este panel y activar, desactivar o eliminar cualquier cuenta.`,"Dar administración",()=>act("digesto_admin_hacer_admin",{objetivo:b.dataset.aadm,valor:true},"Ahora también administra Digesto."))});
+  confirmBox(`${b.dataset.em} podrá entrar en este panel y activar, desactivar o eliminar cualquier cuenta.`,"Dar administración",()=>act("digesto_admin_hacer_admin",{objetivo:b.dataset.aadm,valor:true},"Ahora también tiene permisos de administración."))});
  box.querySelectorAll("[data-adel]").forEach(b=>b.onclick=()=>confirmBox(`Se eliminará la cuenta ${b.dataset.em} y su cuaderno entero, para siempre. No se puede deshacer. Si dudas, desactívala en su lugar.`,"Eliminar para siempre",()=>act("digesto_admin_eliminar",{objetivo:b.dataset.adel},"Cuenta eliminada.")))}
 function exportCsv(){const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"',d=t=>t?new Date(t).toLocaleString("es-ES"):"";
  const lines=[["Correo","Alta","Último acceso","Último guardado","Activa","Administración","Correo confirmado","Asignaturas","Temas","Fichas","Fechas","Bytes"].map(q).join(";"),
   ...DATA.cuentas.map(r=>[r.email,d(r.creado),d(r.ultimo_acceso),d(r.guardado),r.activa?"sí":"no",r.es_admin?"sí":"no",r.confirmado?"sí":"no",r.asignaturas,r.temas,r.fichas,r.fechas,r.bytes].map(q).join(";"))];
- download("digesto-cuentas-"+new Date().toISOString().slice(0,10)+".csv","﻿"+lines.join("\r\n"),"text/csv");toast("Lista descargada.")}
+ download("firztnet-cuentas-"+new Date().toISOString().slice(0,10)+".csv","﻿"+lines.join("\r\n"),"text/csv");toast("Lista descargada.")}
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
 
 /* ---------- COMUNICADOS ---------- */
@@ -590,14 +590,14 @@ function mantText(c){if(!c.mant_inicio)return "";const a=new Date(c.mant_inicio)
  return a.toDateString()===b.toDateString()?`El ${day(a)}, de ${hr(a)} a ${hr(b)}.`:`Del ${day(a)} a las ${hr(a)} al ${day(b)} a las ${hr(b)}.`}
 function bannerHtml(c){return `<div class="banner ${esc(c.tipo)}"><div style="min-width:0"><div class="k">${CT[c.tipo]||"Aviso"}</div><div class="t">${esc(c.titulo)}</div>${c.mensaje?`<div class="m">${esc(c.mensaje)}</div>`:""}${c.tipo==="mantenimiento"&&c.mant_inicio?`<div class="w">${esc(mantText(c))}</div>`:""}</div></div>`}
 function vComunicados(){
- main.innerHTML=head("Comunicados","Comunicados a todas las cuentas","Lo que publiques aparece arriba en Digesto para todos los estudiantes, y también en la pantalla de acceso. Úsalo para avisar de un mantenimiento, una novedad o algo urgente.",`<button class="btn ghost" id="cTpl">Plantilla de mantenimiento</button><button class="btn" id="cNew">Nuevo comunicado</button>`)+
+ main.innerHTML=head("Comunicados","Comunicados a todas las cuentas","Lo que publiques aparece arriba en la web de estudiantes, para todas las cuentas, y también en la pantalla de acceso. Úsalo para avisar de un mantenimiento, una novedad o algo urgente.",`<button class="btn ghost" id="cTpl">Plantilla de mantenimiento</button><button class="btn" id="cNew">Nuevo comunicado</button>`)+
  (DATA.coms?(DATA.coms.length?`<div class="coms">${DATA.coms.map(c=>{const st=comState(c);return `<div class="com"><div class="com-h"><div style="min-width:0"><span class="bdg ${st==="Visible ahora"?"on":st==="Programado"?"unc":"mut"}">${st}</span> <span class="sub">${CT[c.tipo]||"Aviso"} · creado ${relT(c.creado)}</span></div>
   <div class="hbtns"><button class="btn ghost small" data-ced="${c.id}">Editar</button><button class="btn ghost small" data-ctog="${c.id}">${c.activo?"Retirar":"Volver a publicar"}</button><button class="btn ghost small danger" data-cdel="${c.id}">Borrar</button></div></div>
   ${bannerHtml(c)}
   <div class="sub">${c.desde?"Se muestra desde "+fmtDT(c.desde):"Se muestra desde que se publicó"}${c.hasta?" hasta "+fmtDT(c.hasta):", sin fecha de fin"}.</div></div>`}).join("")}</div>`:`<div class="panel empty">Aún no has publicado ningún comunicado.</div>`):DATA.comsErr?errBox(DATA.comsErr):`<div class="panel empty">Cargando…</div>`);
  $("#cNew").onclick=()=>comForm();
  $("#cTpl").onclick=()=>{const a=new Date();a.setDate(a.getDate()+1);a.setHours(22,0,0,0);const b=new Date(a);b.setHours(23,59,0,0);
-  comForm({tipo:"mantenimiento",titulo:"Mantenimiento programado",mensaje:"Digesto no estará disponible durante el mantenimiento. Guarda tus cambios antes de esa hora. Tus datos no se pierden.",mant_inicio:a.toISOString(),mant_fin:b.toISOString(),hasta:b.toISOString(),activo:true})};
+  comForm({tipo:"mantenimiento",titulo:"Mantenimiento programado",mensaje:"La web no estará disponible durante el mantenimiento. Guarda tus cambios antes de esa hora. Tus datos no se pierden.",mant_inicio:a.toISOString(),mant_fin:b.toISOString(),hasta:b.toISOString(),activo:true})};
  main.querySelectorAll("[data-ced]").forEach(b=>b.onclick=()=>comForm(DATA.coms.find(c=>String(c.id)===b.dataset.ced)));
  main.querySelectorAll("[data-ctog]").forEach(b=>b.onclick=()=>{const c=DATA.coms.find(x=>String(x.id)===b.dataset.ctog);saveCom({...c,activo:!c.activo},c.activo?"Comunicado retirado.":"Comunicado publicado de nuevo.")});
  main.querySelectorAll("[data-cdel]").forEach(b=>b.onclick=()=>{const c=DATA.coms.find(x=>String(x.id)===b.dataset.cdel);confirmBox(`Se borrará el comunicado «${c.titulo}». Si solo quieres que deje de verse, usa Retirar.`,"Borrar",()=>act("digesto_admin_borrar_comunicado",{p_id:c.id},"Comunicado borrado."))})}
@@ -626,7 +626,7 @@ function comForm(c){c=c||{tipo:"info",activo:true};
   if(v.mant_inicio&&v.mant_fin&&Date.parse(v.mant_fin)<=Date.parse(v.mant_inicio))return e.textContent="El mantenimiento debe terminar después de empezar.";
   if(v.desde&&v.hasta&&Date.parse(v.hasta)<=Date.parse(v.desde))return e.textContent="La fecha «hasta» debe ser posterior a «desde».";
   if(v.hasta&&Date.parse(v.hasta)<=Date.now())return e.textContent="La fecha «hasta» ya ha pasado: nadie lo vería.";
-  dlg.close();await saveCom(v,c.id?"Comunicado guardado.":"Comunicado publicado. Los estudiantes lo verán al abrir Digesto.")};
+  dlg.close();await saveCom(v,c.id?"Comunicado guardado.":"Comunicado publicado. Los estudiantes lo verán al abrir la web.")};
  openDlg();$("#cTit").focus()}
 
 /* ---------- REGISTRO ---------- */
@@ -634,12 +634,12 @@ function vRegistro(){
  const aj=DATA.aj;
  if(!aj){main.innerHTML=head("Registro","Registro e invitaciones","")+(DATA.ajErr?errBox(DATA.ajErr):`<div class="panel empty">Cargando…</div>`);return}
  const rows=DATA.cuentas||[];
- main.innerHTML=head("Registro","Registro e invitaciones","Decide quién puede crear una cuenta nueva en Digesto.")+`
+ main.innerHTML=head("Registro","Registro e invitaciones","Decide quién puede crear una cuenta nueva en la web de estudiantes.")+`
  <div class="grid2"><div class="panel stack"><div class="phead" style="margin:0"><h2>Registro de cuentas nuevas</h2><span class="bdg ${aj.registro_abierto?"off":"on"}">${aj.registro_abierto?"Abierto":"Cerrado"}</span></div>
-  <p class="sub" style="margin:0">${aj.registro_abierto?"Cualquiera con el enlace de Digesto puede crear una cuenta. Ciérralo cuando ya estén dentro las personas que quieres.":"Solo pueden crear cuenta los correos de la lista de invitados. En la pantalla de acceso se muestra «Acceso solo con invitación»."}</p>
+  <p class="sub" style="margin:0">${aj.registro_abierto?"Cualquiera con el enlace de la web de estudiantes puede crear una cuenta. Ciérralo cuando ya estén dentro las personas que quieres.":"Solo pueden crear cuenta los correos de la lista de invitados. En la pantalla de acceso se muestra «Acceso solo con invitación»."}</p>
   <div><button class="btn ${aj.registro_abierto?"":"ghost"}" id="rReg">${aj.registro_abierto?"Cerrar el registro":"Abrir el registro"}</button></div></div>
  <div class="panel stack"><h2>Invitados (${aj.invitados.length})</h2>
-  <p class="sub" style="margin:0">La persona invitada entra en Digesto, pulsa «Tengo una invitación», usa este mismo correo y elige su contraseña.</p>
+  <p class="sub" style="margin:0">La persona invitada entra en la web de estudiantes, pulsa «Tengo una invitación», usa este mismo correo y elige su contraseña.</p>
   <div style="display:flex;gap:8px"><input id="rInv" type="email" placeholder="correo@ejemplo.com" aria-label="Correo para invitar" autocomplete="off" style="flex:1;min-width:0"><button class="btn" id="rAdd">Invitar</button></div>
   <div>${aj.invitados.map(e=>`<div class="row"><span style="min-width:0;overflow-wrap:anywhere">${esc(e)} ${rows.some(r=>(r.email||"").toLowerCase()===e)?`<span class="bdg on">Ya tiene cuenta</span>`:`<span class="bdg mut">Pendiente</span>`}</span><button class="iconbtn" data-unv="${esc(e)}">Quitar</button></div>`).join("")||`<div class="empty">Sin invitados.</div>`}</div></div></div>`;
  $("#rReg").onclick=()=>aj.registro_abierto?act("digesto_admin_registro",{valor:false},"Registro cerrado. Solo entran los invitados."):act("digesto_admin_registro",{valor:true},"Registro abierto.");
@@ -657,7 +657,7 @@ function vHistorial(){
  const paint=()=>{const f=fold(HQ.trim()),R=L.filter(a=>!f||fold([a.accion,a.detalle,a.admin_email].join(" ")).includes(f));
   $("#hlist").innerHTML=R.length?`<table class="log"><thead><tr><th>Cuándo</th><th>Acción</th><th>Detalle</th><th>Quién</th></tr></thead><tbody>${R.map(a=>`<tr><td class="c">${new Date(a.cuando).toLocaleString("es-ES",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}</td><td><b>${esc(a.accion)}</b></td><td>${esc(a.detalle)}</td><td>${esc(a.admin_email||"")}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">${L.length?"Nada coincide con la búsqueda.":"Todavía no hay acciones registradas."}</div>`};
  paint();const q=$("#hq");q.oninput=()=>{HQ=q.value;paint()};
- const c=$("#hCsv");if(c)c.onclick=()=>{const q2=v=>'"'+String(v??"").replace(/"/g,'""')+'"';download("digesto-historial-"+new Date().toISOString().slice(0,10)+".csv","﻿"+[["Cuándo","Acción","Detalle","Quién"].map(q2).join(";"),...L.map(a=>[new Date(a.cuando).toLocaleString("es-ES"),a.accion,a.detalle,a.admin_email].map(q2).join(";"))].join("\r\n"),"text/csv");toast("Historial descargado.")}}
+ const c=$("#hCsv");if(c)c.onclick=()=>{const q2=v=>'"'+String(v??"").replace(/"/g,'""')+'"';download("firztnet-historial-"+new Date().toISOString().slice(0,10)+".csv","﻿"+[["Cuándo","Acción","Detalle","Quién"].map(q2).join(";"),...L.map(a=>[new Date(a.cuando).toLocaleString("es-ES"),a.accion,a.detalle,a.admin_email].map(q2).join(";"))].join("\r\n"),"text/csv");toast("Historial descargado.")}}
 
 /* ---------- MI CUENTA ---------- */
 function vCuenta(){
@@ -703,7 +703,7 @@ function festYear(y){if(festMemo[y])return festMemo[y];const m={};
 const fest=s=>festYear(+s.slice(0,4))[s]||"";
 
 const AGCOL=[["#2f6fb0","Azul"],["#2f7a4f","Verde"],["#b3312f","Rojo"],["#b8730f","Ámbar"],["#6b4fa0","Morado"],["#1f7a7a","Turquesa"],["#8a2b3a","Granate"],["#5b6670","Gris"]];
-const AGCATS=[{id:"trabajo",n:"Trabajo",c:"#2f6fb0"},{id:"reuniones",n:"Reuniones",c:"#6b4fa0"},{id:"digesto",n:"Digesto",c:"#8a2b3a"},{id:"personal",n:"Personal",c:"#2f7a4f"}];
+const AGCATS=[{id:"trabajo",n:"Trabajo",c:"#2f6fb0"},{id:"reuniones",n:"Reuniones",c:"#6b4fa0"},{id:"digesto",n:"Web estudiantes",c:"#8a2b3a"},{id:"personal",n:"Personal",c:"#2f7a4f"}];
 const REPN={"":"No se repite",dia:"Cada día",lab:"De lunes a viernes",sem:"Cada semana",mes:"Cada mes",tri:"Cada 3 meses",sem6:"Cada 6 meses",ano:"Cada año"};
 /* Tipos de cita para el trabajo con clientes */
 const KIND={"":"Evento",visita:"Visita de soporte",reunion:"Reunión con cliente",llamada:"Llamada"};
@@ -724,7 +724,7 @@ let AGV={tab:"hoy",mode:mob()?"dia":"semana",d:todayS(),tf:"pend",q:"",sc:null,c
 let AGH=new Set();try{AGH=new Set(JSON.parse(localStorage.getItem("digesto-agenda-ocultas")||"[]"))}catch(e){}
 
 function agNorm(x){x=x&&typeof x==="object"?x:{};const A=v=>Array.isArray(v)?v:[],T=v=>typeof v==="string"?v:"",isD=v=>/^\d{4}-\d\d-\d\d$/.test(v||""),isT=v=>/^\d\d:\d\d$/.test(v||"");
- const cats=A(x.cats).filter(c=>c&&c.id).map(c=>({id:T(c.id),n:T(c.n)||"Categoría",c:/^#[0-9a-f]{6}$/i.test(c.c)?c.c:AGCOL[0][0]}));
+ const cats=A(x.cats).filter(c=>c&&c.id).map(c=>({id:T(c.id),n:c.id==="digesto"&&c.n==="Digesto"?"Web estudiantes":T(c.n)||"Categoría",c:/^#[0-9a-f]{6}$/i.test(c.c)?c.c:AGCOL[0][0]}));
  return {v:1,cats:cats.length?cats:AGCATS.map(c=>({...c})),
   events:A(x.events).filter(e=>e&&isD(e.d)).map(e=>({id:T(e.id)||uid(),t:T(e.t),d:e.d,all:!!e.all,s:isT(e.s)?e.s:"09:00",e:isT(e.e)?e.e:"",cat:T(e.cat),loc:T(e.loc),notes:T(e.notes),rep:e.rep in REPN?e.rep:"",until:isD(e.until)?e.until:"",ex:A(e.ex).filter(isD),rem:Number.isFinite(e.rem)?e.rem:-1,
    kind:e.kind in KIND?e.kind:"",cli:T(e.cli),vis:normVis(e.vis),met:normMet(e.met)})),
@@ -922,7 +922,7 @@ function paintAg(){const body=$("#agBody"),side=$("#agSide");if(!body)return;
   $("#ncNew").onclick=()=>noteForm(null,ncq.value)}
  const nca=$("#ncAll");if(nca)nca.onclick=()=>{AGV.tab="notas";AGV.q="";render()};
  const on=(id,fn)=>{const el=$("#"+id);if(el)el.onclick=fn};
- on("catEd",catForm);on("agIcs",agIcs);on("agBak",()=>{download("digesto-agenda-"+todayS()+".json",JSON.stringify(AG,null,1),"application/json");toast("Copia descargada.")});
+ on("catEd",catForm);on("agIcs",agIcs);on("agBak",()=>{download("agenda-firztnet-"+todayS()+".json",JSON.stringify(AG,null,1),"application/json");toast("Copia descargada.")});
  on("agRes",agRestore);on("tplEd",tplForm);
  on("agNot",async()=>{if(!window.Notification)return toast("Este navegador no permite avisos.");const p=await Notification.requestPermission();toast(p==="granted"?"Avisos activados: te avisaré mientras el panel esté abierto.":"El navegador ha bloqueado los avisos. Puedes permitirlos en los ajustes del sitio.");paintAg()});
  root.querySelectorAll("[data-go-tab]").forEach(b=>b.onclick=()=>{AGV.tab=b.dataset.goTab;AGV.q="";if(AGV.tab==="clientes")AGV.cli="";render();window.scrollTo(0,0)});
@@ -1146,7 +1146,7 @@ function agIcs(){const z=s=>String(s).replace(/[\\;,]/g,m=>"\\"+m).replace(/\r?\
   const desc=[e.kind&&KIND[e.kind],c&&("Cliente: "+c.n+(c.tel?" · "+c.tel:"")),e.kind==="visita"&&e.vis.inc,e.notes].filter(Boolean).join("\n");if(desc)L.push("DESCRIPTION:"+z(desc));
   if(e.rem>=0)L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+z(e.t),"TRIGGER:-PT"+e.rem+"M","END:VALARM");
   L.push("END:VEVENT")});
- L.push("END:VCALENDAR");download("digesto-agenda.ics",L.join("\r\n"),"text/calendar");toast(AG.events.length?"Calendario descargado. Ábrelo en el móvil para añadirlo a tu calendario.":"Aún no hay eventos que exportar.")}
+ L.push("END:VCALENDAR");download("agenda-firztnet.ics",L.join("\r\n"),"text/calendar");toast(AG.events.length?"Calendario descargado. Ábrelo en el móvil para añadirlo a tu calendario.":"Aún no hay eventos que exportar.")}
 function agRestore(){const inp=document.createElement("input");inp.type="file";inp.accept=".json,application/json";
  inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let x;try{x=JSON.parse(await f.text())}catch(e){return toast("Ese archivo no es una copia de la agenda.")}
   if(!x||!Array.isArray(x.events))return toast("Ese archivo no es una copia de la agenda.");
@@ -1266,7 +1266,7 @@ function vHoras(){const {from,R,rows,tot,imp}=hoursData(),rate=AG.cfg.rate>0||AG
 function hoursCsv(){const {m,R,imp}=hoursData(),q=v=>'"'+String(v??"").replace(/"/g,'""')+'"',n2=x=>String(Math.round(x*100)/100).replace(".",",");
  const lines=[["Fecha","Cliente","Empresa","Tipo","Cita","Incidencia","Llegada","Salida","Horas","Km","Estado",AG.cfg.rate||AG.cfg.kmRate?"Importe (€)":""].map(q).join(";"),
   ...R.map(r=>{const c=cliOf(r.e.cli)||{};return [pd(r.s).toLocaleDateString("es-ES"),c.n||"",c.emp||"",KIND[r.e.kind],r.e.t,r.e.kind==="visita"?r.e.vis.inc:"",r.e.kind==="visita"?r.e.vis.lleg:"",r.e.kind==="visita"?r.e.vis.sal:"",n2(r.min/60),r.km?n2(r.km):"",r.e.kind==="visita"?ESTN[r.e.vis.est]:"",AG.cfg.rate||AG.cfg.kmRate?n2(imp(r)):""].map(q).join(";")})];
- download("digesto-horas-"+m+".csv","﻿"+lines.join("\r\n"),"text/csv");toast("Horas descargadas.")}
+ download("firztnet-horas-"+m+".csv","﻿"+lines.join("\r\n"),"text/csv");toast("Horas descargadas.")}
 
 /* ---------- IMPRIMIR: parte de trabajo o acta, listo para guardar en PDF ---------- */
 function printDoc(title,body){const f=document.createElement("iframe");f.setAttribute("aria-hidden","true");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";document.body.append(f);
