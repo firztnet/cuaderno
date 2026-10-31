@@ -894,7 +894,7 @@ $("#nav").innerHTML=[["hoy","Hoy"],["temas","Temas","c-temas"],["fichas","Fichas
 /* ---------- IDIOMA: la interfaz se pasa al inglés sobre la marcha, texto a texto.
    Lo que escribe ella y el contenido español (hitos, festivos, fuentes, máximas, ejemplo) no está en el diccionario y se queda igual.
    EN: textos exactos. EN_RX: textos con números o nombres dentro. ---------- */
-const EN=/*EN_DICT*/{"Mantenimiento":"Maintenance","Aviso":"Notice","Urgente":"Urgent","Entendido":"Got it",
+const EN=/*EN_DICT*/{"Confirma tu correo":"Confirm your email","Te hemos enviado un enlace a":"We've sent a link to",". Ábrelo y tu cuenta quedará lista.":". Open it and your account will be ready.","Puede tardar un par de minutos.":"It may take a couple of minutes.","Si no lo ves, mira en «Spam» o «Promociones».":"If you can't see it, check your Spam or Promotions folder.","El enlace sirve una sola vez.":"The link only works once.","Reenviar el correo":"Resend the email","Ya lo he confirmado: entrar":"I've confirmed it: sign in","Correo reenviado. Mira tu bandeja de entrada.":"Email resent. Check your inbox.","Correo confirmado. Te damos la bienvenida a Digesto.":"Email confirmed. Welcome to Digesto.","Ese enlace ha caducado o ya se usó. Si aún no has confirmado tu correo, entra con tu contraseña y podrás pedir otro.":"That link has expired or was already used. If you haven't confirmed your email yet, sign in with your password and you can request another.","Mantenimiento":"Maintenance","Aviso":"Notice","Urgente":"Urgent","Entendido":"Got it",
 "Hoy":"Today","Temas":"Topics","Fichas":"Flashcards","Calificaciones":"Grades","Agenda":"Planner","Calendario":"Calendar","Hitos":"Milestones","Enlaces":"Links","Ayuda":"Help","Ajustes":"Settings","Administración":"Admin","Más":"More",
 "Tu cuaderno se guarda cifrado en este navegador.":"Your notebook is stored encrypted in this browser.","Cerrar sesión":"Sign out","Acceso a Digesto":"Sign in to Digesto",
 "Ver la contraseña":"Show password","Ocultar la contraseña":"Hide password","Abrir menú":"Open menu","Cerrar menú":"Close menu","Ir a la página principal":"Go to the home page","Página principal":"Home page","Secciones":"Sections","Ir al temporizador":"Go to the timer","Avisos":"Notifications","Buscar":"Search","Ayuda de esta pantalla":"Help for this screen",
@@ -983,7 +983,7 @@ const EN=/*EN_DICT*/{"Mantenimiento":"Maintenance","Aviso":"Notice","Urgente":"U
 "Tú":"You","Activa":"Active","Desactivada":"Deactivated","Correo sin confirmar":"Email not confirmed","Alta:":"Joined:","Último acceso:":"Last sign-in:","Último guardado:":"Last saved:","Espacio:":"Space:","Tu cuenta no se puede desactivar ni eliminar desde aquí.":"Your own account can't be deactivated or deleted from here.","Desactivar":"Deactivate","Activar":"Activate","Hacer administración":"Make admin","Quitar administración":"Remove admin","Ninguna cuenta coincide con la búsqueda o el filtro.":"No account matches the search or filter.",
 "Cuenta activada. Ya puede entrar.":"Account activated. They can sign in now.","Cuenta desactivada.":"Account deactivated.","Permisos de administración retirados.":"Admin permissions removed.","Ahora también administra Digesto.":"They now also administer Digesto.","Cuenta eliminada.":"Account deleted.","Lista descargada.":"List downloaded.","Registro cerrado. Solo entran los invitados.":"Sign-ups closed. Only invited people get in.","Registro abierto.":"Sign-ups open.","Escribe un correo válido.":"Enter a valid email.","Invitación retirada.":"Invitation withdrawn.","nunca":"never","ayer":"yesterday","hace más de un año":"over a year ago","(sin correo)":"(no email)"
 }/*END_EN_DICT*/;
-const EN_RX=/*EN_RX*/[
+const EN_RX=/*EN_RX*/[[/^Reenviar en (\d+) s$/,"Resend in $1 s"],
 [/^(Buenos días|Buenas tardes|Buenas noches)(, (.+))?$/,(m,a,b,c)=>({"Buenos días":"Good morning","Buenas tardes":"Good afternoon","Buenas noches":"Good evening"}[a])+(c?", "+c:"")],
 [/^min hoy, de (\d+) de objetivo$/,"min today, out of a $1 goal"],
 [/^Tu mejor hueco para estudiar hoy: de (.+) a (.+)\.$/,"Your best slot to study today: $1 to $2."],
@@ -2165,7 +2165,8 @@ function gateCloudLogin(info){gateShow(`${info?`<p class="sub">${info}</p>`:""}
  <p class="sub" id="gInvite" style="margin:0" hidden>Acceso solo con invitación. Si te han invitado, crea tu cuenta con ese correo.</p>
  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><button type="button" class="linkbtn" id="gnew">Crear cuenta</button><button type="button" class="linkbtn" id="gforgot">He olvidado mi contraseña</button></div>`,
  async d=>{const k=!!d.keep;if(k!==keep()){try{k?localStorage.setItem("cuaderno-keep","1"):localStorage.removeItem("cuaderno-keep")}catch(e){}mkClient()}
-  const {data,error}=await sb.auth.signInWithPassword({email:d.email.trim(),password:d.pass});if(error)return authErr(error);
+  const {data,error}=await sb.auth.signInWithPassword({email:d.email.trim(),password:d.pass});
+  if(error){if((error.message||"").toLowerCase().includes("not confirmed")){gateCloudCheck(d.email.trim());return ""}return authErr(error)}
   await openCloud(data.session)});
  $("#gnew").onclick=gateCloudSignup;$("#gforgot").onclick=gateCloudForgot;
  regOpen().then(o=>{const n=$("#gInvite"),b=$("#gnew");if(o===false&&n&&b){n.hidden=false;b.textContent="Tengo una invitación"}});gateComs()}
@@ -2178,9 +2179,22 @@ function gateCloudSignup(){gateShow(`<h1>Crea tu cuenta</h1><p class="sub" id="g
  <button type="button" class="linkbtn" id="gback">Ya tengo cuenta</button>`,
  async d=>{if(d.pass.length<8)return "La contraseña necesita al menos 8 caracteres.";if(d.pass!==d.pass2)return "Las contraseñas no coinciden.";
   const {data,error}=await sb.auth.signUp({email:d.email.trim(),password:d.pass,options:{emailRedirectTo:HERE}});if(error)return authErr(error);
-  if(data.session)await openCloud(data.session);else gateCloudLogin("Te hemos enviado un correo. Abre su enlace para confirmar la cuenta y después entra aquí.")});
+  if(data.session)return await openCloud(data.session);
+  if(data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length)return "Ese correo ya tiene cuenta. Entra con él.";
+  gateCloudCheck(d.email.trim())});
  regOpen().then(o=>{const i=$("#gsuInfo");if(o===false&&i)i.textContent="Acceso solo con invitación: usa el mismo correo en el que te invitaron y elige tu contraseña."});
  $("#gback").onclick=()=>gateCloudLogin("")}
+/* Confirmación del correo: el enlace llega al correo y, al abrirlo, se entra directamente en Digesto */
+function gateCloudCheck(email){gateShow(`<h1>Confirma tu correo</h1>
+ <p class="sub">Te hemos enviado un enlace a <b translate="no">${esc(email)}</b>. Ábrelo y tu cuenta quedará lista.</p>
+ <ul class="sub" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Puede tardar un par de minutos.</li><li>Si no lo ves, mira en «Spam» o «Promociones».</li><li>El enlace sirve una sola vez.</li></ul>
+ <div class="gerr" id="gerr" role="alert"></div>
+ <button class="btn" type="submit">Reenviar el correo</button>
+ <button type="button" class="linkbtn" id="gback">Ya lo he confirmado: entrar</button>`,
+ async()=>{const {error}=await sb.auth.resend({type:"signup",email,options:{emailRedirectTo:HERE}});if(error)return authErr(error);
+  const b=$("#gateForm [type=submit]");let n=60;const tick=()=>{if(!b.isConnected)return clearInterval(t);n--;if(n>0)b.textContent=`Reenviar en ${n} s`;else{clearInterval(t);b.textContent="Reenviar el correo";delete b.dataset.busy}};
+  b.textContent="Reenviar en 60 s";const t=setInterval(tick,1000);toast("Correo reenviado. Mira tu bandeja de entrada.");return ""});
+ $("#gback").onclick=()=>{gateCloudLogin("");const m=$("#g-mail");if(m){m.value=email;$("#g-pass").focus()}}}
 function gateCloudForgot(){gateShow(`<h1>Recupera tu contraseña</h1><p class="sub">Te enviamos un enlace al correo para que elijas una nueva.</p>
  <label for="g-mail">Correo<input id="g-mail" name="email" type="email" autocomplete="username" required></label>
  <div class="gerr" id="gerr" role="alert"></div>
@@ -2199,12 +2213,12 @@ function gateNewPass(){gateShow(`<h1>Elige tu nueva contraseña</h1>
   const {data}=await sb.auth.getSession();if(!data.session)return gateCloudLogin("Contraseña cambiada. Entra con ella."),"";
   await openCloud(data.session)})}
 async function bootCloud(){
- const h=location.hash, rec=/type=recovery/.test(h), bad=/error=/.test(h);
+ const h=location.hash, rec=/type=recovery/.test(h), bad=/error=/.test(h), conf=/type=(signup|email|invite)/.test(h);
  gateMsg("Abriendo Digesto","Un momento…");
  try{await loadSupa();mkClient();loadComs();const {data}=await sb.auth.getSession();
   if(data.session&&rec)return gateNewPass();
-  if(data.session)return await openCloud(data.session);
-  gateCloudLogin(bad?"Ese enlace ha caducado o ya se usó. Pide otro.":"")}
+  if(data.session){await openCloud(data.session);if(conf)toast("Correo confirmado. Te damos la bienvenida a Digesto.");return}
+  gateCloudLogin(bad?"Ese enlace ha caducado o ya se usó. Si aún no has confirmado tu correo, entra con tu contraseña y podrás pedir otro.":"")}
  catch(e){gateMsg("No se pudo conectar","Revisa tu conexión a internet. Tu cuaderno sigue a salvo en tu cuenta.",bootCloud)}}
 document.addEventListener("visibilitychange",()=>{if(!CLOUD||!OPEN)return;
  if(DEMO)return;
