@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0f151c">
+<link rel="icon" href="icono-digesto.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icono-180.png">
+<meta name="apple-mobile-web-app-title" content="Digesto">
+<link rel="manifest" href="manifest-admin.webmanifest">
 <title>Digesto · Administración</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
@@ -66,6 +70,7 @@ label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500;
 .topbar .brand{text-align:left;font-size:19px;line-height:1.1}
 .topbar .brand small{font-size:10px}
 .topbar .here{margin-left:auto;font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .logo{border-radius:8px;flex:none}
 .hamb{all:unset;cursor:pointer;width:40px;height:40px;display:grid;place-items:center;border-radius:8px;color:var(--ink);flex:none}
 .hamb:hover{background:var(--surface-2)}
 .side{position:fixed;z-index:50;top:0;left:0;bottom:0;width:min(280px,84vw);background:var(--surface);border-right:1px solid var(--line);padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:20px;overflow-y:auto;transform:translateX(-102%);transition:transform .22s ease;visibility:hidden;box-shadow:8px 0 30px rgba(0,0,0,.18)}
@@ -293,7 +298,7 @@ legend{font-size:13px;color:var(--muted);padding:0 4px}
 
 <div class="login" id="login">
   <form class="card" id="loginForm" aria-label="Acceso a la administración de Digesto">
-    <div class="seal">§</div>
+    <img src="icono-digesto.svg" width="64" height="64" alt="" style="display:block;margin:0 auto;border-radius:14px">
     <div class="brand">Digesto<small>Administración</small></div>
     <label for="lEmail">Correo<input id="lEmail" type="email" autocomplete="username" required></label>
     <label for="lPass">Contraseña<span class="pw"><input id="lPass" type="password" autocomplete="current-password" required><button type="button" class="pwbtn" id="lEye" aria-label="Ver la contraseña"></button></span></label>
@@ -305,7 +310,7 @@ legend{font-size:13px;color:var(--muted);padding:0 4px}
 </div>
 
 <div class="shell" id="app" hidden>
-  <header class="topbar"><button class="hamb" id="menuBtn" aria-label="Abrir el menú" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="brand">Digesto<small>Administración</small></div><span class="here" id="here"></span></header>
+  <header class="topbar"><button class="hamb" id="menuBtn" aria-label="Abrir el menú" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><img class="logo" src="icono-digesto.svg" width="32" height="32" alt=""><div class="brand">Digesto<small>Administración</small></div><span class="here" id="here"></span></header>
   <div class="scrim" id="scrim" hidden></div>
   <aside class="side" id="side" aria-label="Menú">
     <div class="side-h"><div class="brand">Digesto<small>Administración</small></div><button class="hamb" id="menuClose" aria-label="Cerrar el menú"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
