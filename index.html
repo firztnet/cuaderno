@@ -624,6 +624,86 @@ dialog h2{margin-bottom:16px}
   .pomo .time{font-size:38px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== Temas «biblioteca»: Biblioteca y Toga (oscuros), Pergamino y Aula (claros) ===== */
+:root[data-skin="biblioteca"]{
+  --bg:#12100c; --surface:#1e1a13; --surface-2:#27221a; --line:#3a3226;
+  --ink:#f3ebdc; --muted:#b3a387; --accent:#4fb388; --accent-soft:#1d3329;
+  --seal:#d0646c; --gold:#d4af5f; --ok:#7bd3a4; --warn:#e8b95a; --crit:#e8867f;
+  --lamp:rgba(63,156,116,.22); --warm:rgba(212,175,95,.12); --r:12px; color-scheme:dark}
+:root[data-skin="pergamino"]{
+  --bg:#f4eee1; --surface:#fffcf5; --surface-2:#f7f0e2; --line:#e2d6bf;
+  --ink:#2a2015; --muted:#6f604a; --accent:#1f4e79; --accent-soft:#e2e8ec;
+  --seal:#8a2b3a; --gold:#8a2b3a; --ok:#2f7a4f; --warn:#96560a; --crit:#b3312f;
+  --lamp:rgba(31,78,121,.1); --warm:rgba(138,43,58,.08); --r:12px; color-scheme:light}
+:root[data-skin="toga"]{
+  --bg:#0b0b0d; --surface:#16161a; --surface-2:#1e1e23; --line:#2b2b32;
+  --ink:#f2f2f4; --muted:#a1a1aa; --accent:#e5626b; --accent-soft:#2c1618;
+  --seal:#d9505a; --gold:#d8b25a; --ok:#6cc292; --warn:#e3a453; --crit:#ec7b78;
+  --lamp:rgba(194,65,75,.16); --warm:rgba(216,178,90,.1); --r:12px; color-scheme:dark}
+:root[data-skin="aula"]{
+  --bg:#eef2f6; --surface:#ffffff; --surface-2:#f4f7fa; --line:#d8e0e9;
+  --ink:#16202c; --muted:#5d6b7a; --accent:#2563eb; --accent-soft:#e1eafd;
+  --seal:#8a2b3a; --gold:#0d7d73; --ok:#2f7a4f; --warn:#96560a; --crit:#b3312f;
+  --lamp:rgba(37,99,235,.12); --warm:rgba(13,148,136,.1); --r:12px; color-scheme:light}
+:root:is([data-skin="biblioteca"],[data-skin="pergamino"],[data-skin="toga"],[data-skin="aula"]) body{background:var(--bg)}
+/* La luz de flexo y las líneas de cuaderno del fondo */
+:root:is([data-skin="biblioteca"],[data-skin="pergamino"],[data-skin="toga"],[data-skin="aula"]) body::before{content:"";position:fixed;top:0;right:0;bottom:0;left:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(700px 500px at 18% 0%,var(--lamp),transparent 65%),radial-gradient(900px 600px at 100% 100%,var(--warm),transparent 60%),
+  repeating-linear-gradient(0deg,transparent 0 31px,color-mix(in srgb,var(--line) 45%,transparent) 31px 32px)}
+:root:is([data-skin="biblioteca"],[data-skin="pergamino"],[data-skin="toga"],[data-skin="aula"]) :is(aside,.topbar){background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+:root:is([data-skin="biblioteca"],[data-skin="pergamino"],[data-skin="toga"],[data-skin="aula"]) :is(.panel,.stat,.maxim,.subj){background:color-mix(in srgb,var(--surface) 90%,transparent)}
+:root:is([data-skin="biblioteca"],[data-skin="toga"]) .btn:not(.ghost){color:#0b0b0d}
+:root[data-skin="toga"] .btn:not(.ghost){color:#fff}
+:root:is([data-skin="biblioteca"],[data-skin="pergamino"],[data-skin="toga"],[data-skin="aula"]) .maxim .seal{background:var(--seal);color:#fff;border-color:var(--seal)}
+
+/* ===== Portada «Hoy»: tu día y la cuenta atrás del próximo examen ===== */
+.dia-hero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;margin-bottom:24px}
+.dia-main{display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;padding:28px 30px;border-radius:calc(var(--r) + 6px);border:1px solid var(--line);
+  background:radial-gradient(600px 320px at 0% 0%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 70%),var(--surface)}
+.dia-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.racha{padding:4px 11px;border-radius:999px;background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn);font-size:12px;font-weight:700;letter-spacing:.02em}
+.dia-main h1{font-size:clamp(32px,4.4vw,46px);font-weight:600;letter-spacing:-.02em;line-height:1.04;margin:12px 0 12px}
+.dia-main h1 em{font-style:italic;color:var(--gold)}
+.dia-main p{color:var(--muted);font-size:16px;line-height:1.55;margin:0 0 20px;max-width:58ch}
+.dia-btns{display:flex;gap:10px;flex-wrap:wrap}
+.dia-btns .btn{padding:11px 18px}
+.dia-exam{padding:22px;border-radius:calc(var(--r) + 6px);border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;min-width:0}
+.dia-exam .eyebrow{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dia-exam .eyebrow strong{color:var(--ink)}
+.anillo{position:relative;width:168px;height:168px;margin:4px 0}
+.anillo svg{width:100%;height:100%;transform:rotate(-90deg)}
+.anillo circle{fill:none;stroke-width:12}
+.anillo .a0{stroke:var(--surface-2)}
+.anillo .a1{stroke:var(--gold);stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.anillo .n{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.anillo .n b{font-family:var(--f-display);font-size:54px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.anillo .n b.w{font-size:34px}
+.anillo .n span{color:var(--muted);font-size:13px;font-weight:600}
+.dia-exam .plan-txt{margin:0;font-size:14px;color:var(--muted);line-height:1.45;max-width:34ch}
+/* Asignaturas como lomos de libro */
+.lomos{display:flex;flex-direction:column}
+.lomo-row{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:8px minmax(0,1fr) 110px 44px;gap:14px;align-items:center;padding:11px 4px;border-top:1px solid var(--line);border-radius:6px}
+.lomo-row:first-child{border-top:0}
+.lomo-row:hover{background:var(--surface-2)}
+.lomo-row .lomo{height:42px;border-radius:3px;background:var(--c);box-shadow:inset -2px 0 0 rgba(0,0,0,.18)}
+.lomo-row b{display:block;font-family:var(--f-display);font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lomo-row small{display:block;color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lomo-row .lb{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.lomo-row .lb i{display:block;height:100%;background:var(--c);border-radius:4px}
+.lomo-row em{font-family:var(--f-mono);font-style:normal;font-size:13px;color:var(--muted);text-align:right}
+@media (max-width:820px){
+  .dia-hero{grid-template-columns:1fr;gap:14px;margin-bottom:16px}
+  .dia-main{padding:22px 20px}
+  .dia-exam{flex-direction:row;flex-wrap:wrap;text-align:left;justify-content:flex-start;padding:16px 18px;gap:6px 16px}
+  .dia-exam .eyebrow{flex-basis:100%}
+  .anillo{width:104px;height:104px;margin:0}
+  .anillo circle{stroke-width:14}
+  .anillo .n b{font-size:34px} .anillo .n b.w{font-size:22px} .anillo .n span{font-size:11px}
+  .dia-exam .ex-txt{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+  .lomo-row{grid-template-columns:6px minmax(0,1fr) 44px}
+  .lomo-row .lb{display:none}
+}
 </style>
 </head>
 <body>
@@ -761,13 +841,15 @@ function sample(){
    {id:uid(),q:"¿Qué derechos protege el recurso de amparo?",a:"Los de los arts. 14 a 29 de la Constitución y la objeción de conciencia del art. 30.2 (art. 53.2 CE).",subject:DC,box:1,due:addDays(1)}]});
 }
 /* Acepta datos guardados por versiones anteriores o copias incompletas y los deja con todos los campos */
-const THEMES={oscuro:["Oscuro","#0f151c","#17202a","#7fb0de"],claro:["Claro","#eef1f4","#ffffff","#1f4e79"],rosa:["Rosa","#fde9f1","#ffffff","#b0286a"],gamer:["Gamer","#07070f","#171930","#22e3ff"]};
+const THEMES={biblioteca:["Biblioteca","#12100c","#1e1a13","#4fb388"],pergamino:["Pergamino","#f4eee1","#fffcf5","#8a2b3a"],toga:["Toga","#0b0b0d","#16161a","#e5626b"],aula:["Aula","#eef2f6","#ffffff","#2563eb"],oscuro:["Oscuro","#0f151c","#17202a","#7fb0de"],claro:["Claro","#eef1f4","#ffffff","#1f4e79"],rosa:["Rosa","#fde9f1","#ffffff","#b0286a"],gamer:["Gamer","#07070f","#171930","#22e3ff"]};
 let THEME="";try{THEME=localStorage.getItem("cuaderno-tema")||""}catch(e){}
-/* Sin elección guardada, la web sigue el modo claro u oscuro del dispositivo */
-function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.dataset.theme=t==="oscuro"||t==="gamer"?"dark":"light";if(t==="rosa"||t==="gamer")r.dataset.skin=t;else delete r.dataset.skin;
+const DARK_T=["oscuro","gamer","biblioteca","toga"];
+/* Sin elección guardada, la web sigue el modo claro u oscuro del dispositivo: Biblioteca de noche, Pergamino de día */
+function applyTheme(t){const r=document.documentElement;if(!THEMES[t])return;r.dataset.theme=DARK_T.includes(t)?"dark":"light";if(t!=="oscuro"&&t!=="claro")r.dataset.skin=t;else delete r.dataset.skin;
  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",THEMES[t][1])}
-applyTheme(THEME);
-const themeNow=()=>THEME||(matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro");
+const themeNow=()=>THEMES[THEME]?THEME:(matchMedia("(prefers-color-scheme: dark)").matches?"biblioteca":"pergamino");
+applyTheme(themeNow());
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{if(!THEMES[THEME])applyTheme(themeNow())})}catch(e){}
 function setTheme(t){THEME=t;try{localStorage.setItem("cuaderno-tema",t)}catch(e){}applyTheme(t);S.theme=t;if(DEMO){REAL.theme=t;exitDemo(true);save();enterDemo();return go("ajustes")}save();render()}
 const GT={examen:"Examen final",parcial:"Parcial",trabajo:"Trabajo",practica:"Prácticas",otro:"Otro"};
 const HK={tratado:"Tratados y orden internacional",conflicto:"Guerras y conflictos",sentencia:"Juicios y sentencias",poder:"Poder y Estado de derecho",derechos:"Derechos",espana:"España"};
@@ -915,7 +997,7 @@ const EN=/*EN_DICT*/{"Confirma tu correo":"Confirm your email","Te hemos enviado
 "Guarda aquí tus temas y apuntes, tus fichas de repaso, tus enlaces y tus exámenes. Está vacío, listo para lo tuyo. Si quieres ver cómo queda lleno, mira antes el ejemplo: no se guarda nada.":"Keep your topics and notes, flashcards, links and exams here. It's empty, ready for your stuff. If you want to see it filled in, look at the example first: nothing gets saved.","Guarda aquí tus temas y apuntes, tus fichas de repaso, tus enlaces y tus exámenes. Lo que ves ahora son datos de ejemplo para que veas cómo queda.":"Keep your topics and notes, flashcards, links and exams here. What you see now is example data so you can see how it looks.",
 "Estás viendo datos de ejemplo.":"You're looking at example data.","Borrarlos y empezar con los míos":"Delete them and start with mine","Se borrarán los datos de ejemplo y lo que hayas añadido mientras tanto.":"The example data and anything you've added in the meantime will be deleted.","Listo. Empieza por crear tu primera asignatura en Temas.":"Done. Start by creating your first subject in Topics.",
 "Máxima del día":"Maxim of the day","temario dominado":"of the syllabus mastered","días seguidos estudiando":"days studying in a row","día seguido estudiando":"day studying in a row","fichas para repasar hoy":"flashcards to review today","ficha para repasar hoy":"flashcard to review today",
-"Tu día":"Your day","Ver semana":"See week","Sin clases ni compromisos hoy. Apunta tu horario en Agenda y lo verás aquí cada día.":"No classes or commitments today. Add your timetable in Planner and you'll see it here every day.","El día ya está hecho. Descansa, mañana más.":"The day is done. Rest, more tomorrow.","Hoy vas justa de tiempo. Diez minutos de fichas también cuentan.":"You're short on time today. Ten minutes of flashcards also count.",
+"Tu día":"Your day","Tus asignaturas":"Your subjects","Empezar sesión de estudio":"Start a study session","Ver la sesión":"See the session","Próxima fecha":"Next date","No tienes exámenes ni entregas a la vista.":"No exams or deadlines in sight.","Apuntar una fecha":"Add a date","Sin temas todavía":"No topics yet","Aún no hay asignaturas. Créalas en Temas y aquí verás cómo vas en cada una.":"No subjects yet. Create them in Topics and you'll see your progress here.","Biblioteca":"Library","Pergamino":"Parchment","Toga":"Gown","Aula":"Classroom","Ver semana":"See week","Sin clases ni compromisos hoy. Apunta tu horario en Agenda y lo verás aquí cada día.":"No classes or commitments today. Add your timetable in Planner and you'll see it here every day.","El día ya está hecho. Descansa, mañana más.":"The day is done. Rest, more tomorrow.","Hoy vas justa de tiempo. Diez minutos de fichas también cuentan.":"You're short on time today. Ten minutes of flashcards also count.",
 "Plan hasta el examen":"Plan until the exam","Ver temas":"See topics","Lo que viene":"Coming up","Ver agenda":"See planner","Nada en la agenda. Añade tu próximo examen y verás aquí la cuenta atrás.":"Nothing in the planner. Add your next exam and you'll see the countdown here.","Temas en curso":"Topics in progress","Ningún tema en curso. Elige uno en Temas y empieza.":"No topics in progress. Pick one in Topics and get started.",
 "Sesión de estudio":"Study session","Descanso":"Break","Empezar":"Start","Pausar":"Pause","Seguir":"Resume","Reiniciar":"Reset","Al terminar suena un aviso y los minutos se suman a tu semana.":"When it ends you'll hear a sound and the minutes are added to your week.","Tu semana":"Your week","Sin minutos aún":"No minutes yet","Hoy ya cuenta":"Today counts","He estudiado hoy sin temporizador":"I studied today without the timer","Sin estudio":"No study","Estudiado":"Studied",
 "Guarda una copia":"Save a backup","Tu última copia tiene más de dos semanas. Tarda diez segundos.":"Your last backup is more than two weeks old. It takes ten seconds.","Aún no has hecho ninguna copia de tu cuaderno. Tarda diez segundos.":"You haven't made a backup of your notebook yet. It takes ten seconds.","Hacer copia":"Make a backup",
@@ -989,7 +1071,7 @@ const EN=/*EN_DICT*/{"Confirma tu correo":"Confirm your email","Te hemos enviado
 }/*END_EN_DICT*/;
 const EN_RX=/*EN_RX*/[[/^Reenviar en (\d+) s$/,"Resend in $1 s"],
 [/^(Buenos días|Buenas tardes|Buenas noches)(, (.+))?$/,(m,a,b,c)=>({"Buenos días":"Good morning","Buenas tardes":"Good afternoon","Buenas noches":"Good evening"}[a])+(c?", "+c:"")],
-[/^min hoy, de (\d+) de objetivo$/,"min today, out of a $1 goal"],
+[/^(\d+) días seguidos$/,"$1 days in a row"],[/^En curso: (.+)$/,"In progress: $1"],[/^min hoy, de (\d+) de objetivo$/,"min today, out of a $1 goal"],
 [/^Tu mejor hueco para estudiar hoy: de (.+) a (.+)\.$/,"Your best slot to study today: $1 to $2."],
 [/^Del (.+) al (.+)\. Con borde, lo que tiene fecha\. Sin borde, tu horario de cada semana\. Toca cualquiera para cambiarlo\.$/,"$1 to $2. With a border: dated items. Without: your weekly timetable. Tap any to change it."],
 [/^Semana del (.+)$/,"Week of $1"],
@@ -1220,10 +1302,20 @@ function vHoy(){
  const nextTxt=next?`${next.title.toLowerCase().startsWith(next.type)?"":TYPES[next.type]+": "}${next.title}, ${soonTxt(daysTo(next.date))}.`:"No tienes exámenes ni entregas a la vista.";
  const paso=due?`Tienes ${due} ${due===1?"ficha":"fichas"} para repasar hoy.`:!studied?"Una sesión de 25 minutos y el día ya cuenta.":"Hoy ya has estudiado. Lo demás es ventaja.";
  const bkOld=!S.ejemplo&&(S.subjects.length||S.cards.length)&&(!S.lastBackup||daysTo(S.lastBackup)<-14);
+ const C=515.2, exN=next?daysTo(next.date):0, exS=next&&S.subjects.find(s=>s.name===next.subject), exT=exS?exS.topics.length:0, exD=exS?exS.topics.filter(x=>x.s==="dominado").length:0;
+ const exP=exT?exD/exT:next?Math.max(.04,1-exN/60):0;
+ const exam=next?`<div class="dia-exam"><div class="eyebrow">${next.title.toLowerCase().startsWith(next.type)?"":`<span>${TYPES[next.type]}</span> · `}<strong>${esc(next.title)}</strong></div>
+   <div class="anillo"><svg viewBox="0 0 190 190" aria-hidden="true"><circle cx="95" cy="95" r="82" class="a0"/><circle cx="95" cy="95" r="82" class="a1" style="stroke-dasharray:${C};stroke-dashoffset:${(C*(1-exP)).toFixed(1)}"/></svg>
+   <div class="n">${exN>1?`<b>${exN}</b><span>días</span>`:`<b class="w">${exN?"Mañana":"Hoy"}</b>`}</div></div>
+   <div class="ex-txt">${exT?`<span class="sub">${exD} de ${exT} dominados</span><p class="plan-txt">${esc(paceTxt(exT-exD,exN))}</p>`:`<p class="plan-txt">${esc(whenTxt(next))}</p>`}
+   <button class="btn ghost small" data-go="eventos">Ver agenda</button></div></div>`
+  :`<div class="dia-exam"><div class="eyebrow">Próxima fecha</div><div class="anillo"><svg viewBox="0 0 190 190" aria-hidden="true"><circle cx="95" cy="95" r="82" class="a0"/></svg><div class="n"><b>—</b></div></div>
+   <div class="ex-txt"><p class="plan-txt">No tienes exámenes ni entregas a la vista.</p><button class="btn ghost small" data-go="eventos">Apuntar una fecha</button></div></div>`;
  main.innerHTML=`
- <div class="head"><div><div class="eyebrow">${now.toLocaleDateString(LOC(),{weekday:"long",day:"numeric",month:"long"})}</div>
- <h1>${saludo}${S.name?", "+esc(S.name):""}</h1><p><span>${esc(nextTxt)}</span> <span>${esc(paso)}</span></p></div>
- <div class="hbtns"><button class="btn" data-go="cv">Currículum</button>${due?`<button class="btn" id="goRev">Repasar ${due} ${due===1?"ficha":"fichas"}</button>`:""}</div></div>
+ <section class="dia-hero"><div class="dia-main"><div class="dia-top"><span class="eyebrow">${now.toLocaleDateString(LOC(),{weekday:"long",day:"numeric",month:"long"})}</span>${st>1?`<span class="racha">${st} días seguidos</span>`:""}</div>
+ <h1>${saludo}${S.name?`<span>, </span><em>${esc(S.name)}</em>`:""}</h1><p><span>${esc(nextTxt)}</span> <span>${esc(paso)}</span></p>
+ <div class="dia-btns">${due?`<button class="btn" id="goRev">Repasar ${due} ${due===1?"ficha":"fichas"}</button>`:""}<button class="btn ${due?"ghost":""}" id="heroPomo">${P.run?"Ver la sesión":"Empezar sesión de estudio"}</button><button class="btn ghost" data-go="cv">Currículum</button></div></div>
+ ${exam}</section>
  ${!S.onboarded?`<div class="welcome"><h2>Esto es Digesto, tu cuaderno de la carrera</h2>
   <p>Guarda aquí tus temas y apuntes, tus fichas de repaso, tus enlaces y tus exámenes. ${S.ejemplo?"Lo que ves ahora son datos de ejemplo para que veas cómo queda.":"Está vacío, listo para lo tuyo. Si quieres ver cómo queda lleno, mira antes el ejemplo: no se guarda nada."}</p>
   <label for="nameIn">¿Cómo te llamas?</label>
@@ -1244,8 +1336,10 @@ function vHoy(){
    ${plan?`<div class="panel"><div class="phead"><h2>Plan hasta el examen</h2><button class="btn ghost small" data-go="temas">Ver temas</button></div>${plan}</div>`:""}
    <div class="panel"><div class="phead"><h2>Lo que viene</h2><button class="btn ghost small" data-go="eventos">Ver agenda</button></div>
     <div class="list">${up.slice(0,4).map(e=>eventRow(e)).join("")||`<div class="empty">Nada en la agenda. Añade tu próximo examen y verás aquí la cuenta atrás.</div>`}</div></div>
-   <div class="panel"><div class="phead"><h2>Temas en curso</h2><button class="btn ghost small" data-go="temas">Ver temas</button></div>
-    <div class="list">${pend.map(x=>`<div class="row" style="grid-template-columns:auto 1fr"><span class="status curso" aria-hidden="true"></span><div style="min-width:0"><div class="t">${esc(x.t)}</div>${x.n?`<div class="s">${esc(x.n)}</div>`:""}</div></div>`).join("")||`<div class="empty">Ningún tema en curso. Elige uno en Temas y empieza.</div>`}</div></div>
+   <div class="panel"><div class="phead"><h2>Tus asignaturas</h2><button class="btn ghost small" data-go="temas">Ver temas</button></div>
+    ${S.subjects.length?`<div class="lomos">${S.subjects.map((s,i)=>{const n=s.topics.length,d=s.topics.filter(x=>x.s==="dominado").length,p=n?Math.round(d/n*100):0,cur=s.topics.find(x=>x.s==="curso");
+     return `<button class="lomo-row" data-subj="${s.id}" style="--c:var(${["--accent","--seal","--gold","--ok","--warn"][i%5]})"><span class="lomo"></span><span style="min-width:0"><b>${esc(s.name)}</b><small>${cur?"En curso: "+esc(cur.t):n?d+" de "+n+" dominados":"Sin temas todavía"}</small></span><span class="lb"><i style="width:${p}%"></i></span><em>${p} %</em></button>`}).join("")}</div>`
+     :`<div class="empty">${pend.length?"":"Aún no hay asignaturas. Créalas en Temas y aquí verás cómo vas en cada una."}</div>`}</div>
   </div>
   <div class="stack">
    <div class="panel pomo" id="pomo"><div class="eyebrow">Sesión de estudio</div>
@@ -1259,6 +1353,8 @@ function vHoy(){
   </div>
  </div>`;
  $("#markDay").onclick=()=>{markStudied();render()};
+ $("#heroPomo").onclick=()=>{if(!P.run)startP();$("#pomo").scrollIntoView({behavior:"smooth",block:"center"})};
+ main.querySelectorAll(".lomo-row[data-subj]").forEach(b=>b.onclick=()=>openSubject(b.dataset.subj));
  const gr=$("#goRev");if(gr)gr.onclick=()=>startReview(dueCards(),false);
  /* Quitar datos de muestra antiguos: se van enteros, salvo los hitos, sus notas y el tema elegido */
  const clear=()=>{S={...normalize({subjects:[]}),name:S.name,goal:S.goal,onboarded:true,hitos:S.hitos,hitoMeta:S.hitoMeta,theme:S.theme};save();render()};
